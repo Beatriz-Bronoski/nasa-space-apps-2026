@@ -11,43 +11,21 @@
     url("/textures/rustic-wood.jpg");
 }
 .app-shell.immersive-reader {
-  background: var(--desk-image) center top / cover #81532e;
+  position: relative;
+  isolation: isolate;
+  background: none;
   min-height: 100dvh;
 }
-.album-opening {
-  --opening-paper: #eee0bb;
-  --opening-paper-shade: #c9af78;
+.app-shell.immersive-reader::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--desk-image) center top / cover #81532e;
 }
 .album-opening .opening-backdrop {
   background: var(--desk-image) center top / cover #81532e;
-}
-.album-opening .opening-paper,
-.album-opening .opening-left-paper,
-.album-opening .opening-cover-back {
-  color: #33434a;
-  background-color: var(--opening-paper);
-  background-image:
-    linear-gradient(
-      90deg,
-      #9e7d3d38,
-      transparent 14%,
-      #f7ecd030 76%,
-      #99703817
-    ),
-    url("/textures/aged-paper.jpg");
-  background-size:
-    auto,
-    480px 480px;
-  border-color: #876b3c60;
-}
-.album-opening .opening-left-paper {
-  border-color: var(--opening-cloth);
-  background-image:
-    linear-gradient(90deg, transparent 76%, #8a69363b),
-    url("/textures/aged-paper.jpg");
-}
-.album-opening .opening-cover-back {
-  border-color: var(--opening-cloth);
 }
 .album-opening .opening-cover-front {
   background-image:
@@ -74,9 +52,7 @@
   border-right: 1px solid #25312860;
   background: linear-gradient(90deg, #21302835, #f4e0b024, #26362b38);
 }
-.album-opening .opening-cover-name,
-.album-opening .opening-paper-caption,
-.album-opening .opening-cover-inscription {
+.album-opening .opening-cover-name {
   font-family: var(--hand-title);
   font-weight: 600;
   font-style: normal;
@@ -84,30 +60,10 @@
 .album-opening .opening-cover-name {
   font-size: clamp(29px, calc(var(--opening-width) * 0.105), 46px);
 }
-.album-opening .opening-paper-caption {
-  font-size: clamp(26px, calc(var(--opening-width) * 0.085), 38px);
-}
-.album-opening .opening-cover-inscription {
-  font-size: 30px;
-}
 .album-opening .opening-cover-photo {
   position: relative;
   background: #fbf5e8;
   box-shadow: 4px 7px 10px #30261740;
-}
-.album-opening .opening-memory {
-  background: #fbf5e8;
-  box-shadow: 4px 7px 10px #30261735;
-}
-.album-opening .opening-paper-number {
-  color: #586054;
-}
-.album-opening .opening-page-block {
-  box-shadow:
-    5px 7px 0 #ba9f6b,
-    7px 11px 0 #dfc996,
-    9px 15px 1px #8a744b,
-    15px 25px 30px #32210e65;
 }
 .album-opening .opening-skip {
   box-shadow: 3px 5px 10px #35200d33;
@@ -170,7 +126,8 @@
   background: transparent;
   box-shadow: none;
 }
-.book-case .album-flipbook {
+.book-case .album-flipbook,
+.book-case .opening-spread {
   clip-path: polygon(
     0.15% 0.2%,
     7% 0,
@@ -305,16 +262,6 @@
   color: #f0e9dc;
   background: #2d4051;
   border-color: #66747c;
-}
-:root[data-theme="night"] .album-opening .opening-paper,
-:root[data-theme="night"] .album-opening .opening-left-paper,
-:root[data-theme="night"] .album-opening .opening-cover-back {
-  color: #f0e9dc;
-  background-image:
-    linear-gradient(#23384be8, #23384be8), url("/textures/aged-paper.jpg");
-}
-:root[data-theme="night"] .album-opening .opening-paper-number {
-  color: #c1c9c8;
 }
 @media (max-width: 520px) {
   .immersive-reader .main-content {

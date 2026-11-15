@@ -28,7 +28,7 @@ npm run preview
 
 Outside the reader, the astronaut's name appears in the upper-left corner and a slate-blue navigation bar separates navigation from the cream canvas. The shelf albums have woven covers, stitched spines, and taped photo labels. Opening one enters a physical scrapbook on a rustic wooden table: yellowed fiber paper, worn edges, a shaded gutter, and visible stacked pages above a cloth lower cover. Handwritten titles and notes, Polaroid frames, patterned washi tape, and stitched fabric stickers carry the same materials into the editor. Night mode preserves a subdued blue palette and textured surfaces. Use **All albums** to restore the main navigation.
 
-Choosing a book on the shelf lifts it forward and opens its hardcover over about 1.78 seconds. Once the animation backdrop covers the shelf, the real reader is mounted at its final size behind it. The opening waits for the first spread’s layout, photos, and handwriting fonts, then fades into that already-painted reader over 0.2 seconds. **Skip animation** or Escape bypasses the cover motion while preparing the reader. Reduced-motion preference bypasses the transition; a viewport resize safely skips the remaining motion. Direct reply links still open their target page without a shelf animation. None of these presentation steps changes page delivery or response state.
+Choosing a book on the shelf lifts it forward and opens its hardcover over about 1.9 seconds. The opening shows the actual first spread, using the same page renderer as the reader. The prepared reader supplies its measured paper/cover bounds, the cover settles fully flat, and a brief 160 ms handoff blends matching pages. Both scenes use one viewport-sized wood texture plane, so the grain keeps its scale and position. The reader still waits for its first layout, photos, and handwriting fonts. **Skip animation** or Escape bypasses the cover motion while preparing the reader. Reduced-motion preference and empty albums go directly to the reading view; a viewport resize safely skips the remaining motion. Direct reply links still open their target page without a shelf animation. These presentation steps do not change delivery or response state.
 
 Use **Add a page** at the bottom of the home or book view. From a book, this opens the composer with the normal navigation restored. **Settings** and **Support** are available in the footer on the other screens; Settings contains the demo profile, connection, and night-mode controls.
 
@@ -62,6 +62,8 @@ For a manual review, follow the album/reply flow above, reload with a saved draf
 - `src/app/globals.css`: responsive visual styles and focus states.
 - `src/app/layout.tsx`: metadata, document language, and self-hosted fonts.
 - `src/components/AlbumBook.tsx`: chronological book reader, page-turn interaction, and accessible navigation.
+- `src/components/AlbumLeaf.tsx`: shared real contribution page used in the reader and opening.
+- `src/lib/opening-geometry.ts`: measured and initial responsive geometry for the shelf transition.
 - `src/components/album-book.css`: paper, binding, page shadows, and responsive reader styles.
 - `src/components/ScrapbookEditor.tsx`: pointer and keyboard composition controls.
 - `src/components/ScrapbookPage.tsx` and `StickerArt.tsx`: shared page rendering and ten original SVG stickers.

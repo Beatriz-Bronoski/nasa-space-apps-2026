@@ -13,16 +13,10 @@ import {
   Plus,
   Send,
 } from "lucide-react";
-import {
-  PEOPLE,
-  formatDate,
-  getStatusLabel,
-  type Album,
-  type Contribution,
-} from "@/lib/model";
+import { PEOPLE, formatDate, type Album, type Contribution } from "@/lib/model";
 import "@openpageflip/core/styles.css";
 import "./album-book.css";
-import ScrapbookPage from "./ScrapbookPage";
+import AlbumLeaf from "./AlbumLeaf";
 import { afterReaderImagesPaint } from "@/lib/reader-ready";
 
 type Props = {
@@ -36,14 +30,6 @@ type Props = {
 
 const authorName = (id: string) =>
   PEOPLE.find((person) => person.id === id)?.name ?? "Someone close";
-const statusIcon = (page: Contribution) =>
-  page.status === "recorded"
-    ? Cloud
-    : page.status === "sent"
-      ? Send
-      : page.status === "answered"
-        ? Heart
-        : CheckCheck;
 
 /** Every contribution is a physical leaf; the fold engine controls only its presentation. */
 export default function AlbumBook({
@@ -228,53 +214,17 @@ export default function AlbumBook({
           }
         >
           {pages.map((page, pageIndex) => {
-            const Icon = statusIcon(page);
-            const own = page.authorId === profileId;
             return (
               <Page
                 data-reader-page-index={pageIndex}
                 className={`album-leaf ${page.photo ? "leaf-with-photo" : "leaf-words"}`}
                 key={page.id}
               >
-                <article
-                  className="book-leaf-inner"
-                  aria-label={`Page ${pageIndex + 1}: ${page.title}`}
-                >
-                  <header className="leaf-header">
-                    <span>
-                      {own
-                        ? "A page from you"
-                        : `A page from ${authorName(page.authorId)}`}
-                    </span>
-                    <Feather size={12} />
-                  </header>
-                  <div
-                    className="leaf-content"
-                    data-opf-no-flip=""
-                    tabIndex={0}
-                    role="region"
-                    aria-label={`Read page ${pageIndex + 1} by ${authorName(page.authorId)}`}
-                  >
-                    <ScrapbookPage
-                      title={page.title}
-                      text={page.text}
-                      photo={page.photo}
-                      design={page.design}
-                    />
-                  </div>
-                  <footer className="leaf-footer">
-                    <time dateTime={page.createdAt}>
-                      {formatDate(page.createdAt)} · UTC
-                    </time>
-                    <span className={`leaf-status leaf-status-${page.status}`}>
-                      <Icon size={11} />
-                      {getStatusLabel(page.status)}
-                    </span>
-                  </footer>
-                  <span className="leaf-page-number" aria-hidden="true">
-                    {String(pageIndex + 1).padStart(2, "0")}
-                  </span>
-                </article>
+                <AlbumLeaf
+                  page={page}
+                  pageIndex={pageIndex}
+                  profileId={profileId}
+                />
               </Page>
             );
           })}

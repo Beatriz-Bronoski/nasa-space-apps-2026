@@ -52,6 +52,10 @@ import {
 import { STORAGE_KEY, compressPhoto, parseStoredData } from "@/lib/storage";
 import AlbumBook from "@/components/AlbumBook";
 import AlbumOpening from "@/components/AlbumOpening";
+import {
+  measureOpeningTarget,
+  type OpeningTarget,
+} from "@/lib/opening-geometry";
 import ScrapbookEditor from "@/components/ScrapbookEditor";
 import "./bookshelf.css";
 import "./physical-albums.css";
@@ -232,6 +236,9 @@ export default function Home() {
     origin: { left: number; top: number; width: number; height: number };
   } | null>(null);
   const [readerReady, setReaderReady] = useState(false);
+  const [openingTarget, setOpeningTarget] = useState<OpeningTarget | null>(
+    null,
+  );
   const openingLock = useRef(false);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -246,15 +253,17 @@ export default function Home() {
   const latestReply = notifications[notifications.length - 1];
   const draftKey = `${profile}:${selected}`;
   const draft = data.drafts[draftKey] ?? emptyDraft;
-  const visiblePages = data.pages
-    .filter(
-      (p) =>
-        p.albumId === selected &&
-        (p.authorId === profile ||
-          p.status === "delivered" ||
-          p.status === "answered"),
-    )
-    .sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt));
+  const pagesForAlbum = (albumId: string) =>
+    data.pages
+      .filter(
+        (page) =>
+          page.albumId === albumId &&
+          (page.authorId === profile ||
+            page.status === "delivered" ||
+            page.status === "answered"),
+      )
+      .sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt));
+  const visiblePages = pagesForAlbum(selected);
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [note, setNote] = useState("");
   const weekly = data.checkIns.find(
@@ -376,6 +385,7 @@ export default function Home() {
     const source = trigger?.querySelector<HTMLElement>(".album-book");
     const bounds = source?.getBoundingClientRect();
     if (
+      !pagesForAlbum(id).length ||
       !bounds?.width ||
       !bounds.height ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -386,6 +396,7 @@ export default function Home() {
     }
     openingLock.current = true;
     setReaderReady(false);
+    setOpeningTarget(null);
     setOpening({
       albumId: id,
       origin: {
@@ -403,7 +414,15 @@ export default function Home() {
     setView("story");
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [opening]);
-  const markReaderReady = useCallback(() => setReaderReady(true), []);
+  const markReaderReady = useCallback(() => {
+    if (openingLock.current) {
+      const reader = document.querySelector<HTMLElement>(
+        ".app-shell .album-reader",
+      );
+      if (reader) setOpeningTarget(measureOpeningTarget(reader));
+    }
+    setReaderReady(true);
+  }, []);
   const finishOpening = useCallback(() => {
     if (!opening || !openingLock.current) return;
     openingLock.current = false;
@@ -1390,6 +1409,9 @@ export default function Home() {
               profile === "alex" ? person(opening.albumId).name : "Alex & you"
             }
             origin={opening.origin}
+            target={openingTarget}
+            profileId={profile}
+            pages={pagesForAlbum(opening.albumId).slice(0, 2)}
             onPrepare={prepareOpening}
             readerReady={readerReady}
             onComplete={finishOpening}
