@@ -211,6 +211,7 @@ export default function AlbumBook({
                       text={page.text}
                       photo={page.photo}
                       object3d={page.object3d}
+                      visibleInBook={pageIndex >= first && pageIndex <= last}
                       onObjectChange={next => onObjectChange(page.id, next)}
                       design={page.design}
                     />

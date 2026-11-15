@@ -10,6 +10,7 @@ type Props = {
   photo: string;
   alt?: string;
   model?: Keepsake;
+  visibleInBook?: boolean;
   onChange: (next?: Keepsake) => void | Promise<void>;
 };
 
@@ -17,6 +18,7 @@ export function PhotoObject({
   photo,
   alt = "Foto da página",
   model,
+  visibleInBook,
   onChange,
 }: Props) {
   const [busy, setBusy] = useState(false);
@@ -37,7 +39,7 @@ export function PhotoObject({
     [],
   );
   useEffect(() => {
-    if (!root.current) return;
+    if (visibleInBook !== undefined || !root.current) return;
     if (!window.IntersectionObserver) {
       setShown(true);
       return;
@@ -48,7 +50,7 @@ export function PhotoObject({
     );
     observer.observe(root.current);
     return () => observer.disconnect();
-  }, []);
+  }, [visibleInBook]);
   useEffect(() => {
     if (transition !== "lifting") return;
     const timer = window.setTimeout(() => setTransition("idle"), 1150);
@@ -122,7 +124,7 @@ export function PhotoObject({
             className={"page-object-surface motion-" + transition}
             aria-busy={busy}
           >
-            {shown && (
+            {(visibleInBook ?? shown) && (
               <Viewer
                 model={model}
                 onDraw={onDraw}

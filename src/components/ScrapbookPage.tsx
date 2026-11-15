@@ -18,6 +18,7 @@ type Props = {
   text: string;
   photo?: string;
   object3d?: Keepsake;
+  visibleInBook?: boolean;
   onObjectChange: (next?: Keepsake) => void;
   design?: PageDesign;
   children?: ReactNode;
@@ -29,6 +30,7 @@ export default function ScrapbookPage({
   text,
   photo,
   object3d,
+  visibleInBook,
   onObjectChange,
   design,
   children,
@@ -52,7 +54,14 @@ export default function ScrapbookPage({
                 className="scrapbook-tape scrapbook-tape-top"
                 aria-hidden="true"
               />
-              <PhotoObject key={photo} photo={photo} alt={`Photo accompanying “${title}”`} model={object3d} onChange={onObjectChange} />
+              <PhotoObject
+                key={photo}
+                photo={photo}
+                alt={`Photo accompanying “${title}”`}
+                model={object3d}
+                visibleInBook={visibleInBook}
+                onChange={onObjectChange}
+              />
               <span
                 className="scrapbook-tape scrapbook-tape-bottom"
                 aria-hidden="true"
