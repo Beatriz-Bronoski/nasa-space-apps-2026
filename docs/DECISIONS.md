@@ -1,5 +1,7 @@
 # Still Here: product and implementation decisions
 
+The interface has no global header bar. The astronaut's name identifies the space in the upper-left corner; switching a demo family perspective does not change that identity. New-page actions appear at the bottom of the home content and after the book's page controls and details. Settings, including the demo profiles and night-mode switch, are available in the footer.
+
 ## Purpose and evidence
 
 Still Here explores how shared albums can preserve ordinary moments across a long separation. A page is a contribution to an ongoing relationship, with room for a later reply. Immediate availability is not assumed.

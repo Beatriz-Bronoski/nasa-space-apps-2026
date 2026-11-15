@@ -15,7 +15,6 @@ import {
   BookOpen,
   Check,
   CheckCheck,
-  ChevronDown,
   CircleHelp,
   Cloud,
   Feather,
@@ -25,12 +24,10 @@ import {
   LockKeyhole,
   Moon,
   Plus,
-  Radio,
   Send,
   Settings2,
   ShieldCheck,
   Sparkles,
-  Sun,
   Trash2,
   Wifi,
   WifiOff,
@@ -230,6 +227,7 @@ export default function Home() {
   const lastStored = useRef<string | null>(null);
   const album = ALBUMS.find((a) => a.id === selected)!;
   const current = person(profile);
+  const astronaut = PEOPLE.find((person) => person.role === "Astronaut")!;
   const online = deviceOnline && !paused;
   const albums =
     profile === "alex" ? ALBUMS : ALBUMS.filter((a) => a.personId === profile);
@@ -470,13 +468,12 @@ export default function Home() {
         Skip to content
       </a>
       <aside className="sidebar">
-        <button
-          className="brand-button"
-          aria-label="Still Here home"
-          onClick={() => navigate("albums")}
+        <div
+          className="astronaut-name"
+          aria-label={"Astronaut " + astronaut.name}
         >
-          <Brand />
-        </button>
+          {astronaut.name}
+        </div>
         <span className="nav-label">YOUR SPACE</span>
         <nav aria-label="Main navigation">
           <button
@@ -530,62 +527,12 @@ export default function Home() {
         </div>
       </aside>
       <div className="workspace">
-        <header className="topbar">
-          <div className="breadcrumb">
-            <span className="desktop-crumb">Your space</span>
-            <span className="crumb-slash">/</span>
-            <strong>
-              {view === "checkin"
-                ? "A moment for you"
-                : view === "replies"
-                  ? "Replies"
-                  : view === "albums"
-                    ? "Our albums"
-                    : person(album.personId).name + "’s album"}
-            </strong>
-          </div>
-          <div className="topbar-actions">
-            <button
-              className="icon-button mobile-help"
-              aria-label="A little support"
-              onClick={() => setDialog("help")}
-            >
-              <CircleHelp size={18} />
-            </button>
-            <button
-              className="mission-pill"
-              onClick={() => setDialog("connection")}
-            >
-              <span className="connection-dot" />
-              <span>Across the distance</span>
-              <ChevronDown size={13} />
-            </button>
-            <button
-              className="icon-button theme-button"
-              aria-label={
-                dark ? "Switch to light mode" : "Switch to night mode"
-              }
-              onClick={() => setDark(!dark)}
-            >
-              {dark ? <Sun size={19} /> : <Moon size={19} />}
-            </button>
-            <button
-              className="icon-button notification-button"
-              aria-label={`Replies, ${notifications.length} unread`}
-              onClick={() => navigate("replies")}
-            >
-              <Bell size={19} />
-              {notifications.length > 0 && <i />}
-            </button>
-            <button
-              className="profile-button"
-              aria-label={`Demo profile: ${current.name}. Open settings`}
-              onClick={() => setDialog("connection")}
-            >
-              <Avatar id={profile} />
-            </button>
-          </div>
-        </header>
+        <div
+          className="mobile-astronaut"
+          aria-label={"Astronaut " + astronaut.name}
+        >
+          {astronaut.name}
+        </div>
         <main id="main-content" className={`main-content view-${view}`}>
           {storageError && (
             <div className="storage-warning" role="alert">
@@ -603,14 +550,6 @@ export default function Home() {
                     <em>from anywhere.</em>
                   </h1>
                   <p>Shared moments with your favorite people.</p>
-                  <button
-                    className="primary-button"
-                    onClick={() => setDialog("choose")}
-                  >
-                    <Plus size={17} />
-                    Add a page
-                    <ArrowRight size={16} />
-                  </button>
                 </div>
                 <div className="welcome-art" aria-hidden="true">
                   <span className="orbit orbit-one" />
@@ -787,6 +726,15 @@ export default function Home() {
                   </div>
                 </div>
               </section>
+              <div className="page-end-action">
+                <button
+                  className="primary-button"
+                  onClick={() => setDialog("choose")}
+                >
+                  <Plus size={16} />
+                  Add a page
+                </button>
+              </div>
             </>
           )}
 
@@ -799,22 +747,9 @@ export default function Home() {
                 <ArrowLeft size={16} />
                 All albums
               </button>
-              <section className="story-heading reader-heading">
-                <div>
-                  <span className="eyebrow small">
-                    {profile === "alex"
-                      ? album.subtitle
-                      : "With Alex · Astronaut"}
-                  </span>
-                  <h1 ref={titleRef} tabIndex={-1}>
-                    {album.title}
-                  </h1>
-                </div>
-                <button className="primary-button" onClick={() => compose()}>
-                  <Plus size={16} />
-                  Add a page
-                </button>
-              </section>
+              <h1 className="sr-only" ref={titleRef} tabIndex={-1}>
+                {album.title}
+              </h1>
               <AlbumBook
                 key={selected + ":" + profile}
                 pages={visiblePages}
@@ -823,6 +758,14 @@ export default function Home() {
                 initialPageId={highlight || undefined}
                 onCompose={(replyTo) => compose(selected, replyTo)}
               />
+              {visiblePages.length > 0 && (
+                <div className="page-end-action book-end-action">
+                  <button className="primary-button" onClick={() => compose()}>
+                    <Plus size={16} />
+                    Add a page
+                  </button>
+                </div>
+              )}
             </>
           )}
 
@@ -1216,6 +1159,7 @@ export default function Home() {
           <Brand small />
           <span>Demo · Simulated delivery · Browser storage</span>
           <div className="footer-links">
+            <button onClick={() => setDialog("connection")}>Settings</button>
             <button onClick={() => setDialog("about")}>How it works</button>
             <button onClick={() => setDialog("help")}>
               Support
@@ -1290,6 +1234,21 @@ export default function Home() {
               Your device is offline. Pages remain queued until it reconnects.
             </p>
           )}
+          <div className="appearance-setting">
+            <span>
+              <Moon size={17} />
+              Night mode
+            </span>
+            <button
+              className={"switch " + (dark ? "on" : "")}
+              role="switch"
+              aria-checked={dark}
+              aria-label="Night mode"
+              onClick={() => setDark(!dark)}
+            >
+              <span />
+            </button>
+          </div>
           <label className="field-label" htmlFor="profile-select">
             Explore another side of the story
           </label>

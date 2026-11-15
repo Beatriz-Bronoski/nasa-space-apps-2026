@@ -163,10 +163,6 @@ svg {
   flex-direction: column;
   z-index: 20;
 }
-.brand-button {
-  align-self: flex-start;
-  padding: 0 7px;
-}
 .brand {
   display: inline-flex;
   align-items: center;
@@ -321,43 +317,6 @@ svg {
   width: calc(100% - 228px);
   min-width: 0;
 }
-.topbar {
-  height: 80px;
-  padding: 0 45px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--line);
-}
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  font-size: 11px;
-  color: var(--muted);
-}
-.breadcrumb strong {
-  color: var(--text);
-  font-weight: 500;
-}
-.crumb-slash {
-  color: var(--line);
-}
-.topbar-actions {
-  display: flex;
-  gap: 15px;
-  align-items: center;
-}
-.mission-pill {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 10px;
-  color: var(--muted);
-  border: 1px solid var(--line);
-  border-radius: 30px;
-  padding: 7px 11px;
-}
 .icon-button {
   display: inline-flex;
   width: 34px;
@@ -372,23 +331,6 @@ svg {
 }
 .icon-button svg {
   stroke-width: 1.5;
-}
-.notification-button {
-  position: relative;
-}
-.notification-button i {
-  position: absolute;
-  top: 4px;
-  right: 6px;
-  width: 5px;
-  height: 5px;
-  background: var(--terra);
-  border-radius: 50%;
-  border: 1px solid var(--bg);
-}
-.profile-button {
-  padding: 0;
-  border-radius: 50%;
 }
 .avatar {
   width: 35px;
@@ -963,26 +905,6 @@ h1 em {
   padding: 0;
   font-size: 11px;
   margin: 28px 0;
-}
-.story-heading {
-  display: flex;
-  align-items: center;
-  gap: 23px;
-  padding: 8px 0 30px;
-  border-bottom: 1px solid var(--line);
-}
-.story-heading h1 {
-  font-size: 32px;
-  margin: 6px 0;
-  letter-spacing: -0.8px;
-}
-.story-heading p {
-  font-size: 12px;
-  color: var(--muted);
-}
-.story-heading .primary-button {
-  margin-left: auto;
-  white-space: nowrap;
 }
 .status {
   display: inline-flex;
@@ -1836,10 +1758,6 @@ summary::-webkit-details-marker {
     margin-left: 250px;
     width: calc(100% - 250px);
   }
-  .topbar {
-    padding-left: 65px;
-    padding-right: 65px;
-  }
 }
 @media (max-width: 1200px) {
   .sidebar {
@@ -1850,9 +1768,6 @@ summary::-webkit-details-marker {
   .workspace {
     margin-left: 205px;
     width: calc(100% - 205px);
-  }
-  .topbar {
-    padding: 0 30px;
   }
   .main-content {
     padding-left: 30px;
@@ -1919,10 +1834,6 @@ summary::-webkit-details-marker {
     padding: 28px 12px 20px;
     align-items: center;
   }
-  .brand-button {
-    align-self: center;
-    padding: 0;
-  }
   .sidebar .brand > span:last-child,
   .nav-label,
   .sidebar .nav-item > span,
@@ -1987,20 +1898,10 @@ summary::-webkit-details-marker {
   .toast {
     left: calc(50% + 35px);
   }
-  .mission-pill {
-    display: none;
-  }
 }
 @media (max-width: 760px) {
   .main-content {
     padding: 0 24px 30px;
-  }
-  .topbar {
-    height: 68px;
-    padding: 0 24px;
-  }
-  .topbar-actions {
-    gap: 7px;
   }
   .welcome {
     min-height: 330px;
@@ -2084,19 +1985,6 @@ summary::-webkit-details-marker {
   .workspace-footer > span:nth-child(2) {
     font-size: 7px;
     max-width: 200px;
-  }
-  .story-heading {
-    gap: 18px;
-    flex-wrap: wrap;
-  }
-  .story-heading > div:nth-child(2) {
-    flex: 1;
-  }
-  .story-heading h1 {
-    font-size: 27px;
-  }
-  .story-heading > .primary-button {
-    margin-left: 96px;
   }
   .editor-heading h1 {
     font-size: 29px;
@@ -2183,9 +2071,6 @@ summary::-webkit-details-marker {
     justify-content: center;
     background: var(--sidebar);
   }
-  .brand-button {
-    display: none;
-  }
   .sidebar nav {
     margin: 0;
     flex-direction: row;
@@ -2215,25 +2100,6 @@ summary::-webkit-details-marker {
     margin: 0;
     width: 100%;
     padding-bottom: 67px;
-  }
-  .topbar {
-    height: 63px;
-    padding: 0 19px;
-  }
-  .topbar .breadcrumb {
-    font-size: 10px;
-    gap: 9px;
-  }
-  .topbar-actions {
-    gap: 4px;
-  }
-  .theme-button {
-    width: 30px;
-  }
-  .topbar-actions .avatar {
-    height: 31px;
-    width: 31px;
-    font-size: 8px;
   }
   .main-content {
     padding: 0 20px 25px;
@@ -2367,20 +2233,6 @@ summary::-webkit-details-marker {
   }
   .brand-small {
     font-size: 14px;
-  }
-  .story-heading {
-    gap: 14px;
-  }
-  .story-heading h1 {
-    font-size: 24px;
-  }
-  .story-heading p {
-    font-size: 10px;
-  }
-  .story-heading .primary-button {
-    margin-left: 78px;
-    min-height: 37px;
-    font-size: 10px;
   }
   .text-button {
     font-size: 9px;
@@ -2573,13 +2425,6 @@ summary::-webkit-details-marker {
   .welcome-copy h1 {
     font-size: 36px;
   }
-  .topbar {
-    padding: 0 15px;
-  }
-  .desktop-crumb,
-  .crumb-slash {
-    display: none;
-  }
   .album-update {
     font-size: 7px;
   }
@@ -2595,9 +2440,6 @@ summary::-webkit-details-marker {
     transition: none !important;
     scroll-behavior: auto !important;
   }
-}
-.mobile-help {
-  display: none;
 }
 .welcome {
   min-height: 310px;
@@ -2616,22 +2458,88 @@ summary::-webkit-details-marker {
 .albums-section {
   margin-top: 18px;
 }
-.reader-heading {
-  padding: 0 0 18px;
-  border-bottom: 0;
-}
-.reader-heading > div {
-  min-width: 0;
-}
-.reader-heading h1 {
-  margin-top: 8px;
-}
 .footer-links {
   margin-left: auto;
   display: flex;
   align-items: center;
   gap: 18px;
   flex-shrink: 0;
+}
+.astronaut-name {
+  font-family: var(--serif);
+  font-size: 27px;
+  line-height: 1.2;
+  padding: 0 7px;
+  letter-spacing: -0.8px;
+}
+.mobile-astronaut {
+  display: none;
+}
+.main-content {
+  min-height: calc(100vh - 62px);
+}
+.page-end-action {
+  display: flex;
+  justify-content: center;
+  padding: 30px 0 5px;
+}
+.book-end-action {
+  max-width: 940px;
+  margin: 0 auto;
+  padding-top: 24px;
+}
+.view-story > .album-reader {
+  margin-top: 2px;
+}
+.appearance-setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 0 0 24px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--line);
+}
+.appearance-setting > span {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12px;
+}
+@media (max-width: 980px) {
+  .astronaut-name {
+    font-size: 18px;
+    padding: 0;
+    letter-spacing: -0.4px;
+  }
+}
+@media (max-width: 520px) {
+  .astronaut-name {
+    display: none;
+  }
+  .mobile-astronaut {
+    display: block;
+    font-family: var(--serif);
+    font-size: 23px;
+    line-height: 1.2;
+    padding: 25px 20px 8px;
+    letter-spacing: -0.6px;
+  }
+  .main-content {
+    min-height: calc(100dvh - 187px);
+  }
+  .view-story > .back-button {
+    margin: 18px 0;
+  }
+  .page-end-action {
+    padding-top: 25px;
+  }
+  .book-end-action {
+    padding-top: 22px;
+  }
+  .footer-links {
+    gap: 12px;
+  }
 }
 .footer-links button {
   display: inline-flex;
@@ -2657,15 +2565,6 @@ summary::-webkit-details-marker {
   .welcome-art {
     transform: scale(0.65);
   }
-  .reader-heading {
-    flex-wrap: nowrap;
-  }
-  .reader-heading > .primary-button {
-    margin-left: auto;
-  }
-  .reader-heading h1 {
-    font-size: 27px;
-  }
 }
 @media (max-width: 520px) {
   .welcome {
@@ -2674,38 +2573,28 @@ summary::-webkit-details-marker {
   .welcome-art {
     top: 12px;
   }
-  .reader-heading {
-    gap: 12px;
-  }
-  .reader-heading h1 {
-    font-size: 24px;
-  }
-  .reader-heading .primary-button {
-    min-height: 36px;
-    padding: 8px 10px;
-    font-size: 10px;
-    gap: 5px;
-  }
   .workspace-footer {
-    padding: 0 16px;
-    gap: 10px;
+    height: auto;
+    min-height: 68px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 13px 16px;
+    gap: 7px 12px;
   }
   .workspace-footer > .brand {
     display: none;
   }
   .workspace-footer > span:nth-child(2) {
-    max-width: 170px;
-    font-size: 7px;
+    max-width: none;
+    width: 100%;
+    text-align: center;
+    font-size: 8px;
   }
   .footer-links {
-    gap: 14px;
+    margin-left: 0;
+    gap: 20px;
   }
   .footer-links button {
     font-size: 8px;
-  }
-}
-@media (max-width: 980px) {
-  .mobile-help {
-    display: inline-flex;
   }
 }

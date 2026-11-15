@@ -26,6 +26,8 @@ npm run preview
 
 ## Explore the demo
 
+The astronaut's name appears in the upper-left corner. Use **Add a page** at the bottom of the home or book view. **Settings** in the footer contains the demo profile, connection, and night-mode controls.
+
 1. Open a person's album as a book. Each contribution occupies a page in chronological order. Turn pages forward or backward with the navigation controls, arrow keys, or a corner drag; narrow screens show one page at a time. Reduced-motion mode is implemented to navigate without the page-turn animation. Longer contributions remain inside a focusable region with native scrolling on the paper page; there is no separate full-text modal.
 2. Add a written moment or a photo, then leave the editor to check that its draft is saved.
 3. Use connection settings to pause simulated delivery. A recorded page stays in this browser until the simulator can advance it. Resume to see **Recorded → Sent → Delivered**. Delivery uses a 12-second simulated deadline; an offline or paused simulator makes no transitions. If the deadline passes during a pause, pending delivery can complete on reconnection. This is not a real network guarantee or a promised arrival time.
