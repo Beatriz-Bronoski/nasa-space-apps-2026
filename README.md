@@ -26,7 +26,7 @@ npm run preview
 
 ## Explore the demo
 
-The home screen is **My bookshelf**, a rustic wooden cabinet with upright cloth-bound spines. Hover a book or focus it with the keyboard to pull it forward and reveal its embroidered name label, printed photo, and four corner mounts. Neighboring spines move aside to keep the shelf usable. On a touch device, the first tap previews the cover and the next tap opens it. The astronaut's name sits on the paper navigation panel; Replies, the private check-in, Settings, and Support remain available.
+The home screen is **My bookshelf**, a rustic wooden cabinet with upright cloth-bound spines. Hover a book or focus it with the keyboard to pull it forward and reveal its embroidered name label, printed photo, and four corner mounts. Neighboring spines move aside to keep the shelf usable. On a touch device, the first tap previews the cover and the next tap opens it. The astronaut's name sits on the paper navigation panel. The same navigation, background, spacing, and footer continue through Replies, the composer, and the private check-in; the album reader remains immersive. Replies uses the bookshelf's wood frame and parchment materials, with Add album and Still Here in the same header positions.
 
 Opening an album fills the workspace with a physical scrapbook against a warm parchment surface: aged paper, worn edges, a shaded gutter, and visible stacked pages above a cloth cover. Uppercase author/location labels, light handwritten titles, photo frames, washi tape, and fabric stickers carry the album materials into the editor. Existing words, photos, and saved decorations remain intact. Night mode preserves textured blue surfaces and light ink. Use **Shelf** to return.
 
@@ -64,7 +64,8 @@ For a manual review, follow the album/reply flow above, reload with a saved draf
 
 - `src/app/page.tsx`: interactive application, album creation, and local browser state.
 - `src/components/Bookshelf.tsx` and `bookshelf-scene.css`: rustic cabinet, upright spines, pointer/keyboard previews, and shared cover contents.
-- `src/app/bookshelf-home.css`: home-only paper navigation and scene layout.
+- `src/app/bookshelf-home.css`: shared paper navigation and workspace layout outside the immersive reader.
+- `src/app/replies-board.css`: replies framed in the same wood and parchment materials as the bookshelf.
 - `src/app/globals.css`: responsive visual styles and focus states.
 - `src/app/layout.tsx`: metadata, document language, and self-hosted fonts.
 - `src/components/AlbumBook.tsx`: chronological book reader, page-turn interaction, and accessible navigation.

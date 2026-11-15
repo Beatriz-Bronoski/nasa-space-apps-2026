@@ -142,3 +142,12 @@ The pickup geometry was aligned to the deeper cover: a desktop opening targeted 
 - A new Little traditions album was created locally with Maya, survived a reload, accepted its first contribution, and reopened after another reload. The contribution retained its text and simulated transport state. Switching to Maya showed only her seeded and added albums; no unrelated books appeared.
 - At 320 × 844, five albums formed three compartments. A focused front cover stayed inside the 285 px cabinet, and document scrollWidth 305 stayed below innerWidth 320. Day and night materials were reviewed. No local browser warnings or errors were observed.
 - Physical touchscreen activation, runtime OS reduced-motion changes, a full accessibility audit, and frame-rate measurement remain untested. The touch preview branch and reduced-motion styles were reviewed in source.
+
+## Replies workspace continuity
+
+- TypeScript checking passed. This presentation change adds no data schema, transport, or notification rules.
+- Before and after navigating from the bookshelf to Replies at 1280 × 720, the sidebar rectangle/background, astronaut name rectangle/font, navigation button positions, and workspace background were identical. The wood frame retained x = 258, y = 34, width = 977 px. Taller reply content flows naturally and can place the footer lower in the document.
+- Read replies remained visible. Opening the response to Our little moon garden selected the correct contribution on spread 3–4 without a shelf-opening overlay, preserving the existing direct-reply behavior. The reader retained its immersive shell.
+- The private check-in retained all three questions and the same paper navigation. Night mode was reviewed with both populated and empty Replies states.
+- At 320 × 844, two reply cards wrapped without horizontal overflow: document scrollWidth was 305 px. Switching profiles through Settings and then navigating to Replies ended at scrollY = 0, frame y = 63.6, with focus on the Replies heading. No browser warnings or errors were observed.
+- These functional viewport checks do not replace physical-device testing or a full accessibility audit. No new unit tests were added for the visual styling.

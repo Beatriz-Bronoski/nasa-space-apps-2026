@@ -60,6 +60,7 @@ import Bookshelf from "@/components/Bookshelf";
 import "./bookshelf.css";
 import "./physical-albums.css";
 import "./bookshelf-home.css";
+import "./replies-board.css";
 
 type View = "albums" | "story" | "compose" | "checkin" | "replies";
 type Dialog = "connection" | "help" | "about" | "new-album" | null;
@@ -68,21 +69,6 @@ const shelfOrder = new Map(
   ["sam", "maya", "june", "lily"].map((id, index) => [id, index]),
 );
 const person = (id: string) => PEOPLE.find((p) => p.id === id)!;
-
-function Brand({ small = false }: { small?: boolean }) {
-  return (
-    <span className={`brand ${small ? "brand-small" : ""}`}>
-      <span className="brand-mark" aria-hidden="true">
-        <i />
-        <i />
-        <span />
-      </span>
-      <span>
-        still here<span className="brand-period">.</span>
-      </span>
-    </span>
-  );
-}
 
 function Avatar({
   id,
@@ -139,7 +125,7 @@ function Modal({
     return () => {
       document.removeEventListener("keydown", key);
       document.body.style.overflow = overflow;
-      previous?.focus();
+      previous?.focus({ preventScroll: true });
     };
   }, [onClose]);
   return (
@@ -362,7 +348,10 @@ export default function Home() {
     return () => clearTimeout(t);
   }, [toast]);
   useEffect(() => {
-    if (ready && !opening) titleRef.current?.focus({ preventScroll: true });
+    if (ready && !opening) {
+      window.scrollTo({ top: 0, behavior: "instant" });
+      titleRef.current?.focus({ preventScroll: true });
+    }
   }, [view, selected, ready, opening]);
   useEffect(() => {
     if (view === "checkin") {
@@ -540,6 +529,12 @@ export default function Home() {
     setToast("Your check-in is saved privately on this device.");
   };
   const closeDialog = useCallback(() => setDialog(null), []);
+  const showNewAlbum = () => {
+    setNewAlbumTitle("");
+    setNewAlbumPerson(profile === "alex" ? "lily" : profile);
+    setNewAlbumError("");
+    setDialog("new-album");
+  };
   const handleCreateAlbum = () => {
     try {
       const id = `album-${crypto.randomUUID()}`;
@@ -570,9 +565,7 @@ export default function Home() {
       className={
         view === "story"
           ? "app-shell immersive-reader"
-          : view === "albums"
-            ? "app-shell bookshelf-home"
-            : "app-shell"
+          : `app-shell scrapbook-shell${view === "albums" ? " bookshelf-home" : ""}`
       }
       inert={opening ? true : undefined}
     >
@@ -680,12 +673,7 @@ export default function Home() {
                   ),
                 }))}
               onOpen={openAlbum}
-              onAddAlbum={() => {
-                setNewAlbumTitle("");
-                setNewAlbumPerson(profile === "alex" ? "lily" : profile);
-                setNewAlbumError("");
-                setDialog("new-album");
-              }}
+              onAddAlbum={showNewAlbum}
               headingRef={titleRef}
               openingAlbumId={opening?.albumId}
             />
@@ -837,71 +825,96 @@ export default function Home() {
           )}
 
           {view === "replies" && (
-            <div className="narrow-content">
-              <h1 ref={titleRef} tabIndex={-1}>
-                Replies.
-              </h1>
-
-              {data.pages
-                .filter(
-                  (p) =>
-                    p.replyTo &&
-                    p.authorId !== profile &&
-                    ["delivered", "answered"].includes(p.status) &&
-                    data.pages.some(
-                      (parent) =>
-                        parent.id === p.replyTo && parent.authorId === profile,
-                    ),
-                )
-                .reverse()
-                .map((page) => (
+            <section
+              className="rustic-bookshelf replies-board"
+              aria-labelledby="replies-title"
+            >
+              <div className="shelf-cabinet">
+                <header className="shelf-heading">
+                  <h1 id="replies-title" ref={titleRef} tabIndex={-1}>
+                    Replies
+                  </h1>
                   <button
-                    className="inbox-card"
-                    key={page.id}
-                    onClick={() => openReply(page)}
+                    className="shelf-add-album"
+                    type="button"
+                    onClick={showNewAlbum}
                   >
-                    <Avatar id={page.authorId} />
-                    <div>
-                      {!data.readReplyIds.includes(page.id) && (
-                        <span className="new-label">A NEW PAGE</span>
-                      )}
-                      <h2>{person(page.authorId).name} continued your story</h2>
-                      <p>
-                        In response to “
-                        {data.pages.find((p) => p.id === page.replyTo)?.title}”
-                      </p>
-                      <blockquote>{page.text}</blockquote>
-                      <span className="inbox-date">
-                        {formatDate(page.createdAt)} · Open their page
-                      </span>
+                    <Plus size={18} />
+                    Add album
+                  </button>
+                  <span className="shelf-heading-brand">Still Here</span>
+                </header>
+                <div className="replies-paper">
+                  {data.pages
+                    .filter(
+                      (p) =>
+                        p.replyTo &&
+                        p.authorId !== profile &&
+                        ["delivered", "answered"].includes(p.status) &&
+                        data.pages.some(
+                          (parent) =>
+                            parent.id === p.replyTo &&
+                            parent.authorId === profile,
+                        ),
+                    )
+                    .reverse()
+                    .map((page) => (
+                      <button
+                        className="inbox-card"
+                        key={page.id}
+                        onClick={() => openReply(page)}
+                      >
+                        <Avatar id={page.authorId} />
+                        <div>
+                          {!data.readReplyIds.includes(page.id) && (
+                            <span className="new-label">A NEW PAGE</span>
+                          )}
+                          <h2>
+                            {person(page.authorId).name} continued your story
+                          </h2>
+                          <p>
+                            In response to “
+                            {
+                              data.pages.find((p) => p.id === page.replyTo)
+                                ?.title
+                            }
+                            ”
+                          </p>
+                          <blockquote>{page.text}</blockquote>
+                          <span className="inbox-date">
+                            {formatDate(page.createdAt)} · Open their page
+                          </span>
+                        </div>
+                        <ArrowRight size={19} />
+                      </button>
+                    ))}
+                  {!data.pages.some(
+                    (p) =>
+                      p.replyTo &&
+                      p.authorId !== profile &&
+                      ["delivered", "answered"].includes(p.status) &&
+                      data.pages.some(
+                        (parent) =>
+                          parent.id === p.replyTo &&
+                          parent.authorId === profile,
+                      ),
+                  ) && (
+                    <div className="empty-state">
+                      <BookHeart size={40} />
+                      <h2>A quiet space for now.</h2>
+
+                      <button
+                        className="secondary-button"
+                        onClick={() => navigate("albums")}
+                      >
+                        Back to my bookshelf
+                        <ArrowRight size={15} />
+                      </button>
                     </div>
-                    <ArrowRight size={19} />
-                  </button>
-                ))}
-              {!data.pages.some(
-                (p) =>
-                  p.replyTo &&
-                  p.authorId !== profile &&
-                  ["delivered", "answered"].includes(p.status) &&
-                  data.pages.some(
-                    (parent) =>
-                      parent.id === p.replyTo && parent.authorId === profile,
-                  ),
-              ) && (
-                <div className="empty-state">
-                  <BookHeart size={40} />
-                  <h2>A quiet space for now.</h2>
-
-                  <button
-                    className="secondary-button"
-                    onClick={() => navigate("albums")}
-                  >
-                    Back to your albums
-                    <ArrowRight size={15} />
-                  </button>
+                  )}
                 </div>
-              )}
-            </div>
+              </div>
+            </section>
           )}
 
           {view === "checkin" && (
@@ -1071,7 +1084,6 @@ export default function Home() {
         </main>
         {view !== "story" && (
           <footer className="workspace-footer">
-            {view !== "albums" && <Brand small />}
             <span>Demo · Simulated delivery · Browser storage</span>
             <div className="footer-links">
               <button onClick={() => setDialog("connection")}>Settings</button>
