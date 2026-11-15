@@ -22,6 +22,8 @@ type Props = {
   album: Album;
   personName: string;
   origin: AlbumOpeningOrigin;
+  onPrepare: () => void;
+  readerReady: boolean;
   onComplete: () => void;
 };
 
@@ -52,13 +54,35 @@ export default function AlbumOpening({
   album,
   personName,
   origin,
+  onPrepare,
+  readerReady,
   onComplete,
 }: Props) {
   const callback = useRef(onComplete);
   callback.current = onComplete;
+  const prepareCallback = useRef(onPrepare);
+  prepareCallback.current = onPrepare;
+  const prepared = useRef(false);
   const completed = useRef(false);
   const skipButton = useRef<HTMLButtonElement>(null);
   const [geometry] = useState(() => stageGeometry(origin));
+  const [animationDone, setAnimationDone] = useState(false);
+  const [bypassed, setBypassed] = useState(false);
+  const [revealing, setRevealing] = useState(false);
+
+  const prepare = useCallback(() => {
+    if (prepared.current) return;
+    prepared.current = true;
+    prepareCallback.current();
+  }, []);
+  const finishAnimation = useCallback(() => {
+    prepare();
+    setAnimationDone(true);
+  }, [prepare]);
+  const skip = useCallback(() => {
+    setBypassed(true);
+    finishAnimation();
+  }, [finishAnimation]);
 
   const complete = useCallback(() => {
     if (completed.current) return;
@@ -67,10 +91,17 @@ export default function AlbumOpening({
   }, []);
 
   useEffect(() => {
+    if (!animationDone || !readerReady) return;
+    setRevealing(true);
+    // The mounted book is already painted; only the lightweight overlay fades.
+    const fade = window.setTimeout(complete, 220);
+    return () => window.clearTimeout(fade);
+  }, [animationDone, readerReady, complete]);
+
+  useEffect(() => {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (preference.matches) {
-      complete();
-      return;
+      skip();
     }
     const previousOverflow = document.body.style.overflow;
     const previousGutter = document.documentElement.style.scrollbarGutter;
@@ -81,7 +112,7 @@ export default function AlbumOpening({
       if (event.key === "Escape") {
         event.preventDefault();
         event.stopPropagation();
-        complete();
+        skip();
       }
       if (event.key === "Tab") {
         event.preventDefault();
@@ -89,28 +120,37 @@ export default function AlbumOpening({
       }
     };
     const reducedMotion = () => {
-      if (preference.matches) complete();
+      if (preference.matches) skip();
     };
     // A changed viewport invalidates the captured shelf position: finish safely.
-    window.addEventListener("resize", complete);
+    window.addEventListener("resize", skip);
     window.addEventListener("keydown", key, true);
     preference.addEventListener("change", reducedMotion);
     // Covers CSS animation cancellation, background-tab throttling and slow frames.
-    const fallback = window.setTimeout(complete, 2100);
+    // The backdrop is opaque at 43% (765 ms), leaving the shelf intact before it.
+    // Build the real reader at its final size while the cover is still opening.
+    const warmup = window.setTimeout(prepare, 780);
+    const fallback = window.setTimeout(finishAnimation, 2100);
+    const safety = window.setTimeout(() => {
+      prepare();
+      complete();
+    }, 7000);
     return () => {
+      window.clearTimeout(warmup);
       window.clearTimeout(fallback);
+      window.clearTimeout(safety);
       document.body.style.overflow = previousOverflow;
       document.documentElement.style.scrollbarGutter = previousGutter;
-      window.removeEventListener("resize", complete);
+      window.removeEventListener("resize", skip);
       window.removeEventListener("keydown", key, true);
       preference.removeEventListener("change", reducedMotion);
     };
-  }, [complete]);
+  }, [complete, prepare, finishAnimation, skip]);
 
   const photo = album.cover.replace(/\.svg$/, ".jpg");
   return (
     <div
-      className={`album-opening opening-${album.accent}`}
+      className={`album-opening opening-${album.accent}${bypassed ? " opening-bypassed" : ""}${revealing ? " opening-revealing" : ""}`}
       style={geometry}
       role="dialog"
       aria-modal="true"
@@ -128,7 +168,7 @@ export default function AlbumOpening({
             event.target === event.currentTarget &&
             event.animationName === "album-lift-and-open"
           )
-            complete();
+            finishAnimation();
         }}
       >
         <div className="opening-page-block" />
@@ -176,7 +216,7 @@ export default function AlbumOpening({
         ref={skipButton}
         className="opening-skip"
         type="button"
-        onClick={complete}
+        onClick={skip}
       >
         Skip animation
       </button>

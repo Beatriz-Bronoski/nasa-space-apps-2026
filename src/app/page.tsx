@@ -230,6 +230,7 @@ export default function Home() {
     albumId: string;
     origin: { left: number; top: number; width: number; height: number };
   } | null>(null);
+  const [readerReady, setReaderReady] = useState(false);
   const openingLock = useRef(false);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -340,8 +341,8 @@ export default function Home() {
     return () => clearTimeout(t);
   }, [toast]);
   useEffect(() => {
-    if (ready) titleRef.current?.focus();
-  }, [view, selected]);
+    if (ready && !opening) titleRef.current?.focus({ preventScroll: true });
+  }, [view, selected, ready, opening]);
   useEffect(() => {
     if (view === "checkin") {
       setRatings(
@@ -383,6 +384,7 @@ export default function Home() {
       return;
     }
     openingLock.current = true;
+    setReaderReady(false);
     setOpening({
       albumId: id,
       origin: {
@@ -393,6 +395,14 @@ export default function Home() {
       },
     });
   };
+  const prepareOpening = useCallback(() => {
+    if (!opening || !openingLock.current) return;
+    setSelected(opening.albumId);
+    setHighlight("");
+    setView("story");
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [opening]);
+  const markReaderReady = useCallback(() => setReaderReady(true), []);
   const finishOpening = useCallback(() => {
     if (!opening || !openingLock.current) return;
     openingLock.current = false;
@@ -800,6 +810,7 @@ export default function Home() {
                 album={album}
                 profileId={profile}
                 initialPageId={highlight || undefined}
+                onReady={markReaderReady}
                 onCompose={(replyTo) => compose(selected, replyTo)}
               />
               {visiblePages.length > 0 && (
@@ -1378,6 +1389,8 @@ export default function Home() {
               profile === "alex" ? person(opening.albumId).name : "Alex & you"
             }
             origin={opening.origin}
+            onPrepare={prepareOpening}
+            readerReady={readerReady}
             onComplete={finishOpening}
           />,
           document.body,

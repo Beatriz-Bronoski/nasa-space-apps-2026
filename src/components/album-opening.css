@@ -8,6 +8,20 @@
   overflow: hidden;
   perspective: 2200px;
   isolation: isolate;
+  opacity: 1;
+  transition: opacity 200ms ease-out;
+  will-change: opacity;
+}
+.album-opening.opening-revealing {
+  opacity: 0;
+  pointer-events: none;
+}
+.opening-bypassed .opening-flight {
+  visibility: hidden;
+}
+.opening-bypassed .opening-backdrop {
+  animation: none;
+  opacity: 1;
 }
 .opening-sage {
   --opening-cloth: var(--cover-olive);
@@ -298,7 +312,6 @@
   54% {
     transform: rotateY(-14deg);
   }
-  91%,
   100% {
     transform: rotateY(-172deg);
   }
@@ -343,5 +356,6 @@
   .album-opening,
   .album-opening * {
     animation: none !important;
+    transition: none !important;
   }
 }

@@ -65,3 +65,10 @@ All delivery tests use the clearly labeled simulator. They do not verify communi
 - A 390 × 844 viewport had no horizontal page overflow. The mobile tray remained available above the preview; dragging from it onto the paper added a sticker. The paper expanded to preserve the complete note. This is viewport/pointer verification, not a physical touchscreen test.
 - A crisis cue displayed support next to the text field while Publish remained enabled. Removing the cue removed the panel. No browser warnings/errors were observed in these flows.
 - Physical-device touch, runtime OS reduced-motion changes, a full assistive-technology audit, and clinical review remain unverified.
+
+## Opening handoff performance revision
+
+- TypeScript and all 25 tests passed. Four new isolated readiness tests cover loading/decoding (including rejection), the image deadline, cancellation and late callbacks, and empty spreads waiting for two paint frames.
+- In a desktop browser sample approximately 1.1 seconds after activating a shelf book, the opening overlay was still present with an opaque backdrop, while the real reader already reported ready at its final 880 px width. Focus remained on Skip animation and the application stayed inert. After handoff, the ready reader remained available, focus moved to its heading, inert was removed, and body scrolling was restored.
+- Page navigation advanced to the next spread. Repeated opening of different albums, keyboard activation, Escape, and the Skip animation button completed without a stuck overlay. A 390 × 844 viewport also had the reader ready while the opening was still present, with no horizontal overflow. Resizing to 414 px during opening safely revealed the correct ready reader and restored scrolling. No browser warnings/errors were observed.
+- These are functional timing samples and source-level checks of the mount handoff, not an FPS benchmark or a promise for every device. CPU throttling, physical touch devices, and runtime OS reduced-motion changes were not exercised.

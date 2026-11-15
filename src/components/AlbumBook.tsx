@@ -23,6 +23,7 @@ import {
 import "@openpageflip/core/styles.css";
 import "./album-book.css";
 import ScrapbookPage from "./ScrapbookPage";
+import { afterReaderImagesPaint } from "@/lib/reader-ready";
 
 type Props = {
   pages: Contribution[];
@@ -30,6 +31,7 @@ type Props = {
   profileId: string;
   initialPageId?: string;
   onCompose: (replyTo?: string) => void;
+  onReady?: () => void;
 };
 
 const authorName = (id: string) =>
@@ -50,8 +52,17 @@ export default function AlbumBook({
   profileId,
   initialPageId,
   onCompose,
+  onReady,
 }: Props) {
   const book = useRef<Book>(null);
+  const reader = useRef<HTMLElement>(null);
+  const readyCallback = useRef(onReady);
+  readyCallback.current = onReady;
+  const [readerReady, setReaderReady] = useState(false);
+  const [initialLayout, setInitialLayout] = useState<{
+    page: number;
+    portrait: boolean;
+  } | null>(null);
   const lastJump = useRef("");
   const target = Math.max(
     0,
@@ -60,7 +71,33 @@ export default function AlbumBook({
   const [index, setIndex] = useState(target);
   const [portrait, setPortrait] = useState(false);
   const [turning, setTurning] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+  const hasPages = pages.length > 0;
+
+  useEffect(() => {
+    if (readerReady || (hasPages && !initialLayout) || !reader.current) return;
+    const spread = initialLayout
+      ? [
+          initialLayout.page,
+          ...(initialLayout.portrait ? [] : [initialLayout.page + 1]),
+        ]
+      : [];
+    const images = spread.flatMap((page) =>
+      Array.from(
+        reader.current!.querySelectorAll<HTMLImageElement>(
+          `[data-reader-page-index="${page}"] img`,
+        ),
+      ),
+    );
+    return afterReaderImagesPaint(images, () => {
+      setReaderReady(true);
+      readyCallback.current?.();
+    });
+  }, [initialLayout, hasPages, readerReady]);
 
   useEffect(() => {
     const preference = matchMedia("(prefers-reduced-motion: reduce)");
@@ -117,7 +154,11 @@ export default function AlbumBook({
 
   if (!pages.length)
     return (
-      <section className="album-reader book-empty">
+      <section
+        ref={reader}
+        className="album-reader book-empty"
+        data-reader-ready={readerReady ? "true" : "false"}
+      >
         <Feather size={28} />
         <h2>A new chapter.</h2>
         <button className="primary-button" onClick={() => onCompose()}>
@@ -129,6 +170,8 @@ export default function AlbumBook({
 
   return (
     <section
+      ref={reader}
+      data-reader-ready={readerReady ? "true" : "false"}
       className={`album-reader ${portrait ? "book-portrait" : "book-spread"}`}
       aria-label={`${album.title}, chronological book`}
       onKeyDown={onKey}
@@ -160,6 +203,10 @@ export default function AlbumBook({
             setTurning(false);
             setIndex(page);
             setPortrait(orientation === "portrait");
+            setInitialLayout(
+              (layout) =>
+                layout ?? { page, portrait: orientation === "portrait" },
+            );
           }}
           onFlip={({ page }) => setIndex(page)}
           onUpdate={({ page, orientation }) => {
@@ -181,6 +228,7 @@ export default function AlbumBook({
             const own = page.authorId === profileId;
             return (
               <Page
+                data-reader-page-index={pageIndex}
                 className={`album-leaf ${page.photo ? "leaf-with-photo" : "leaf-words"}`}
                 key={page.id}
               >
