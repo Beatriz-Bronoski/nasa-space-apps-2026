@@ -1,8 +1,12 @@
 import {
   MAX_CUSTOM_ALBUMS,
-  PEOPLE,
+  MAX_CUSTOM_PEOPLE,
   getAlbums,
+  getPeople,
   isCustomAlbum,
+  isCustomPerson,
+  isLocalPhoto,
+  upgradeDemoStories,
   type Album,
   type AppData,
   type Contribution,
@@ -18,13 +22,7 @@ const text = (x: unknown, max = 12000) =>
   typeof x === "string" && x.length <= max;
 const date = (x: unknown) =>
   typeof x === "string" && Number.isFinite(Date.parse(x));
-const person = (x: unknown) => PEOPLE.some((p) => p.id === x);
-const photo = (x: unknown) =>
-  x === undefined ||
-  (typeof x === "string" &&
-    x.length < 500000 &&
-    (/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(x) ||
-      /^\/images\/(lily|sam|maya|june)\.jpg$/.test(x)));
+const photo = (x: unknown) => x === undefined || isLocalPhoto(x);
 const identifier = (x: unknown) =>
   text(x, 100) && (x as string).trim().length > 0;
 const unique = (values: string[]) => new Set(values).size === values.length;
@@ -37,6 +35,7 @@ function invalid(): never {
 const validPage = (
   p: unknown,
   albums: Map<string, Album>,
+  personIds: Set<string>,
 ): p is Contribution => {
   if (!isObject(p)) return false;
   const album =
@@ -44,7 +43,7 @@ const validPage = (
   return (
     identifier(p.id) &&
     !!album &&
-    person(p.authorId) &&
+    personIds.has(p.authorId as string) &&
     (p.authorId === "alex" || p.authorId === album.personId) &&
     text(p.title, 120) &&
     text(p.text, 10000) &&
@@ -60,10 +59,10 @@ const validPage = (
     (p.replyTo === undefined || identifier(p.replyTo))
   );
 };
-const validCheckIn = (c: unknown): c is CheckIn =>
+const validCheckIn = (c: unknown, personIds: Set<string>): c is CheckIn =>
   isObject(c) &&
   identifier(c.id) &&
-  person(c.profileId) &&
+  personIds.has(c.profileId as string) &&
   date(c.createdAt) &&
   typeof c.week === "string" &&
   /^\d{4}-\d{2}-\d{2}$/.test(c.week) &&
@@ -98,19 +97,35 @@ export function parseStoredData(raw: string): AppData {
     !Array.isArray(v.readReplyIds)
   )
     throw new Error("Unrecognized saved data");
+  if (v.demoStoriesVersion !== undefined && v.demoStoriesVersion !== 1)
+    invalid();
+  const customPeople = v.customPeople === undefined ? [] : v.customPeople;
+  if (
+    !Array.isArray(customPeople) ||
+    customPeople.length > MAX_CUSTOM_PEOPLE ||
+    !customPeople.every(isCustomPerson)
+  )
+    invalid();
+  const people = getPeople({ customPeople });
+  if (
+    !unique(people.map((item) => item.id)) ||
+    !unique(people.map((item) => item.name.toLocaleLowerCase()))
+  )
+    invalid();
+  const personIds = new Set(people.map((item) => item.id));
   const customAlbums = v.customAlbums === undefined ? [] : v.customAlbums;
   if (
     !Array.isArray(customAlbums) ||
     customAlbums.length > MAX_CUSTOM_ALBUMS ||
-    !customAlbums.every(isCustomAlbum)
+    !customAlbums.every((album) => isCustomAlbum(album, people))
   )
     invalid();
   const albums = getAlbums({ customAlbums });
   if (!unique(albums.map((item) => item.id))) invalid();
   const albumById = new Map(albums.map((item) => [item.id, item]));
   if (
-    !v.pages.every((page) => validPage(page, albumById)) ||
-    !v.checkIns.every(validCheckIn) ||
+    !v.pages.every((page) => validPage(page, albumById, personIds)) ||
+    !v.checkIns.every((checkIn) => validCheckIn(checkIn, personIds)) ||
     !v.readReplyIds.every(identifier)
   )
     invalid();
@@ -142,20 +157,27 @@ export function parseStoredData(raw: string): AppData {
     const parts = key.split(":");
     const [authorId, albumId] = parts;
     const album = albumById.get(albumId);
-    if (parts.length !== 2 || !person(authorId) || !album || !validDraft(d))
+    if (
+      parts.length !== 2 ||
+      !personIds.has(authorId) ||
+      !album ||
+      !validDraft(d)
+    )
       invalid();
     if (authorId !== "alex" && authorId !== album.personId) invalid();
     if (d.replyTo && !validReply(d.replyTo, albumId, authorId)) invalid();
     drafts[key] = d;
   }
-  return {
+  return upgradeDemoStories({
     version: 1,
     ...(v.customAlbums === undefined ? {} : { customAlbums }),
+    ...(v.customPeople === undefined ? {} : { customPeople }),
+    ...(v.demoStoriesVersion === undefined ? {} : { demoStoriesVersion: 1 }),
     pages,
     drafts,
     checkIns,
     readReplyIds,
-  };
+  });
 }
 
 /** Canvas re-encoding strips source metadata and keeps the queued payload small. */

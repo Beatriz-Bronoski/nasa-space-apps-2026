@@ -34,9 +34,9 @@ import {
   X,
 } from "lucide-react";
 import {
-  PEOPLE,
   createAlbum,
   getAlbums,
+  getPeople,
   addContribution,
   advanceDelivery,
   createInitialData,
@@ -47,6 +47,7 @@ import {
   type AppData,
   type Contribution,
   type Draft,
+  type Person,
 } from "@/lib/model";
 import { STORAGE_KEY, compressPhoto, parseStoredData } from "@/lib/storage";
 import AlbumBook from "@/components/AlbumBook";
@@ -57,6 +58,7 @@ import {
 } from "@/lib/opening-geometry";
 import ScrapbookEditor from "@/components/ScrapbookEditor";
 import Bookshelf from "@/components/Bookshelf";
+import AddAlbumForm, { type AlbumInput } from "@/components/AddAlbumForm";
 import "./bookshelf.css";
 import "./physical-albums.css";
 import "./bookshelf-home.css";
@@ -68,16 +70,13 @@ const emptyDraft: Draft = { title: "", text: "" };
 const shelfOrder = new Map(
   ["sam", "maya", "june", "lily"].map((id, index) => [id, index]),
 );
-const person = (id: string) => PEOPLE.find((p) => p.id === id)!;
-
 function Avatar({
-  id,
+  person: p,
   size = "normal",
 }: {
-  id: string;
+  person: Person;
   size?: "normal" | "small";
 }) {
-  const p = person(id);
   return (
     <span className={`avatar ${p.color} ${size}`} aria-hidden="true">
       {p.initials}
@@ -215,9 +214,6 @@ export default function Home() {
   const [deviceOnline, setDeviceOnline] = useState(true);
   const [dark, setDark] = useState(false);
   const [dialog, setDialog] = useState<Dialog>(null);
-  const [newAlbumTitle, setNewAlbumTitle] = useState("");
-  const [newAlbumPerson, setNewAlbumPerson] = useState("lily");
-  const [newAlbumError, setNewAlbumError] = useState("");
   const [toast, setToast] = useState("");
   const [storageError, setStorageError] = useState("");
   const [photoError, setPhotoError] = useState("");
@@ -236,12 +232,14 @@ export default function Home() {
   const fileRef = useRef<HTMLInputElement>(null);
   const lastStored = useRef<string | null>(null);
   const allAlbums = getAlbums(data);
+  const allPeople = getPeople(data);
+  const person = (id: string) => allPeople.find((item) => item.id === id)!;
   const album = allAlbums.find((a) => a.id === selected) ?? allAlbums[0];
   const openingAlbum = opening
     ? allAlbums.find((a) => a.id === opening.albumId)
     : undefined;
   const current = person(profile);
-  const astronaut = PEOPLE.find((person) => person.role === "Astronaut")!;
+  const astronaut = person("alex");
   const online = deviceOnline && !paused;
   const albums =
     profile === "alex"
@@ -530,34 +528,16 @@ export default function Home() {
   };
   const closeDialog = useCallback(() => setDialog(null), []);
   const showNewAlbum = () => {
-    setNewAlbumTitle("");
-    setNewAlbumPerson(profile === "alex" ? "lily" : profile);
-    setNewAlbumError("");
     setDialog("new-album");
   };
-  const handleCreateAlbum = () => {
-    try {
-      const id = `album-${crypto.randomUUID()}`;
-      const next = createAlbum(
-        data,
-        {
-          personId: profile === "alex" ? newAlbumPerson : profile,
-          title: newAlbumTitle,
-        },
-        id,
-      );
-      setData(next);
-      setSelected(id);
-      setDialog(null);
-      navigate("albums");
-      setToast("Album added to your bookshelf.");
-    } catch (error) {
-      setNewAlbumError(
-        error instanceof Error
-          ? error.message
-          : "This album could not be created.",
-      );
-    }
+  const handleCreateAlbum = (input: AlbumInput) => {
+    const id = `album-${crypto.randomUUID()}`;
+    const next = createAlbum(data, input, id);
+    setData(next);
+    setSelected(id);
+    setDialog(null);
+    navigate("albums");
+    setToast("Album added to your bookshelf.");
   };
 
   return (
@@ -699,6 +679,7 @@ export default function Home() {
                 key={selected + ":" + profile}
                 pages={visiblePages}
                 album={album}
+                people={allPeople}
                 profileId={profile}
                 initialPageId={highlight || undefined}
                 onReady={markReaderReady}
@@ -784,7 +765,7 @@ export default function Home() {
                 )}
                 <div className="editor-meta">
                   <span>
-                    <Avatar id={profile} size="small" />A page from{" "}
+                    <Avatar person={current} size="small" />A page from{" "}
                     {current.name}
                   </span>
                   <span>
@@ -864,7 +845,7 @@ export default function Home() {
                         key={page.id}
                         onClick={() => openReply(page)}
                       >
-                        <Avatar id={page.authorId} />
+                        <Avatar person={person(page.authorId)} />
                         <div>
                           {!data.readReplyIds.includes(page.id) && (
                             <span className="new-label">A NEW PAGE</span>
@@ -1112,54 +1093,16 @@ export default function Home() {
       )}
       {dialog === "new-album" && (
         <Modal title="Add an album" onClose={closeDialog}>
-          <form
-            className="album-create-form"
-            onSubmit={(event) => {
-              event.preventDefault();
-              handleCreateAlbum();
-            }}
-          >
-            <label className="field-label" htmlFor="new-album-title">
-              Album title
-            </label>
-            <input
-              id="new-album-title"
-              className="story-input"
-              value={newAlbumTitle}
-              onChange={(event) => setNewAlbumTitle(event.target.value)}
-              placeholder="A place for little memories"
-              maxLength={70}
-              required
-            />
-            <label className="field-label" htmlFor="new-album-person">
-              Share with
-            </label>
-            <select
-              id="new-album-person"
-              className="profile-select"
-              value={newAlbumPerson}
-              onChange={(event) => setNewAlbumPerson(event.target.value)}
-            >
-              {PEOPLE.filter(
-                (item) =>
-                  item.id !== "alex" &&
-                  (profile === "alex" || item.id === profile),
-              ).map((item) => (
-                <option value={item.id} key={item.id}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
-            {newAlbumError && (
-              <p className="field-error" role="alert">
-                {newAlbumError}
-              </p>
+          <AddAlbumForm
+            people={allPeople.filter(
+              (item) =>
+                item.id !== "alex" &&
+                (profile === "alex" || item.id === profile),
             )}
-            <button className="primary-button" type="submit">
-              <Plus size={17} />
-              Add album
-            </button>
-          </form>
+            defaultPersonId={profile === "alex" ? "lily" : profile}
+            canAddPerson={profile === "alex"}
+            onCreate={handleCreateAlbum}
+          />
         </Modal>
       )}
       {dialog === "connection" && (
@@ -1220,12 +1163,16 @@ export default function Home() {
             value={profile}
             onChange={(e) => {
               setProfile(e.target.value);
-              if (e.target.value !== "alex") setSelected(e.target.value);
+              if (e.target.value !== "alex")
+                setSelected(
+                  allAlbums.find((item) => item.personId === e.target.value)
+                    ?.id ?? "lily",
+                );
               navigate("albums");
               setDialog(null);
             }}
           >
-            {PEOPLE.map((p) => (
+            {allPeople.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
               </option>
@@ -1327,6 +1274,7 @@ export default function Home() {
         createPortal(
           <AlbumOpening
             album={openingAlbum!}
+            people={allPeople}
             personName={person(openingAlbum!.personId).name}
             origin={opening.origin}
             target={openingTarget}

@@ -12,6 +12,7 @@ import {
   formatDate,
   getStatusLabel,
   type Contribution,
+  type Person,
 } from "@/lib/model";
 import ScrapbookPage from "./ScrapbookPage";
 import "./album-leaf.css";
@@ -28,12 +29,11 @@ type Props = {
   page: Contribution;
   pageIndex: number;
   profileId: string;
+  people?: Person[];
   presentation?: boolean;
   onReply?: () => void;
   navigation?: LeafNavigation;
 };
-const authorName = (id: string) =>
-  PEOPLE.find((person) => person.id === id)?.name ?? "Someone close";
 const statusIcon = (page: Contribution) =>
   page.status === "recorded"
     ? Cloud
@@ -48,10 +48,13 @@ export default function AlbumLeaf({
   page,
   pageIndex,
   profileId,
+  people = PEOPLE,
   presentation = false,
   onReply,
   navigation,
 }: Props) {
+  const authorName = (id: string) =>
+    people.find((person) => person.id === id)?.name ?? "Someone close";
   const Icon = statusIcon(page);
   const own = page.authorId === profileId;
   const canReply =

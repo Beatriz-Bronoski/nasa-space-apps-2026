@@ -17,7 +17,13 @@ import {
   Plus,
   Send,
 } from "lucide-react";
-import { PEOPLE, formatDate, type Album, type Contribution } from "@/lib/model";
+import {
+  PEOPLE,
+  formatDate,
+  type Album,
+  type Contribution,
+  type Person,
+} from "@/lib/model";
 import "@openpageflip/core/styles.css";
 import "./album-book.css";
 import AlbumLeaf from "./AlbumLeaf";
@@ -30,23 +36,24 @@ type Props = {
   pages: Contribution[];
   album: Album;
   profileId: string;
+  people?: Person[];
   initialPageId?: string;
   onCompose: (replyTo?: string) => void;
   onReady?: () => void;
 };
-
-const authorName = (id: string) =>
-  PEOPLE.find((person) => person.id === id)?.name ?? "Someone close";
 
 /** Every contribution is a physical leaf; the fold engine controls only its presentation. */
 export default function AlbumBook({
   pages,
   album,
   profileId,
+  people = PEOPLE,
   initialPageId,
   onCompose,
   onReady,
 }: Props) {
+  const authorName = (id: string) =>
+    people.find((person) => person.id === id)?.name ?? "Someone close";
   const book = useRef<Book>(null);
   const reader = useRef<HTMLElement>(null);
   const focusAfterTurn = useRef(false);
@@ -236,7 +243,7 @@ export default function AlbumBook({
     >
       <div className={`book-case book-case-${album.accent}`}>
         <div className="book-ground-shadow" aria-hidden="true" />
-        <AlbumNameplate album={album} />
+        <AlbumNameplate album={album} people={people} />
         <BookVolume
           portrait={portrait}
           firstPage={first}
@@ -300,6 +307,7 @@ export default function AlbumBook({
                   page={page}
                   pageIndex={pageIndex}
                   profileId={profileId}
+                  people={people}
                   onReply={() => onCompose(page.id)}
                   navigation={{
                     showPrevious: pageIndex === first && first > 0,

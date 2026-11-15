@@ -7,7 +7,12 @@ import {
   useState,
   type CSSProperties,
 } from "react";
-import { PEOPLE, type Album, type Contribution } from "@/lib/model";
+import {
+  PEOPLE,
+  type Album,
+  type Contribution,
+  type Person,
+} from "@/lib/model";
 import {
   estimateOpeningTarget,
   type OpeningTarget,
@@ -32,6 +37,7 @@ type Props = {
   pages: Contribution[];
   totalPages: number;
   profileId: string;
+  people?: Person[];
   target: OpeningTarget | null;
   onPrepare: () => void;
   readerReady: boolean;
@@ -70,6 +76,7 @@ export default function AlbumOpening({
   pages,
   totalPages,
   profileId,
+  people = PEOPLE,
   target,
   onPrepare,
   readerReady,
@@ -212,6 +219,7 @@ export default function AlbumOpening({
                   page={rightPage}
                   pageIndex={rightIndex}
                   profileId={profileId}
+                  people={people}
                   presentation
                   navigation={{ showNext: rightIndex < totalPages - 1 }}
                 />
@@ -221,7 +229,7 @@ export default function AlbumOpening({
           {!destination.portrait && <div className="book-binding" />}
         </div>
         <div className="opening-nameplate-anchor">
-          <AlbumNameplate album={album} presentation />
+          <AlbumNameplate album={album} people={people} presentation />
         </div>
         <div className="opening-hardcover">
           <div className="opening-cover-face opening-cover-front shelf-front-cover">
@@ -230,7 +238,7 @@ export default function AlbumOpening({
               album={album}
               companionName={personName}
               astronautName={
-                PEOPLE.find((item) => item.role === "Astronaut")?.name ?? "Alex"
+                people.find((item) => item.role === "Astronaut")?.name ?? "Alex"
               }
             />
           </div>
@@ -241,6 +249,7 @@ export default function AlbumOpening({
                   page={pages[0]}
                   pageIndex={0}
                   profileId={profileId}
+                  people={people}
                   presentation
                 />
               )}

@@ -151,3 +151,11 @@ The pickup geometry was aligned to the deeper cover: a desktop opening targeted 
 - The private check-in retained all three questions and the same paper navigation. Night mode was reviewed with both populated and empty Replies states.
 - At 320 × 844, two reply cards wrapped without horizontal overflow: document scrollWidth was 305 px. Switching profiles through Settings and then navigating to Replies ended at scrollY = 0, frame y = 63.6, with focus on the Replies heading. No browser warnings or errors were observed.
 - These functional viewport checks do not replace physical-device testing or a full accessibility audit. No new unit tests were added for the visual styling.
+
+## New stories, people, and cover photos — 15 November 2026
+
+- All 51 automated tests passed, including custom people, uploaded cover validation, exact-album participant/reply boundaries, legacy snapshot migration, one-time story installation, and collision-safe seed IDs. TypeScript passed.
+- Existing local browser data retained its previous custom album, pages, and draft; Gui (6 pages), Rosa (4), and Theo (4) appeared without resetting storage. Opened Gui's real first spread and exercised the next-page control.
+- Through the UI, created a fictional Milo album with a chosen JPEG cover. The preview appeared, submission added the book, and a reload retained its cover/person/album. Switched to Milo in Settings and published a first page; the reader displayed Milo in its author, accessible region, and sewn pair label.
+- At 320 × 844, the new-person form fit without horizontal overflow (dialog client and scroll widths both 273 px). Reviewed its night palette, labels, photo control, preview, and submit control. Restored the normal viewport and day theme afterward.
+- No warnings or errors were captured from the local tab. Real-device touch, OS reduced-motion, exhaustive image-decoder failures, and a full accessibility audit remain outside this verification.
