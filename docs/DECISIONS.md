@@ -1,10 +1,10 @@
 # Still Here: product and implementation decisions
 
-The complementary palette now uses slate-blue text, olive actions, and richer cloth covers in ochre (`#7b6744`), olive (`#60705a`), clay (`#88614f`), and slate (`#527080`). Cream cover lettering (`#f8eedc`) maintains normal-text contrast from 4.58:1 to 4.72:1. The approved cream backgrounds, surfaces, and light-mode paper remain unchanged. Navigation, avatars, delivery states, physical book bindings, and the navy night mode use the same coordinated color tokens.
+The complementary palette now uses slate-blue text, olive actions, and richer cloth covers in ochre (`#7b6744`), olive (`#60705a`), clay (`#88614f`), and slate (`#527080`). Cream cover lettering (`#f8eedc`) maintains normal-text contrast from 4.58:1 to 4.72:1. The main cream canvas, content surfaces, and light-mode paper remain unchanged. A darker slate-blue navigation bar with cream text distinguishes navigation from the canvas; selected items have a separate indicator as well as a different background. Avatars, delivery states, physical book bindings, and the navy night mode use the coordinated color tokens.
 
 The light palette uses a visible warm cream background (`#f2e7d4`), with cream surfaces and paper. Albums stand upright on a continuous light-maple display ledge, arranged four across on desktop and two per row on mobile. Their names, story titles, dates, and update states remain; relationship subtitles are omitted. The night palette retains its navy background and uses darker wooden ledges.
 
-The interface has no global header bar. The astronaut's name identifies the space in the upper-left corner; switching a demo family perspective does not change that identity. New-page actions appear at the bottom of the home content and after the book's page controls and details. Settings, including the demo profiles and night-mode switch, are available in the footer.
+The interface has no global header bar. Outside the immersive reader, the astronaut's name identifies the space in the upper-left corner; switching a demo family perspective does not change that identity. New-page actions appear at the bottom of the home content and after the book's page controls and details. Settings, including the demo profiles and night-mode switch, and Support are available in the footer on the other screens.
 
 ## Purpose and evidence
 
@@ -20,7 +20,7 @@ Connection settings expose Alex, Lily, Sam, Maya, and June as demo perspectives.
 
 ## A book for each shared story
 
-Opening an album shows a physical-book reader rather than a timeline. Each contribution is a page, ordered by its creation time from oldest to newest. The paper, binding, page stack, folding leaf, and moving shadows support the album metaphor. Forward and backward turns, including corner dragging, preserve the sense of turning a sheet rather than sliding cards.
+Opening an album shows an immersive physical-book reader rather than a timeline. The sidebar, mobile navigation, astronaut identity label, and global footer are not rendered in this view. The book is centered in the available workspace, with its page controls, delivery details, bottom **Add a page** action, and a discreet **All albums** return control. **All albums** restores the regular navigation; **Add a page** opens the composer with that navigation restored. Each contribution is a page, ordered by its creation time from oldest to newest. The paper, binding, page stack, folding leaf, and moving shadows support the album metaphor. Forward and backward turns, including corner dragging, preserve the sense of turning a sheet rather than sliding cards.
 
 The reader uses `src/components/AlbumBook.tsx` and `src/components/album-book.css`, with the page-fold engine supplied by `@openpageflip/react` and `@openpageflip/core`. The lockfile records the installed versions. Author, full UTC date, page position, and delivery status remain visible without a repeated explanatory paragraph on every page. A reply opens its corresponding contribution in the reader.
 
@@ -28,7 +28,7 @@ Previous/next controls and arrow-key navigation complement pointer interaction. 
 
 ## Less copy, information when needed
 
-The home and editor focus on choosing a person, reading, and adding a page. Repeated slogans and prominent response-time reassurance are removed. The “no rush” explanation is available in the existing **How it works** modal through a discreet footer link. Operational status is still conveyed where it matters: a paused connection, an unsaved draft, or an unavailable browser store must remain clear.
+The home and editor focus on choosing a person, reading, and adding a page. Repeated slogans and prominent response-time reassurance are removed. The “no rush” explanation is available in the existing **How it works** modal through a discreet footer link outside the immersive reader. Operational status is still conveyed where it matters: a paused connection, an unsaved draft, or an unavailable browser store must remain clear.
 
 Copy reduction does not remove the local-demo boundary, private check-in/storage information, or immediate support and emergency guidance. Those explain material limits or help the person make a decision, rather than repeating the product's mood.
 
@@ -69,7 +69,7 @@ No composite score, diagnostic label, risk classification, or alert to a third p
 
 ## Immediate support
 
-Help is available independently of writing or completing a check-in. Phrase matching in the editor and check-in note can surface an immediate, nonblocking support panel. Its English and Portuguese cues are a limited heuristic: it cannot reliably understand context, negation, intent, or every expression of distress. False positives and missed cues are expected limitations. It does not diagnose, contact anyone, or prevent a user from continuing.
+Help is available from the footer on the regular screens, independently of writing or completing a check-in. The immersive reader provides **All albums** to return to those screens. Phrase matching in the editor and check-in note can surface an immediate, nonblocking support panel. Its English and Portuguese cues are a limited heuristic: it cannot reliably understand context, negation, intent, or every expression of distress. False positives and missed cues are expected limitations. It does not diagnose, contact anyone, or prevent a user from continuing.
 
 The panel directs urgent situations to local emergency services or the mission medical team without waiting for a delayed album response. The demo includes a Brazil-specific CVV resource verified through the helpline lookup tool. This is a localized example, not a resource suitable for every country or mission. Production work must include clinical review, accessible wording, supported-language evaluation, current regional resources, and a clear operational response protocol.
 

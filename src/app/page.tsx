@@ -464,76 +464,84 @@ export default function Home() {
   const closeDialog = useCallback(() => setDialog(null), []);
 
   return (
-    <div className="app-shell">
+    <div
+      className={view === "story" ? "app-shell immersive-reader" : "app-shell"}
+    >
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>
-      <aside className="sidebar">
-        <div
-          className="astronaut-name"
-          aria-label={"Astronaut " + astronaut.name}
-        >
-          {astronaut.name}
-        </div>
-        <span className="nav-label">YOUR SPACE</span>
-        <nav aria-label="Main navigation">
-          <button
-            className={
-              ["albums", "story", "compose"].includes(view)
-                ? "nav-item active"
-                : "nav-item"
-            }
-            onClick={() => navigate("albums")}
+      {view !== "story" && (
+        <aside className="sidebar">
+          <div
+            className="astronaut-name"
+            aria-label={"Astronaut " + astronaut.name}
           >
-            <BookOpen size={19} />
-            Our albums<span className="nav-number">{albums.length}</span>
-          </button>
-          <button
-            className={view === "replies" ? "nav-item active" : "nav-item"}
-            onClick={() => navigate("replies")}
-          >
-            <Bell size={19} />
-            Replies
-            {notifications.length > 0 && (
-              <span className="notification-count">{notifications.length}</span>
-            )}
-          </button>
-          <button
-            className={view === "checkin" ? "nav-item active" : "nav-item"}
-            onClick={() => navigate("checkin")}
-          >
-            <Leaf size={19} />
-            Your check-in
-            <LockKeyhole className="nav-lock" size={13} />
-          </button>
-        </nav>
-        <div className="sidebar-bottom">
-          <button
-            className="connection-card"
-            onClick={() => setDialog("connection")}
-          >
-            <span className={`connection-dot ${online ? "" : "paused"}`} />
-            <span>
-              <strong>
-                {online ? "Connection is open" : "Connection is paused"}
-              </strong>
-            </span>
-            <Settings2 size={14} />
-          </button>
-          <button className="help-button" onClick={() => setDialog("help")}>
-            <CircleHelp size={16} />
-            Support
-            <ArrowRight size={14} />
-          </button>
-        </div>
-      </aside>
+            {astronaut.name}
+          </div>
+          <span className="nav-label">YOUR SPACE</span>
+          <nav aria-label="Main navigation">
+            <button
+              className={
+                ["albums", "story", "compose"].includes(view)
+                  ? "nav-item active"
+                  : "nav-item"
+              }
+              onClick={() => navigate("albums")}
+            >
+              <BookOpen size={19} />
+              Our albums<span className="nav-number">{albums.length}</span>
+            </button>
+            <button
+              className={view === "replies" ? "nav-item active" : "nav-item"}
+              onClick={() => navigate("replies")}
+            >
+              <Bell size={19} />
+              Replies
+              {notifications.length > 0 && (
+                <span className="notification-count">
+                  {notifications.length}
+                </span>
+              )}
+            </button>
+            <button
+              className={view === "checkin" ? "nav-item active" : "nav-item"}
+              onClick={() => navigate("checkin")}
+            >
+              <Leaf size={19} />
+              Your check-in
+              <LockKeyhole className="nav-lock" size={13} />
+            </button>
+          </nav>
+          <div className="sidebar-bottom">
+            <button
+              className="connection-card"
+              onClick={() => setDialog("connection")}
+            >
+              <span className={`connection-dot ${online ? "" : "paused"}`} />
+              <span>
+                <strong>
+                  {online ? "Connection is open" : "Connection is paused"}
+                </strong>
+              </span>
+              <Settings2 size={14} />
+            </button>
+            <button className="help-button" onClick={() => setDialog("help")}>
+              <CircleHelp size={16} />
+              Support
+              <ArrowRight size={14} />
+            </button>
+          </div>
+        </aside>
+      )}
       <div className="workspace">
-        <div
-          className="mobile-astronaut"
-          aria-label={"Astronaut " + astronaut.name}
-        >
-          {astronaut.name}
-        </div>
+        {view !== "story" && (
+          <div
+            className="mobile-astronaut"
+            aria-label={"Astronaut " + astronaut.name}
+          >
+            {astronaut.name}
+          </div>
+        )}
         <main id="main-content" className={`main-content view-${view}`}>
           {storageError && (
             <div className="storage-warning" role="alert">
@@ -1151,18 +1159,20 @@ export default function Home() {
             </div>
           )}
         </main>
-        <footer className="workspace-footer">
-          <Brand small />
-          <span>Demo · Simulated delivery · Browser storage</span>
-          <div className="footer-links">
-            <button onClick={() => setDialog("connection")}>Settings</button>
-            <button onClick={() => setDialog("about")}>How it works</button>
-            <button onClick={() => setDialog("help")}>
-              Support
-              <Heart size={12} />
-            </button>
-          </div>
-        </footer>
+        {view !== "story" && (
+          <footer className="workspace-footer">
+            <Brand small />
+            <span>Demo · Simulated delivery · Browser storage</span>
+            <div className="footer-links">
+              <button onClick={() => setDialog("connection")}>Settings</button>
+              <button onClick={() => setDialog("about")}>How it works</button>
+              <button onClick={() => setDialog("help")}>
+                Support
+                <Heart size={12} />
+              </button>
+            </div>
+          </footer>
+        )}
       </div>
       {toast && (
         <div className="toast" role="status">

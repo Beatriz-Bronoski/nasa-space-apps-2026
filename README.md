@@ -26,15 +26,17 @@ npm run preview
 
 ## Explore the demo
 
-The astronaut's name appears in the upper-left corner. Use **Add a page** at the bottom of the home or book view. **Settings** in the footer contains the demo profile, connection, and night-mode controls.
+Outside the reader, the astronaut's name appears in the upper-left corner and a slate-blue navigation bar separates navigation from the cream canvas. Opening an album enters an immersive book view without the sidebar, mobile navigation, astronaut label, or global footer. Use **All albums** to leave the book and restore the main navigation.
 
-1. Open a person's album as a book. Each contribution occupies a page in chronological order. Turn pages forward or backward with the navigation controls, arrow keys, or a corner drag; narrow screens show one page at a time. Reduced-motion mode is implemented to navigate without the page-turn animation. Longer contributions remain inside a focusable region with native scrolling on the paper page; there is no separate full-text modal.
+Use **Add a page** at the bottom of the home or book view. From a book, this opens the composer with the normal navigation restored. **Settings** and **Support** are available in the footer on the other screens; Settings contains the demo profile, connection, and night-mode controls.
+
+1. Open a person's album as a book. The surrounding navigation disappears, leaving the book, its controls, the bottom creation action, and **All albums** to return. Each contribution occupies a page in chronological order. Turn pages forward or backward with the navigation controls, arrow keys, or a corner drag; narrow screens show one page at a time. Reduced-motion mode is implemented to navigate without the page-turn animation. Longer contributions remain inside a focusable region with native scrolling on the paper page; there is no separate full-text modal.
 2. Add a written moment or a photo, then leave the editor to check that its draft is saved.
 3. Use connection settings to pause simulated delivery. A recorded page stays in this browser until the simulator can advance it. Resume to see **Recorded → Sent → Delivered**. Delivery uses a 12-second simulated deadline; an offline or paused simulator makes no transitions. If the deadline passes during a pause, pending delivery can complete on reconnection. This is not a real network guarantee or a promised arrival time.
 4. In connection settings, switch from Alex to Lily, Sam, Maya, or June. Open the relevant book and manually reply to a delivered page. Switch back after that reply is delivered to see its notification and the original page marked **Answered**. Opening a reply takes you to that contribution in the book. A timer never writes a human reply.
 5. Open the weekly check-in. Connection, loneliness, and support are separate labeled 1–5 responses. The current week's check-in can be edited; there is no composite health score, diagnosis, or automatic third-party alert.
 
-The interface keeps explanatory copy brief. Response-time reassurance lives in **How it works**, reached from a discreet footer link. Delivery states, demo limitations, privacy information, and immediate support remain available. There are no typing indicators, recipient read receipts, streaks, rankings, or measures that treat message quantity as relationship health. The local notification state only tracks which reply notifications have been opened in this demo.
+The interface keeps explanatory copy brief. Response-time reassurance lives in **How it works**, reached from a discreet footer link outside the immersive reader. Delivery states remain in the book; demo limitations, privacy information, and support remain on the other screens. There are no typing indicators, recipient read receipts, streaks, rankings, or measures that treat message quantity as relationship health. The local notification state only tracks which reply notifications have been opened in this demo.
 
 ## Local data and photos
 
@@ -44,7 +46,7 @@ The photo editor accepts JPEG, PNG, and WebP files up to 10 MB. It uses canvas t
 
 ## Support behavior
 
-Help is always available. Limited English and Portuguese phrase matching also surfaces a nonblocking support panel while typing in the editor or a check-in note. It can miss a crisis or match unrelated text; it does not diagnose risk, monitor anyone, send an alert, or replace human help. Urgent support must use local emergency services or the mission medical team without waiting for an album response. The Brazil resource included in this demo is CVV: [188](tel:+55188?oai_link_source=model_response_hotline), [https://www.cvv.org.br/](https://www.cvv.org.br/?oai_link_source=model_response_hotline). Resources need localization and clinical review before use beyond the demo.
+**Support** is available from the footer outside the immersive reader; use **All albums** to return from a book. Limited English and Portuguese phrase matching also surfaces a nonblocking support panel while typing in the editor or a check-in note. It can miss a crisis or match unrelated text; it does not diagnose risk, monitor anyone, send an alert, or replace human help. Urgent support must use local emergency services or the mission medical team without waiting for an album response. The Brazil resource included in this demo is CVV: [188](tel:+55188?oai_link_source=model_response_hotline), [https://www.cvv.org.br/](https://www.cvv.org.br/?oai_link_source=model_response_hotline). Resources need localization and clinical review before use beyond the demo.
 
 ## Verification guide
 

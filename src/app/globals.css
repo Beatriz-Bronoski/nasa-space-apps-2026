@@ -2,7 +2,7 @@
 
 :root {
   --bg: #f2e7d4;
-  --sidebar: #eaddc5;
+  --sidebar: #3b4d60;
   --surface: #f8eedc;
   --surface-2: #eadcc2;
   --text: #3b4d60;
@@ -27,7 +27,7 @@
 }
 :root[data-theme="night"] {
   --bg: #1d2b3c;
-  --sidebar: #182535;
+  --sidebar: #304354;
   --surface: #27384a;
   --surface-2: #304354;
   --text: #f0e9dc;
@@ -2601,5 +2601,57 @@ summary::-webkit-details-marker {
   }
   .footer-links button {
     font-size: 8px;
+  }
+}
+
+/* Navigation has its own palette, separate from the cream reading surface. */
+.sidebar {
+  --text: #f8eedc;
+  --muted: #c9d1d2;
+  --line: #61717c;
+  --surface-2: #4a5e6e;
+  --sage: #f8eedc;
+  --sage-light: #566d75;
+  --amber: #fff0d0;
+  --amber-light: #526571;
+  color: var(--text);
+}
+.sidebar .nav-item.active {
+  box-shadow: inset 3px 0 0 #f8eedc;
+}
+.sidebar button:focus-visible {
+  outline-color: #f8eedc;
+}
+:root[data-theme="night"] .sidebar {
+  --surface-2: #405665;
+  --sage-light: #4c6370;
+  --line: #647582;
+}
+
+/* The album is the whole reading view; navigation returns on exit. */
+.immersive-reader .workspace {
+  width: 100%;
+  margin-left: 0;
+  padding-bottom: 0;
+}
+.immersive-reader .main-content {
+  width: 100%;
+  max-width: 1140px;
+  min-height: 100dvh;
+  padding: 22px 48px 32px;
+}
+.immersive-reader .back-button {
+  margin: 10px 0 24px;
+}
+.immersive-reader .toast {
+  left: 50%;
+  bottom: 24px;
+}
+@media (max-width: 520px) {
+  .immersive-reader .main-content {
+    padding: 16px 18px 24px;
+  }
+  .immersive-reader .back-button {
+    margin: 2px 0 18px;
   }
 }
