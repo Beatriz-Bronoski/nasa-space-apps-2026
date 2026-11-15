@@ -266,7 +266,7 @@ export default function KeepsakeViewer({
             aria-haspopup="dialog"
             aria-label={
               LABELS[kind] +
-              " em 3D. Use as setas para girar ou Enter para avaliar."
+              " in 3D. Use the arrow keys to rotate or Enter to review."
             }
           />
         </svg>
@@ -275,7 +275,7 @@ export default function KeepsakeViewer({
         </span>
       </div>
       {failed && (
-        <p role="alert">O visor perdeu a conexão gráfica. Reabra a prévia.</p>
+        <p role="alert">The graphics context was lost. Reopen the page to view the miniature.</p>
       )}
     </div>
   );

@@ -19,7 +19,7 @@ type Props = {
   photo?: string;
   object3d?: Keepsake;
   visibleInBook?: boolean;
-  onObjectChange: (next?: Keepsake) => void;
+  onObjectChange?: (next?: Keepsake) => void;
   design?: PageDesign;
   children?: ReactNode;
   voice?: "earth" | "space";
@@ -58,14 +58,18 @@ export default function ScrapbookPage({
                 className="scrapbook-tape scrapbook-tape-top"
                 aria-hidden="true"
               />
-              <PhotoObject
-                key={photo}
-                photo={photo}
-                alt={`Photo accompanying “${title}”`}
-                model={object3d}
-                visibleInBook={visibleInBook}
-                onChange={onObjectChange}
-              />
+              {onObjectChange || object3d ? (
+                <PhotoObject
+                  key={photo}
+                  photo={photo}
+                  alt={`Photo accompanying “${title}”`}
+                  model={object3d}
+                  visibleInBook={visibleInBook}
+                  onChange={onObjectChange}
+                />
+              ) : (
+                <img src={photo} alt={`Photo accompanying “${title}”`} draggable={false} />
+              )}
               {voice === "earth" &&
                 ["tl", "tr", "bl", "br"].map((corner) => (
                   <span

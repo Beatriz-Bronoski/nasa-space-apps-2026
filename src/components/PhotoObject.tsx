@@ -11,14 +11,14 @@ type Props = {
   alt?: string;
   model?: Keepsake;
   visibleInBook?: boolean;
-  onChange: (next?: Keepsake) => void | Promise<void>;
+  onChange?: (next?: Keepsake) => void;
 };
 
 export function PhotoObject({
   photo,
-  alt = "Foto da página",
+  alt = "Album photo",
   model,
-  visibleInBook,
+  visibleInBook = true,
   onChange,
 }: Props) {
   const [busy, setBusy] = useState(false);
@@ -26,8 +26,6 @@ export function PhotoObject({
   const [transition, setTransition] = useState<"idle" | "waiting" | "lifting">(
     "idle",
   );
-  const [shown, setShown] = useState(false);
-  const root = useRef<HTMLDivElement>(null);
   const ask = useRef<HTMLDialogElement>(null);
   const review = useRef<HTMLDialogElement>(null);
   const [resetVersion, setResetVersion] = useState(0);
@@ -39,37 +37,14 @@ export function PhotoObject({
     [],
   );
   useEffect(() => {
-    if (visibleInBook !== undefined || !root.current) return;
-    if (!window.IntersectionObserver) {
-      setShown(true);
-      return;
-    }
-    const observer = new IntersectionObserver(
-      ([entry]) => setShown(entry.isIntersecting),
-      { rootMargin: "120px" },
-    );
-    observer.observe(root.current);
-    return () => observer.disconnect();
-  }, [visibleInBook]);
-  useEffect(() => {
     if (transition !== "lifting") return;
     const timer = window.setTimeout(() => setTransition("idle"), 1150);
     return () => clearTimeout(timer);
   }, [transition]);
 
-  async function apply(next: Keepsake | undefined, closeReview = false) {
-    setError("");
-    setBusy(true);
-    try {
-      await onChange(next);
-      if (closeReview) review.current?.close();
-    } catch (e) {
-      setError(
-        e instanceof Error ? e.message : "Não foi possível salvar a alteração.",
-      );
-    } finally {
-      setBusy(false);
-    }
+  function apply(next: Keepsake | undefined, closeReview = false) {
+    onChange?.(next);
+    if (closeReview) review.current?.close();
   }
   async function transform() {
     ask.current?.close();
@@ -84,11 +59,9 @@ export function PhotoObject({
           ? "idle"
           : "waiting",
       );
-      await onChange({
+      onChange?.({
         version: 1,
-        kind: result.kind,
-        color: result.color,
-        aspect: result.aspect,
+        ...result,
         style: "faceted",
         variant: 0,
       });
@@ -98,7 +71,7 @@ export function PhotoObject({
         setError(
           e instanceof Error
             ? e.message
-            : "Não foi possível reconhecer a foto.",
+            : "Could not recognize this photo. Try again.",
         );
       }
     } finally {
@@ -110,8 +83,7 @@ export function PhotoObject({
   };
   return (
     <div
-      ref={root}
-      lang="pt-BR"
+      inert={!onChange}
       className={"page-object " + (model ? "object-present" : "photo-present")}
       data-opf-no-flip={model ? undefined : ""}
       onKeyDown={(e) => {
@@ -124,7 +96,7 @@ export function PhotoObject({
             className={"page-object-surface motion-" + transition}
             aria-busy={busy}
           >
-            {(visibleInBook ?? shown) && (
+            {visibleInBook && (
               <Viewer
                 model={model}
                 onDraw={onDraw}
@@ -150,26 +122,26 @@ export function PhotoObject({
             ref={review}
             className="object-dialog object-review"
             data-opf-no-flip=""
-            aria-label="Avaliar ou ajustar a miniatura"
+            aria-label="Review miniature"
           >
-            <h2>{LABELS[model.kind]} em 3D</h2>
+            <h2>{LABELS[model.kind]} in 3D</h2>
             <label>
-              Avalie o resultado
+              Rate this miniature
               <select
                 disabled={busy}
                 value={model.rating ?? ""}
                 onChange={(e) =>
-                  void apply({
+                  apply({
                     ...model,
                     style: "faceted",
                     rating: e.target.value ? Number(e.target.value) : undefined,
                   })
                 }
               >
-                <option value="">Sem avaliação</option>
+                <option value="">Not rated</option>
                 {[1, 2, 3, 4, 5].map((n) => (
                   <option value={n} key={n}>
-                    {n} de 5
+                    {n} out of 5
                   </option>
                 ))}
               </select>
@@ -180,7 +152,7 @@ export function PhotoObject({
                 disabled={busy}
                 className="object-link"
                 onClick={() =>
-                  void apply(
+                  apply(
                     {
                       ...model,
                       style: "faceted",
@@ -191,15 +163,15 @@ export function PhotoObject({
                   )
                 }
               >
-                <RefreshCw size={14} /> Gerar outra versão
+                <RefreshCw size={14} /> Generate another version
               </button>
               <button
                 type="button"
                 disabled={busy}
                 className="plain-object"
-                onClick={() => void apply(undefined, true)}
+                onClick={() => apply(undefined, true)}
               >
-                Voltar à foto
+                Restore photo
               </button>
             </div>
             <div className="object-entry">
@@ -211,21 +183,16 @@ export function PhotoObject({
                   review.current?.close();
                 }}
               >
-                Restaurar orientação
+                Reset orientation
               </button>
               <button
                 type="button"
                 className="object-link"
                 onClick={() => review.current?.close()}
               >
-                Fechar
+                Close
               </button>
             </div>
-            {error && (
-              <p className="object-error" role="alert">
-                {error}
-              </p>
-            )}
           </dialog>
         </>
       ) : (
@@ -234,7 +201,7 @@ export function PhotoObject({
             type="button"
             className="transform-photo"
             disabled={busy}
-            aria-label={"Transformar em 3D: " + alt}
+            aria-label={"Turn into 3D: " + alt}
             onClick={() => ask.current?.showModal()}
           >
             <img src={photo} alt={alt} draggable={false} />
@@ -244,18 +211,17 @@ export function PhotoObject({
           </button>
           {busy && (
             <p role="status" className="object-caption">
-              Reconhecendo no seu dispositivo…
+              Recognizing the subject on your device…
             </p>
           )}
           <dialog
             ref={ask}
             className="object-dialog"
-            aria-label="Transformar esta foto em 3D?"
+            aria-label="Turn this photo into 3D?"
           >
-            <h2>Transformar esta foto em 3D?</h2>
+            <h2>Turn this photo into 3D?</h2>
             <p>
-              A miniatura fica apoiada no lugar da foto. Clique e arraste sobre
-              ela para girar. Um clique simples abre a avaliação.
+              The miniature sits where the photo was. Drag it to rotate, or click it to review.
             </p>
             <div className="object-entry">
               <button
@@ -264,14 +230,14 @@ export function PhotoObject({
                 className="object-link"
                 onClick={() => ask.current?.close()}
               >
-                Manter foto
+                Keep photo
               </button>
               <button
                 type="button"
                 className="primary-button"
                 onClick={() => void transform()}
               >
-                Sim, transformar
+                Create miniature
               </button>
             </div>
           </dialog>

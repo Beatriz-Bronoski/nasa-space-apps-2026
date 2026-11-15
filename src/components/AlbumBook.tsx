@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import { PEOPLE, formatDate, type Album, type Contribution } from "@/lib/model";
 import "@openpageflip/core/styles.css";
-import type { Keepsake } from "@/lib/keepsake";
 import "./album-book.css";
 import AlbumLeaf from "./AlbumLeaf";
 import AlbumNameplate from "./AlbumNameplate";
@@ -32,7 +31,8 @@ type Props = {
   profileId: string;
   initialPageId?: string;
   onCompose: (replyTo?: string) => void;
-  onObjectChange: (id: string, next?: Keepsake) => void;
+  onObjectChange: (id: string, model?: Contribution["object3d"]) => void;
+  onReady?: () => void;
 };
 
 const authorName = (id: string) =>
@@ -46,6 +46,7 @@ export default function AlbumBook({
   initialPageId,
   onCompose,
   onObjectChange,
+  onReady,
 }: Props) {
   const book = useRef<Book>(null);
   const reader = useRef<HTMLElement>(null);
@@ -292,48 +293,22 @@ export default function AlbumBook({
                 className={`album-leaf ${page.photo ? "leaf-with-photo" : "leaf-words"}`}
                 key={page.id}
               >
-                <article
-                  className="book-leaf-inner"
-                  aria-label={`Page ${pageIndex + 1}: ${page.title}`}
-                >
-                  <header className="leaf-header">
-                    <span>
-                      {own
-                        ? "A page from you"
-                        : `A page from ${authorName(page.authorId)}`}
-                    </span>
-                    <Feather size={12} />
-                  </header>
-                  <div
-                    className="leaf-content"
-                    data-opf-no-flip=""
-                    tabIndex={0}
-                    role="region"
-                    aria-label={`Read page ${pageIndex + 1} by ${authorName(page.authorId)}`}
-                  >
-                    <ScrapbookPage
-                      title={page.title}
-                      text={page.text}
-                      photo={page.photo}
-                      object3d={page.object3d}
-                      visibleInBook={pageIndex >= first && pageIndex <= last}
-                      onObjectChange={next => onObjectChange(page.id, next)}
-                      design={page.design}
-                    />
-                  </div>
-                  <footer className="leaf-footer">
-                    <time dateTime={page.createdAt}>
-                      {formatDate(page.createdAt)} · UTC
-                    </time>
-                    <span className={`leaf-status leaf-status-${page.status}`}>
-                      <Icon size={11} />
-                      {getStatusLabel(page.status)}
-                    </span>
-                  </footer>
-                  <span className="leaf-page-number" aria-hidden="true">
-                    {String(pageIndex + 1).padStart(2, "0")}
-                  </span>
-                </article>
+                <AlbumLeaf
+                  page={page}
+                  pageIndex={pageIndex}
+                  profileId={profileId}
+                  visibleInBook={pageIndex >= first && pageIndex <= last}
+                  onObjectChange={model => onObjectChange(page.id, model)}
+                  onReply={() => onCompose(page.id)}
+                  navigation={{
+                    showPrevious: pageIndex === first && first > 0,
+                    showNext: pageIndex === last && last < pages.length - 1,
+                    previousDisabled: turning,
+                    nextDisabled: turning,
+                    onPrevious: () => turn("previous"),
+                    onNext: () => turn("next"),
+                  }}
+                />
               </Page>
             );
           })}

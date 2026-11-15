@@ -21,14 +21,14 @@ export type Keepsake = {
   rating?: number;
 };
 export const LABELS: Record<Kind, string> = {
-  cat: "Gato",
-  dog: "Cachorro",
-  bird: "Pássaro",
-  bottle: "Garrafa",
-  cup: "Copo ou caneca",
-  car: "Carro",
-  airplane: "Avião",
-  "teddy bear": "Urso de pelúcia",
+  cat: "Cat",
+  dog: "Dog",
+  bird: "Bird",
+  bottle: "Bottle",
+  cup: "Cup",
+  car: "Car",
+  airplane: "Airplane",
+  "teddy bear": "Teddy bear",
 };
 export function isKeepsake(value: unknown): value is Keepsake {
   if (!value || typeof value !== "object") return false;

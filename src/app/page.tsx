@@ -51,7 +51,6 @@ import {
 } from "@/lib/model";
 import { STORAGE_KEY, compressPhoto, parseStoredData } from "@/lib/storage";
 import AlbumBook from "@/components/AlbumBook";
-import Link from "next/link";
 import AlbumOpening from "@/components/AlbumOpening";
 import {
   measureOpeningTarget,
@@ -744,9 +743,6 @@ export default function Home() {
                   })}
                 </div>
               </section>
-              <div className="shared-entry" lang="pt-BR">
-                <Link href="/shared" className="object-link"><BookOpen size={16} /> Álbuns compartilhados</Link>
-              </div>
               <section className="home-bottom">
                 <div className="latest-card">
                   <div className="mini-heading">

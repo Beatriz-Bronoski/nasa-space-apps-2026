@@ -6,5 +6,5 @@ out/
 !.env.example
 .openai/local/
 coverage/
-.data/
 public/ai/runtime/
+.data/

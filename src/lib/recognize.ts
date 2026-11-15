@@ -58,12 +58,9 @@ async function classifyPet(canvas: HTMLCanvasElement, bbox: number[]) {
       cat = sum(281, 285);
     if (Math.max(dog, cat) < 0.45 || Math.abs(dog - cat) < 0.22)
       throw new Error(
-        "Não consegui distinguir gato de cachorro nesta foto. Tente uma imagem mais nítida ou mantenha a foto.",
+        "Could not distinguish a cat from a dog. Try a clearer photo.",
       );
-    return {
-      kind: dog > cat ? ("dog" as const) : ("cat" as const),
-      confidence: Math.max(dog, cat),
-    };
+    return dog > cat ? "dog" : "cat";
   } finally {
     prediction.dispose();
   }
@@ -76,7 +73,7 @@ async function script(src: string) {
     tag.onerror = () => {
       tag.remove();
       reject(
-        new Error("Não foi possível carregar o reconhecedor. Tente novamente."),
+        new Error("Could not load the recognition model. Try again."),
       );
     };
     document.head.append(tag);
@@ -112,7 +109,7 @@ export async function recognizePhoto(photo: string) {
   canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
   canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
-  if (!ctx) throw new Error("O navegador não conseguiu ler a foto.");
+  if (!ctx) throw new Error("Your browser could not read this photo.");
   ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
   loading ??= loadDetector().catch((error) => {
     loading = undefined;
@@ -129,7 +126,7 @@ export async function recognizePhoto(photo: string) {
     !KINDS.includes(primary.class as Kind)
   )
     throw new Error(
-      "Não reconheci um dos oito tipos aceitos. Tente uma foto com um único objeto em destaque, ou mantenha a foto.",
+      "No supported subject found. Try a photo with one clearly visible animal or object.",
     );
   if (
     found[1] &&
@@ -137,7 +134,7 @@ export async function recognizePhoto(photo: string) {
     found[1].score >= primary.score - 0.1
   )
     throw new Error(
-      "Há mais de um elemento em destaque. Recorte a foto e tente novamente.",
+      "Several subjects stand out. Crop the photo around one and try again.",
     );
   const [left, top, w, h] = primary.bbox;
   const x = Math.max(
@@ -167,12 +164,12 @@ export async function recognizePhoto(photo: string) {
           .padStart(2, "0"),
       )
       .join("");
-  const identified =
+  const kind =
     primary.class === "cat" || primary.class === "dog"
       ? await classifyPet(canvas, primary.bbox)
-      : { kind: primary.class as Kind, confidence: primary.score };
+      : primary.class as Kind;
   return {
-    ...identified,
+    kind,
     color,
     aspect: Math.min(2, Math.max(0.5, w / Math.max(1, h))),
   };
