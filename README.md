@@ -15,6 +15,8 @@ npm run dev
 
 Open [http://127.0.0.1:3000](http://127.0.0.1:3000). No API key or environment file is required.
 
+Photo-to-3D downloads and verifies TensorFlow models on the first dev or production build. Later builds reuse the files in `public/ai/`. Photo recognition runs in the browser.
+
 ```sh
 npm run typecheck
 npm test
@@ -23,8 +25,6 @@ npm run preview
 ```
 
 `build` creates the static site in `out/`; `preview` serves that export on port 3000. Stop the development server before previewing on the same port. Use the static preview for a production-build check: this project exports static files and does not use `next start`.
-
-See [Photo miniatures](docs/IMAGE_TO_OBJECT_SPEC.md) to turn an album photo into a faceted 3D object.
 
 ## Explore the demo
 
