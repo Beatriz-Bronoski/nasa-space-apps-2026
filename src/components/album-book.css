@@ -8,9 +8,9 @@
   --book-muted: #60614a;
   --book-thread: #d2b98b;
   --book-edge: #a99063;
-  --book-ambient-shadow: #4b311c3d;
-  --book-contact-shadow: #39291b66;
-  --book-cast-shadow: #34231773;
+  --book-ambient-shadow: #50322252;
+  --book-contact-shadow: #39271c80;
+  --book-cast-shadow: #40291d70;
   --leaf-edge-light: #f4e7c9;
   --leaf-edge-mid: #dec99e;
   --leaf-edge-dark: #aa8c5c;
@@ -21,7 +21,7 @@
 }
 .book-case {
   position: relative;
-  padding: 16px 18px 24px;
+  padding: 16px 18px 44px;
   border-radius: 25px 32px 29px 23px;
   background-color: var(--book-cloth);
   background-image:
@@ -36,17 +36,27 @@
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='7'%3E%3Cpath d='M0 0h7M0 3.5h7' stroke='%23ecddbd' stroke-opacity='.2' stroke-width='1'/%3E%3Cpath d='M0 0v7M3.5 0v7' stroke='%232e342a' stroke-opacity='.24' stroke-width='1'/%3E%3C/svg%3E");
   border: 1px solid color-mix(in srgb, var(--book-cloth) 64%, #342b21);
   box-shadow:
-    0 0 22px 3px var(--book-ambient-shadow),
-    0 3px 6px var(--book-contact-shadow),
-    14px 25px 30px -10px var(--book-cast-shadow),
-    -2px -2px 2px #f8dfb842,
+    0 1px 2px #3b2a1c66,
+    -2px -2px 2px #f8dfb85c,
     inset 0 1px 2px #fff7;
   isolation: isolate;
+}
+/* Outside the clipped paper engine: a broad halo, contact edge and cast shadow. */
+.book-ground-shadow {
+  position: absolute;
+  inset: 5px 1px -12px;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    0 0 26px 8px var(--book-ambient-shadow),
+    0 8px 12px 4px var(--book-contact-shadow),
+    12px 30px 32px 4px var(--book-cast-shadow);
 }
 .book-case::before {
   content: "";
   position: absolute;
-  inset: 4px 1px -7px 3px;
+  inset: 8px -3px -14px 3px;
   z-index: 0;
   border-radius: 24px 31px 30px 23px;
   background-color: color-mix(in srgb, var(--book-cloth) 83%, #443226);
@@ -58,10 +68,10 @@
     24px 24px;
   border: 1px solid #3b2b2480;
   box-shadow:
-    inset 0 -2px 1px #34281e88,
+    inset 0 -4px 2px #34281e99,
     inset 0 1px #f5e3be66,
-    0 2px 0 color-mix(in srgb, var(--book-cloth) 70%, #293027),
-    1px 5px 6px var(--book-contact-shadow);
+    0 3px 0 color-mix(in srgb, var(--book-cloth) 66%, #293027),
+    0 5px 2px #372a2166;
   pointer-events: none;
 }
 .book-case::after {
@@ -88,25 +98,40 @@
 }
 .book-page-edges {
   position: absolute;
-  inset: 17px 18px 13px;
+  inset: 17px 12px 12px 18px;
   border-radius: 5px 16px 21px 6px;
   background:
-    linear-gradient(90deg, #c4ad7855, transparent 30%, #967a4d55 98%),
+    linear-gradient(90deg, #95754a33, transparent 32%, #78563040 99%),
+    linear-gradient(
+      90deg,
+      transparent 47%,
+      #6b4d3033 49%,
+      #49372066 50%,
+      #fff5 51%,
+      transparent 53%
+    ),
+    repeating-linear-gradient(
+        90deg,
+        var(--leaf-edge-mid) 0 2px,
+        var(--leaf-edge-light) 2px 3px,
+        var(--leaf-edge-dark) 3px 4px
+      )
+      right top / 14px 100% no-repeat,
     repeating-linear-gradient(
       to bottom,
-      var(--leaf-edge-light) 0 1px,
-      var(--leaf-edge-dark) 1px 2px,
-      var(--leaf-edge-mid) 2px 4px
+      var(--leaf-edge-light) 0 2px,
+      var(--leaf-edge-mid) 2px 4px,
+      var(--leaf-edge-dark) 4px 5px
     );
   border: 1px solid var(--leaf-edge-dark);
   box-shadow:
     0 1px 0 var(--leaf-edge-light),
     0 3px 0 var(--leaf-edge-dark),
     1px 4px 0 var(--leaf-edge-light),
-    2px 6px 4px var(--book-contact-shadow),
-    inset -4px 0 5px #8b714d66,
-    inset 0 -2px 3px #8b714d66;
-  transform: translate(4px, 8px);
+    2px 7px 5px #503a2866,
+    inset -4px 0 6px #8b714d88,
+    inset 0 -3px 4px #8b714d88;
+  transform: translate(6px, 8px);
   pointer-events: none;
   z-index: 1;
 }
@@ -114,16 +139,16 @@
 .book-page-edges::after {
   content: "";
   position: absolute;
-  inset: -2px 2px 4px -2px;
+  inset: -2px 3px 7px -2px;
   border-radius: 4px 15px 19px 5px;
   border: 1px solid var(--leaf-edge-dark);
   background:
-    linear-gradient(90deg, #cab48288, #f0e0b8 40%, #bda16d66),
+    linear-gradient(90deg, #cab48255, transparent 40%, #bda16d44),
     repeating-linear-gradient(
       to bottom,
-      var(--leaf-edge-light) 0 1px,
-      var(--leaf-edge-dark) 1px 2px,
-      var(--leaf-edge-mid) 2px 4px
+      var(--leaf-edge-light) 0 2px,
+      var(--leaf-edge-mid) 2px 4px,
+      var(--leaf-edge-dark) 4px 5px
     );
   box-shadow:
     0 1px 0 var(--leaf-edge-light),
@@ -131,8 +156,13 @@
     1px 4px 2px #5b452c4d;
 }
 .book-page-edges::after {
-  inset: -4px 4px 8px -4px;
-  background: var(--paper);
+  inset: -4px 6px 14px -4px;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--leaf-edge-light) 0 2px,
+    var(--leaf-edge-mid) 2px 4px,
+    var(--leaf-edge-dark) 4px 5px
+  );
   border-color: var(--leaf-edge-mid);
   box-shadow:
     0 1px 0 var(--leaf-edge-light),
@@ -527,8 +557,8 @@
   --book-muted: #c8cbbb;
   --book-thread: #b4a68b;
   --book-cloth: var(--cover-olive);
-  --book-ambient-shadow: #09151b70;
-  --book-contact-shadow: #09151b99;
+  --book-ambient-shadow: #09151b8c;
+  --book-contact-shadow: #09151bb3;
   --book-cast-shadow: #09151bb3;
   --leaf-edge-light: #637078;
   --leaf-edge-mid: #455b68;
@@ -549,24 +579,9 @@
   --book-cloth: var(--cover-slate);
   border-color: color-mix(in srgb, var(--book-cloth) 80%, #263544);
 }
-:root[data-theme="night"] .book-page-edges {
-  background: repeating-linear-gradient(
-    to bottom,
-    #344952 0,
-    #344952 1px,
-    #4d6267 1px,
-    #4d6267 3px
-  );
-}
 :root[data-theme="night"] .book-page-edges::before,
 :root[data-theme="night"] .book-page-edges::after {
-  background: repeating-linear-gradient(
-    to bottom,
-    #637078 0 1px,
-    #3b4e5a 1px 2px,
-    #455b68 2px 4px
-  );
-  border-color: #6c766f;
+  border-color: var(--leaf-edge-mid);
 }
 :root[data-theme="night"] .book-leaf-inner::before {
   opacity: 0.48;
@@ -596,7 +611,7 @@
     margin-top: 23px;
   }
   .book-case {
-    padding: 16px 18px 24px;
+    padding: 16px 18px 44px;
   }
   .book-page-edges {
     inset: 12px 12px 16px;
@@ -624,7 +639,7 @@
     margin-top: 21px;
   }
   .book-case {
-    padding: 10px 10px 18px;
+    padding: 10px 10px 34px;
     border-radius: 16px 22px 22px 16px;
   }
   .book-page-edges {
@@ -718,8 +733,8 @@
 }
 
 /* Wide album composition: controls live on the paper, leaving one quiet bottom row. */
-.app-shell.immersive-reader .album-reader {
-  margin-top: 0;
+.app-shell.immersive-reader .album-reader:not(.opening-flight) {
+  margin-top: 18px;
 }
 .album-reader > .book-pagination.sr-only {
   min-width: 0;
@@ -729,7 +744,7 @@
 }
 .album-reader .book-footer-actions {
   position: relative;
-  margin-top: 14px;
+  margin-top: 42px;
   min-height: 38px;
 }
 .album-reader .book-footer-actions .book-add-page {
@@ -797,10 +812,11 @@
     margin-top: 0;
   }
   .book-case {
-    padding: 16px 18px 24px;
+    padding: 16px 18px 44px;
   }
   .book-page-edges {
-    inset: 17px 18px 13px;
+    inset: 17px 12px 12px 18px;
+    transform: translate(6px, 8px);
   }
   .book-binding {
     top: 16px;
@@ -808,12 +824,25 @@
   }
 }
 @media (max-width: 520px) {
+  .app-shell.immersive-reader .album-reader:not(.opening-flight) {
+    margin-top: 16px;
+  }
   .book-case {
-    padding: 10px 10px 18px;
+    padding: 10px 10px 34px;
+  }
+  .book-case::before {
+    inset: 8px -2px -10px 2px;
+  }
+  .book-ground-shadow {
+    inset: 5px 0 -10px;
+    box-shadow:
+      0 0 18px 4px var(--book-ambient-shadow),
+      0 5px 8px 2px var(--book-contact-shadow),
+      8px 20px 22px 2px var(--book-cast-shadow);
   }
   .book-page-edges {
-    inset: 11px 10px 9px;
-    transform: translate(2px, 6px);
+    inset: 11px 8px 9px 10px;
+    transform: translate(4px, 6px);
   }
   .book-binding {
     top: 10px;
@@ -822,6 +851,9 @@
   .album-reader .book-footer-actions .book-add-page {
     padding-inline: 18px;
     font-size: 12px;
+  }
+  .album-reader .book-footer-actions {
+    margin-top: 32px;
   }
   .album-reader .book-footer-actions .book-journey {
     right: 0;

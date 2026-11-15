@@ -199,6 +199,7 @@ export default function AlbumOpening({
         <div
           className={`book-case book-case-${album.accent} opening-reader-case`}
         >
+          <div className="book-ground-shadow" />
           <div className="book-page-edges" />
           <div className="opening-spread">
             {rightPage && (

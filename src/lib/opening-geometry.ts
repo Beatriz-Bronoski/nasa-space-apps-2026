@@ -74,13 +74,13 @@ export function getReaderLayout(
   const mobile = width <= 520;
   const horizontalPadding = mobile ? 10 : 18;
   const topPadding = mobile ? 10 : 16;
-  const bottomPadding = mobile ? 18 : 24;
-  const mainWidth = Math.max(1, width - (mobile ? 24 : 32));
+  const bottomPadding = mobile ? 34 : 44;
+  const mainWidth = Math.max(1, width - (mobile ? 40 : 80));
   const coverWidth = horizontalPadding * 2 + 2;
   const portrait = mainWidth - coverWidth < 560;
   const maxPageWidth = Math.min(
     740,
-    Math.max(300, (height - 154) / BOOK_PAGE_RATIO),
+    Math.max(300, (height - 218) / BOOK_PAGE_RATIO),
   );
   const caseWidth = Math.max(
     1,
@@ -113,7 +113,7 @@ export function estimateOpeningTarget(
   const width =
     Number.isFinite(viewportWidth) && viewportWidth > 0 ? viewportWidth : 1280;
   const layout = getReaderLayout(width, viewportHeight);
-  const y = width <= 520 ? 57 : 63;
+  const y = width <= 520 ? 73 : 81;
   return {
     x: layout.portrait ? (width - layout.pageWidth) / 2 : width / 2,
     y,

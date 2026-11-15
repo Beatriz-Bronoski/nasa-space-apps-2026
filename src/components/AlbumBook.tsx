@@ -234,6 +234,7 @@ export default function AlbumBook({
       onKeyDown={onKey}
     >
       <div className={`book-case book-case-${album.accent}`}>
+        <div className="book-ground-shadow" aria-hidden="true" />
         <AlbumNameplate album={album} />
         <div className="book-page-edges" aria-hidden="true" />
         <FlipBook

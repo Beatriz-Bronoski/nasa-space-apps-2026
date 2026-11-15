@@ -66,61 +66,61 @@ test("missing, zero-sized or non-finite reader geometry does not replace the fli
   }
 });
 
-test("wide album uses the available viewport while preserving its physical cover insets", () => {
+test("wide album reserves surrounding shadow space and the deeper physical cover", () => {
   const desktop = estimateOpeningTarget(1280, 900);
   assert.equal(desktop.portrait, false);
   assert.equal(desktop.x, 640);
-  assert.equal(desktop.width, 605);
-  assert.equal(desktop.y, 63);
-  assert.equal(desktop.case.left, 16);
-  assert.equal(desktop.case.top, 46);
-  assert.equal(desktop.case.width, 1248);
-  assert.equal(desktop.case.height, desktop.height + 42);
+  assert.ok(Math.abs(desktop.height - 682) < 0.001);
+  assert.equal(desktop.y, 81);
+  assert.ok(desktop.case.left >= 40);
+  assert.equal(desktop.case.top, 64);
+  assert.ok(desktop.case.width <= 1200);
+  assert.equal(desktop.case.height, desktop.height + 62);
 
   const reference = estimateOpeningTarget(1536, 1024);
-  assert.equal(reference.case.width, 1500);
-  assert.equal(reference.case.left, 18);
-  assert.equal(reference.width, 731);
+  assert.ok(reference.case.width <= 1456);
+  assert.ok(reference.case.left >= 40);
+  assert.ok(Math.abs(reference.height - 806) < 0.001);
   assert.equal(reference.height, reference.width * BOOK_PAGE_RATIO);
 });
 
 test("portrait and narrow phone layouts fit their paper and cover inside the viewport", () => {
   const mobile = estimateOpeningTarget(375, 844);
   assert.equal(mobile.portrait, true);
-  assert.equal(mobile.width, 329);
-  assert.equal(mobile.height, 387.75);
-  assert.equal(mobile.x, 23);
-  assert.equal(mobile.y, 57);
-  assert.equal(mobile.case.left, 12);
-  assert.equal(mobile.case.top, 46);
-  assert.equal(mobile.case.width, 351);
-  assert.equal(mobile.case.height, mobile.height + 30);
+  assert.equal(mobile.width, 313);
+  assert.equal(mobile.height, 313 * BOOK_PAGE_RATIO);
+  assert.equal(mobile.x, 31);
+  assert.equal(mobile.y, 73);
+  assert.equal(mobile.case.left, 20);
+  assert.equal(mobile.case.top, 62);
+  assert.equal(mobile.case.width, 335);
+  assert.equal(mobile.case.height, mobile.height + 46);
 
   const smallPhone = getReaderLayout(305, 640);
-  assert.equal(smallPhone.pageWidth, 259);
-  assert.equal(smallPhone.minPageWidth, 259);
-  assert.ok(smallPhone.caseWidth <= 305 - 24);
+  assert.equal(smallPhone.pageWidth, 243);
+  assert.equal(smallPhone.minPageWidth, 243);
+  assert.ok(smallPhone.caseWidth <= 305 - 40);
   assert.equal(smallPhone.caseWidth, smallPhone.pageWidth + 22);
 });
 
 test("height-limited desktop book leaves room for its toolbar and bottom action", () => {
   const short = getReaderLayout(1600, 720);
-  const tall = getReaderLayout(1600, 1043);
+  const tall = getReaderLayout(1600, 1120);
   assert.ok(short.caseWidth < tall.caseWidth);
-  assert.equal(short.pageHeight, 566);
-  assert.ok(short.caseHeight + 46 + 52 + 12 <= 720);
+  assert.equal(short.pageHeight, 502);
+  assert.ok(short.caseHeight + 46 + 18 + 42 + 38 + 12 <= 720);
   assert.equal(tall.caseWidth, 1500);
   assert.equal(tall.maxPageWidth, 740);
   assert.ok(tall.pageWidth <= tall.maxPageWidth);
 });
 
 test("fallback portrait/spread boundary follows paper width after cover and scene padding", () => {
-  const portrait = estimateOpeningTarget(629, 900);
-  const spread = estimateOpeningTarget(630, 900);
+  const portrait = estimateOpeningTarget(677, 900);
+  const spread = estimateOpeningTarget(678, 900);
   assert.equal(portrait.portrait, true);
   assert.equal(spread.portrait, false);
   assert.equal(spread.width, 280);
-  assert.equal(spread.x, 315);
+  assert.equal(spread.x, 339);
   assert.equal(spread.case.width, 598);
 });
 

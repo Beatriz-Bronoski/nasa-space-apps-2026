@@ -112,3 +112,12 @@ The pickup geometry was aligned to the deeper cover: a desktop opening targeted 
 - At 320 × 844, shelf books and the open album had document scrollWidth 305 px. The 259 px paper remained inside the 281 px cover. Layered edges, lower cloth cover, all-around shadows, and bottom controls remained contained. Night mode retained the depth layers and readable paper controls.
 - During a night-mode opening, the real reader was ready while the presentation remained visible. Both cases had identical computed ambient, contact, and cast-shadow layers. No local browser warnings or errors were observed.
 - These are functional and visual browser checks, not an FPS benchmark, a physical-touch test, or a full accessibility audit. Runtime OS reduced-motion testing remains separate; its existing instant-navigation path is unchanged.
+
+## Stronger volume on the open album
+
+- TypeScript checking and all 39 tests passed, with the eight geometry tests updated for the deeper cover, surrounding shadow space, and height budget.
+- At 1280 × 720, the case began at y = 64 and ended near y = 628, with its bottom action ending near y = 708. The live paper began at y = 81; its lower edge sat 45 px above the case's lower edge, exposing the layered paper block. Forward and reverse page navigation retained soft leaves and moved focus correctly.
+- At 1536 × 1024, the case measured about 1406 × 868 px with approximately 58 px of side space. The bottom action ended near y = 1012; document scrollWidth 1521 remained below innerWidth 1536. The surrounding shadow and lower cloth lip were visually reviewed.
+- At 320 × 844, the 243 px paper remained within a 265 px case at x = 20, y = 62. The bottom action and Page details remained separate, and document scrollWidth was 305 px. Both day and night depth layers were reviewed.
+- A timed night-mode opening showed the real reader ready while the presentation remained visible. Both ground-shadow elements had identical computed shadow layers, and the moving case was already within about one pixel of the real case. No local browser warnings or errors were observed.
+- These checks do not measure frame rate or replace physical-device and full accessibility testing.
