@@ -1,6 +1,12 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState, type RefObject } from "react";
+import {
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type RefObject,
+} from "react";
 import { Plus } from "lucide-react";
 import type { Album } from "@/lib/model";
 import "./bookshelf-scene.css";
@@ -67,6 +73,14 @@ type Props = {
   openingAlbumId?: string;
 };
 
+type ShelfGeometry = {
+  capacity: number;
+  rowWidth: number;
+  baseSpineWidth: number;
+  coverWidth: number;
+  gap: number;
+};
+
 /** Upright spines reveal their own covers without changing the order of the shelf. */
 export default function Bookshelf({
   albums,
@@ -77,7 +91,7 @@ export default function Bookshelf({
 }: Props) {
   const rowsRef = useRef<HTMLDivElement>(null);
   const pointerType = useRef("");
-  const [capacity, setCapacity] = useState<number | null>(null);
+  const [geometry, setGeometry] = useState<ShelfGeometry | null>(null);
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [hoverId, setHoverId] = useState<string | null>(null);
   const [focusId, setFocusId] = useState<string | null>(null);
@@ -92,17 +106,19 @@ export default function Bookshelf({
     if (!surface || !albums.length) return;
     const measure = () => {
       const row = surface.querySelector<HTMLElement>(".shelf-book-row");
-      const trigger = surface.querySelector<HTMLElement>(".shelf-book-trigger");
+      const probe = surface.querySelector<HTMLElement>(".shelf-sizing-probe");
       const cover = surface.querySelector<HTMLElement>(".shelf-front-cover");
-      if (!row || !trigger || !cover) return;
+      if (!row || !probe || !cover) return;
       const rowStyle = getComputedStyle(row);
-      const spineWidth = parseFloat(getComputedStyle(trigger).width);
+      const baseSpineWidth = parseFloat(getComputedStyle(probe).width);
+      const rowWidth = row.clientWidth;
+      const coverWidth = cover.offsetWidth;
       const gap = parseFloat(rowStyle.columnGap) || 0;
-      // Leave enough distributed free space for one expanded cover. Measuring
-      // the unchanged physical cover keeps hover from changing row capacity.
+      // Capacity depends on an immutable sizing probe. The actual spines grow
+      // to pack a row and narrow for previews without regrouping its books.
       const reserve = Math.max(
         0,
-        Math.ceil(cover.offsetWidth - spineWidth * 0.55),
+        Math.ceil(coverWidth - baseSpineWidth * 0.55),
       );
       const max =
         parseInt(rowStyle.getPropertyValue("--shelf-max-row"), 10) ||
@@ -111,10 +127,18 @@ export default function Bookshelf({
         1,
         Math.min(
           max,
-          Math.floor((row.clientWidth - reserve + gap) / (spineWidth + gap)),
+          Math.floor((rowWidth - reserve + gap) / (baseSpineWidth + gap)),
         ),
       );
-      setCapacity((current) => (current === count ? current : count));
+      setGeometry((current) =>
+        current?.capacity === count &&
+        current.rowWidth === rowWidth &&
+        current.baseSpineWidth === baseSpineWidth &&
+        current.coverWidth === coverWidth &&
+        current.gap === gap
+          ? current
+          : { capacity: count, rowWidth, baseSpineWidth, coverWidth, gap },
+      );
     };
     measure();
     const observer = new ResizeObserver(measure);
@@ -123,13 +147,13 @@ export default function Bookshelf({
   }, [albums.length]);
 
   const rows: BookshelfAlbum[][] = [];
-  const count = capacity ?? 4;
+  const count = geometry?.capacity ?? 4;
   for (let index = 0; index < albums.length; index += count)
     rows.push(albums.slice(index, index + count));
 
   return (
     <section
-      className={`rustic-bookshelf${capacity === null ? " shelf-measuring" : ""}`}
+      className={`rustic-bookshelf${geometry === null ? " shelf-measuring" : ""}`}
       aria-labelledby="bookshelf-title"
       onKeyDownCapture={() => setPreviewMode("keyboard")}
       onPointerMove={(event) => {
@@ -159,115 +183,150 @@ export default function Bookshelf({
           <span className="shelf-heading-brand">Still Here</span>
         </header>
         <div className="shelf-rows" ref={rowsRef}>
-          {rows.map((row, rowIndex) => (
-            <div className="shelf-compartment" key={rowIndex}>
-              <div
-                className="shelf-book-row"
-                role="list"
-                aria-label={`Bookshelf row ${rowIndex + 1}`}
-              >
-                {row.map((entry) => {
-                  const {
-                    album,
-                    companionName,
-                    astronautName,
-                    pageCount,
-                    hasReply,
-                    hasDraft,
-                  } = entry;
-                  const preview = previewId === album.id;
-                  return (
-                    <div
-                      className="shelf-book-slot"
-                      role="listitem"
-                      key={album.id}
-                    >
-                      <button
-                        type="button"
-                        className={`shelf-book-trigger shelf-accent-${album.accent}${activeId === album.id ? " shelf-active" : ""}${preview ? " shelf-previewing" : ""}${openingAlbumId === album.id ? " opening-source" : ""}`}
-                        aria-label={`Open ${companionName}'s album, ${album.title}`}
-                        aria-describedby={`shelf-description-${album.id}`}
-                        onPointerDown={(event) => {
-                          pointerType.current = event.pointerType;
-                        }}
-                        onPointerEnter={(event) => {
-                          if (event.pointerType === "mouse") {
-                            setPreviewId(null);
-                            setHoverId(album.id);
-                            setPreviewMode("pointer");
-                          }
-                        }}
-                        onPointerLeave={(event) => {
-                          if (event.pointerType === "mouse")
-                            setHoverId((current) =>
+          <span className="shelf-sizing-probe" aria-hidden="true" />
+          {rows.map((row, rowIndex) => {
+            const expanded = row.some((entry) => entry.album.id === activeId);
+            const spineWidth = geometry
+              ? row.length === 1
+                ? geometry.baseSpineWidth
+                : Math.max(
+                    1,
+                    Math.min(
+                      155,
+                      (geometry.rowWidth -
+                        geometry.gap * (row.length - 1) -
+                        (expanded ? geometry.coverWidth : 0)) /
+                        (row.length - (expanded ? 0.55 : 0)),
+                    ),
+                  )
+              : null;
+            return (
+              <div className="shelf-compartment" key={rowIndex}>
+                <div
+                  className="shelf-book-row"
+                  role="list"
+                  aria-label={`Bookshelf row ${rowIndex + 1}`}
+                  style={
+                    spineWidth === null
+                      ? undefined
+                      : ({
+                          "--shelf-spine-width": `${spineWidth}px`,
+                        } as CSSProperties)
+                  }
+                >
+                  {row.map((entry) => {
+                    const {
+                      album,
+                      companionName,
+                      astronautName,
+                      pageCount,
+                      hasReply,
+                      hasDraft,
+                    } = entry;
+                    const preview = previewId === album.id;
+                    return (
+                      <div
+                        className="shelf-book-slot"
+                        role="listitem"
+                        key={album.id}
+                        style={
+                          spineWidth === null
+                            ? undefined
+                            : {
+                                flexBasis:
+                                  activeId === album.id
+                                    ? geometry!.coverWidth + spineWidth * 0.45
+                                    : spineWidth,
+                              }
+                        }
+                      >
+                        <button
+                          type="button"
+                          className={`shelf-book-trigger shelf-accent-${album.accent}${activeId === album.id ? " shelf-active" : ""}${preview ? " shelf-previewing" : ""}${openingAlbumId === album.id ? " opening-source" : ""}`}
+                          aria-label={`Open ${companionName}'s album, ${album.title}`}
+                          aria-describedby={`shelf-description-${album.id}`}
+                          onPointerDown={(event) => {
+                            pointerType.current = event.pointerType;
+                          }}
+                          onPointerEnter={(event) => {
+                            if (event.pointerType === "mouse") {
+                              setPreviewId(null);
+                              setHoverId(album.id);
+                              setPreviewMode("pointer");
+                            }
+                          }}
+                          onPointerLeave={(event) => {
+                            if (event.pointerType === "mouse")
+                              setHoverId((current) =>
+                                current === album.id ? null : current,
+                              );
+                          }}
+                          onFocus={(event) => {
+                            setFocusId(album.id);
+                            if (event.currentTarget.matches(":focus-visible"))
+                              setPreviewMode("keyboard");
+                          }}
+                          onClick={(event) => {
+                            if (
+                              event.detail !== 0 &&
+                              pointerType.current !== "mouse" &&
+                              pointerType.current !== "" &&
+                              !preview
+                            ) {
+                              setPreviewId(album.id);
+                              return;
+                            }
+                            onOpen(album.id, event.currentTarget);
+                          }}
+                          onBlur={() => {
+                            setPreviewId((current) =>
                               current === album.id ? null : current,
                             );
-                        }}
-                        onFocus={(event) => {
-                          setFocusId(album.id);
-                          if (event.currentTarget.matches(":focus-visible"))
-                            setPreviewMode("keyboard");
-                        }}
-                        onClick={(event) => {
-                          if (
-                            event.detail !== 0 &&
-                            pointerType.current !== "mouse" &&
-                            pointerType.current !== "" &&
-                            !preview
-                          ) {
-                            setPreviewId(album.id);
-                            return;
-                          }
-                          onOpen(album.id, event.currentTarget);
-                        }}
-                        onBlur={() => {
-                          setPreviewId((current) =>
-                            current === album.id ? null : current,
-                          );
-                          setFocusId((current) =>
-                            current === album.id ? null : current,
-                          );
-                        }}
-                      >
-                        <span className="shelf-volume" aria-hidden="true">
-                          <span className="shelf-back-board" />
-                          <span className="shelf-page-block" />
-                          <span className="shelf-page-edge" />
-                          <span className="shelf-spine">
-                            <span className="shelf-spine-band shelf-band-top" />
-                            <span className="shelf-spine-pair">
-                              {companionName} &amp; {astronautName}
+                            setFocusId((current) =>
+                              current === album.id ? null : current,
+                            );
+                          }}
+                        >
+                          <span className="shelf-volume" aria-hidden="true">
+                            <span className="shelf-back-board" />
+                            <span className="shelf-page-block" />
+                            <span className="shelf-page-edge" />
+                            <span className="shelf-spine">
+                              <span className="shelf-spine-band shelf-band-top" />
+                              <span className="shelf-spine-pair">
+                                {companionName} &amp; {astronautName}
+                              </span>
+                              <span className="shelf-spine-title">
+                                {album.title}
+                              </span>
+                              <span className="shelf-spine-band shelf-band-bottom" />
+                              {hasReply && (
+                                <span className="shelf-reply-marker" />
+                              )}
                             </span>
-                            <span className="shelf-spine-title">
-                              {album.title}
+                            <span className="album-book shelf-front-cover">
+                              <ShelfCoverContents {...entry} />
                             </span>
-                            <span className="shelf-spine-band shelf-band-bottom" />
-                            {hasReply && (
-                              <span className="shelf-reply-marker" />
-                            )}
                           </span>
-                          <span className="album-book shelf-front-cover">
-                            <ShelfCoverContents {...entry} />
-                          </span>
+                        </button>
+                        <span
+                          className="sr-only"
+                          id={`shelf-description-${album.id}`}
+                        >
+                          {pageCount} {pageCount === 1 ? "page" : "pages"}.
+                          {hasReply
+                            ? " A new reply."
+                            : hasDraft
+                              ? " A page in the making."
+                              : ""}
                         </span>
-                      </button>
-                      <span
-                        className="sr-only"
-                        id={`shelf-description-${album.id}`}
-                      >
-                        {pageCount} {pageCount === 1 ? "page" : "pages"}.
-                        {hasReply
-                          ? " A new reply."
-                          : hasDraft
-                            ? " A page in the making."
-                            : ""}
-                      </span>
-                    </div>
-                  );
-                })}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           {!albums.length && (
             <div className="shelf-empty">
               <button type="button" onClick={onAddAlbum}>

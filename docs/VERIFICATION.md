@@ -166,3 +166,10 @@ The pickup geometry was aligned to the deeper cover: a desktop opening targeted 
 - At a 1280px desktop viewport with existing custom books, the first row held eight books; both outer gaps measured 0px across an 895px row. The last book's keyboard preview remained inside the row (cover right 1190px, row right 1194px).
 - At 320 × 844, the two-book arrangement and last-book preview stayed within the cabinet (cover right 266px, row right 271px). Document width was 305px within a 320px viewport. No browser warnings or errors were captured; the temporary viewport was reset.
 - No data model or storage changes. Existing automated model tests were not rerun for this layout-only change. Production build includes TypeScript validation; real-device touch and exhaustive animation timing remain separate checks.
+
+## Closely packed bookshelf spines — 15 November 2026
+
+- Replaced distributed empty gaps with fixed 7px desktop and 5px narrow-screen spacing. Rendered spine widths share the row's available width and narrow for the expanded cover, with a 155px cap and baseline thickness for a single book. Capacity measures an independent probe, so previews do not regroup rows.
+- Local desktop review with eight books in the first row measured seven gaps of 7px and zero unused space at either end. Spines measured 106px closed and 79px during the last book's preview; the cover stayed inside the row with no horizontal overflow or capacity change.
+- At 320 × 844, the last cover in a two-book row remained within its compartment with no document overflow. Spine typography was capped at 23px. Reset the viewport, opened a book through its full cover transition, and confirmed the reader appeared. No browser warnings or errors were captured.
+- TypeScript passed. Model/storage behavior is unchanged; model tests were not rerun for this presentation change. Physical touch, exhaustive motion timing, and older browsers without registered custom-property animation remain outside this verification.
