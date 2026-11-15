@@ -184,6 +184,64 @@
     24px 24px;
   border-color: color-mix(in srgb, var(--album-cover) 70%, #3d3024);
   border-radius: 4px 8px 9px 4px;
+  overflow: visible;
+  box-shadow:
+    -3px 0 0 var(--album-spine),
+    -6px 1px 0 var(--album-spine),
+    0 2px 4px #3a302334,
+    4px 7px 0 -2px color-mix(in srgb, var(--album-cover) 75%, #34352b),
+    5px 11px 11px -5px #3a30234d,
+    0 0 15px #5a453318,
+    inset 3px 0 5px #f6e6b91c,
+    inset -2px 0 2px #2b332b40;
+}
+.album-grid .album-card .album-book::before,
+.album-opening .opening-cover-front::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0 -6px -7px 0;
+  width: auto;
+  border: 0;
+  transform: none;
+  pointer-events: none;
+  border-radius: 4px 9px 9px 4px;
+  background:
+    repeating-linear-gradient(
+        90deg,
+        #e8dab9 0 1px,
+        #b19a70 1px 2px,
+        #f5e8c9 2px 3px
+      )
+      right top / 7px 100% no-repeat,
+    repeating-linear-gradient(
+        0deg,
+        #e8dab9 0 1px,
+        #b19a70 1px 2px,
+        #f5e8c9 2px 3px
+      )
+      left bottom / 100% 8px no-repeat,
+    #b6a17e;
+  clip-path: polygon(
+    calc(100% - 8px) 5px,
+    100% 8px,
+    100% 100%,
+    6px 100%,
+    3px calc(100% - 9px),
+    calc(100% - 8px) calc(100% - 9px)
+  );
+}
+.album-grid .album-card:hover .album-book,
+.album-grid .album-card:focus-visible .album-book {
+  box-shadow:
+    -3px 0 0 var(--album-spine),
+    -6px 1px 0 var(--album-spine),
+    0 3px 5px #3a302334,
+    4px 7px 0 -2px color-mix(in srgb, var(--album-cover) 75%, #34352b),
+    7px 17px 18px -7px #3a302357,
+    0 0 16px #5a45331c,
+    inset 3px 0 5px #f6e6b91c,
+    inset -2px 0 2px #2b332b40;
 }
 .album-grid .album-card .album-book::after {
   inset: 6px;
@@ -199,7 +257,9 @@
   border-left: 1px dashed #eed6aeb0;
   border-right: 1px solid #1f2b3140;
   background: linear-gradient(90deg, #1d292a38, #f4dfa31c, #26342c30);
-  box-shadow: 2px 0 3px #25312826;
+  box-shadow:
+    3px 0 5px #25312845,
+    -1px 0 1px #f1dfb64d;
 }
 .album-grid .album-card .book-name {
   font-family: var(--hand-title);
@@ -266,6 +326,36 @@
 }
 :root[data-theme="night"] .reader-topbar {
   color: #eee6d1;
+}
+:root[data-theme="night"] .album-grid .album-card .album-book {
+  box-shadow:
+    -3px 0 0 var(--album-spine),
+    -6px 1px 0 var(--album-spine),
+    0 2px 4px #09151b66,
+    4px 7px 0 -2px color-mix(in srgb, var(--album-cover) 65%, #162a36),
+    5px 11px 12px -4px #09151b88,
+    0 0 16px #09151b40,
+    inset 3px 0 5px #d7e1d514,
+    inset -2px 0 2px #162a3659;
+}
+:root[data-theme="night"] .album-grid .album-card .album-book::before,
+:root[data-theme="night"] .album-opening .opening-cover-front::before {
+  background:
+    repeating-linear-gradient(
+        90deg,
+        #8e9a96 0 1px,
+        #53686d 1px 2px,
+        #a4aaa0 2px 3px
+      )
+      right top / 7px 100% no-repeat,
+    repeating-linear-gradient(
+        0deg,
+        #8e9a96 0 1px,
+        #53686d 1px 2px,
+        #a4aaa0 2px 3px
+      )
+      left bottom / 100% 8px no-repeat,
+    #53686d;
 }
 @media (max-width: 520px) {
   .immersive-reader .main-content {

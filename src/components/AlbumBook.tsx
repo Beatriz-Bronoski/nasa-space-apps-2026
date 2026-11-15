@@ -285,6 +285,7 @@ export default function AlbumBook({
           {pages.map((page, pageIndex) => {
             return (
               <Page
+                density="soft"
                 data-reader-page-index={pageIndex}
                 className={`album-leaf ${page.photo ? "leaf-with-photo" : "leaf-words"}`}
                 key={page.id}
