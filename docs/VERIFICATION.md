@@ -45,6 +45,8 @@ In the initial prototype, core text pairs were checked against WCAG AA's 4.5:1 n
 
 ## Remaining operational boundary
 
+Complementary palette revision: browser-computed light background remained RGB 242/231/212. The four book covers match their new ochre/olive/clay/slate tokens, with cream names; calculated cover-name contrast is at least 4.58:1. The chronological reader still opens, its bottom creation action remains unique, and a 390px viewport has no horizontal overflow. Night mode uses RGB 29/43/60 with light page text RGB 240/233/220. No browser warnings/errors were observed during these checks.
+
 The cream/bookshelf refinement was checked in the browser: the body background computes to RGB 242/231/212; the desktop shelf has four columns and the 390px viewport has two columns with no horizontal overflow. Relationship subtitle elements are absent. An album still opens its chronological book and keeps one bottom Add a page action. Night mode applies the darker shelf palette. Core normal-text contrast pairs for the revised cream palette were calculated at 4.81:1 or higher.
 
 Layout refinement was checked in the browser on desktop and at 390 × 844: the global header and visible book heading are removed, the astronaut name remains in the upper-left (including after switching to Lily), exactly one Add a page control follows the reader, and that control opens the editor. Footer Settings retains profile selection, simulated connection controls, and the working night-mode switch. No horizontal overflow was observed at the mobile width.

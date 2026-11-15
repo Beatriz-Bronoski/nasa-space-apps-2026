@@ -1,9 +1,9 @@
 .album-reader {
   --paper: #f8eed9;
   --paper-shade: #ecdfc4;
-  --book-cloth: #cbd5bf;
-  --book-ink: #354a53;
-  --book-muted: #596763;
+  --book-cloth: var(--cover-olive);
+  --book-ink: var(--text);
+  --book-muted: var(--muted);
   max-width: 940px;
   margin: 30px auto 0;
   outline: none;
@@ -14,7 +14,7 @@
   border-radius: 9px 15px 15px 9px;
   background-color: var(--book-cloth);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='5' height='5'%3E%3Cpath d='M0 0h5M0 2.5h5M0 0v5M2.5 0v5' stroke='%234e5b42' stroke-opacity='.13' stroke-width='.5'/%3E%3C/svg%3E");
-  border: 1px solid #a5b393;
+  border: 1px solid color-mix(in srgb, var(--book-cloth) 80%, #263544);
   box-shadow:
     0 17px 30px #45503b18,
     0 3px 6px #45503b14,
@@ -22,16 +22,16 @@
   isolation: isolate;
 }
 .book-case-amber {
-  --book-cloth: #e3d2af;
-  border-color: #c5b28d;
+  --book-cloth: var(--cover-ochre);
+  border-color: color-mix(in srgb, var(--book-cloth) 80%, #263544);
 }
 .book-case-terracotta {
-  --book-cloth: #d9c2b2;
-  border-color: #bea28e;
+  --book-cloth: var(--cover-clay);
+  border-color: color-mix(in srgb, var(--book-cloth) 80%, #263544);
 }
 .book-case-blue {
-  --book-cloth: #c5d6d8;
-  border-color: #a1bdc0;
+  --book-cloth: var(--cover-slate);
+  border-color: color-mix(in srgb, var(--book-cloth) 80%, #263544);
 }
 .book-page-edges {
   position: absolute;
@@ -137,7 +137,7 @@
   position: relative;
   margin: 6px 4px 21px 2px;
   padding: 6px;
-  background: #fffef8;
+  background: #fbf2df;
   box-shadow: 0 2px 8px #5c523421;
   transform: rotate(-1.5deg);
   border: 1px solid #ded7c690;
@@ -198,12 +198,12 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: #52694e;
+  color: var(--sage);
   font-size: 8px;
 }
 .leaf-status-recorded,
 .leaf-status-sent {
-  color: #896138;
+  color: var(--amber);
 }
 .leaf-status svg {
   stroke-width: 1.5;
@@ -366,29 +366,29 @@
   margin: 17px 0 25px;
 }
 :root[data-theme="night"] .album-reader {
-  --paper: #263941;
-  --paper-shade: #203039;
-  --book-ink: #e7ece5;
-  --book-muted: #bccac3;
-  --book-cloth: #445849;
+  --paper: #283c4e;
+  --paper-shade: #203141;
+  --book-ink: var(--text);
+  --book-muted: var(--muted);
+  --book-cloth: var(--cover-olive);
 }
 :root[data-theme="night"] .book-case {
-  border-color: #64715e;
+  border-color: color-mix(in srgb, var(--book-cloth) 80%, #263544);
   box-shadow:
     0 17px 30px #09151b40,
     inset 0 0 0 1px #ffffff10;
 }
 :root[data-theme="night"] .book-case-amber {
-  --book-cloth: #695e45;
-  border-color: #8a7956;
+  --book-cloth: var(--cover-ochre);
+  border-color: color-mix(in srgb, var(--book-cloth) 80%, #263544);
 }
 :root[data-theme="night"] .book-case-terracotta {
-  --book-cloth: #624f43;
-  border-color: #81695a;
+  --book-cloth: var(--cover-clay);
+  border-color: color-mix(in srgb, var(--book-cloth) 80%, #263544);
 }
 :root[data-theme="night"] .book-case-blue {
-  --book-cloth: #3f5860;
-  border-color: #5e7880;
+  --book-cloth: var(--cover-slate);
+  border-color: color-mix(in srgb, var(--book-cloth) 80%, #263544);
 }
 :root[data-theme="night"] .book-page-edges {
   background: repeating-linear-gradient(
@@ -400,11 +400,11 @@
   );
 }
 :root[data-theme="night"] .leaf-status {
-  color: #bed2ad;
+  color: var(--sage);
 }
 :root[data-theme="night"] .leaf-status-recorded,
 :root[data-theme="night"] .leaf-status-sent {
-  color: #e0be88;
+  color: var(--amber);
 }
 :root[data-theme="night"] .leaf-flourish {
   color: #d5b28a;

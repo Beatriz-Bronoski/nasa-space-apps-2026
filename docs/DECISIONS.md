@@ -1,5 +1,7 @@
 # Still Here: product and implementation decisions
 
+The complementary palette now uses slate-blue text, olive actions, and richer cloth covers in ochre (`#7b6744`), olive (`#60705a`), clay (`#88614f`), and slate (`#527080`). Cream cover lettering (`#f8eedc`) maintains normal-text contrast from 4.58:1 to 4.72:1. The approved cream backgrounds, surfaces, and light-mode paper remain unchanged. Navigation, avatars, delivery states, physical book bindings, and the navy night mode use the same coordinated color tokens.
+
 The light palette uses a visible warm cream background (`#f2e7d4`), with cream surfaces and paper. Albums stand upright on a continuous light-maple display ledge, arranged four across on desktop and two per row on mobile. Their names, story titles, dates, and update states remain; relationship subtitles are omitted. The night palette retains its navy background and uses darker wooden ledges.
 
 The interface has no global header bar. The astronaut's name identifies the space in the upper-left corner; switching a demo family perspective does not change that identity. New-page actions appear at the bottom of the home content and after the book's page controls and details. Settings, including the demo profiles and night-mode switch, are available in the footer.
