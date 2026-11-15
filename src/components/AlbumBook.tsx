@@ -22,6 +22,7 @@ import "@openpageflip/core/styles.css";
 import "./album-book.css";
 import AlbumLeaf from "./AlbumLeaf";
 import AlbumNameplate from "./AlbumNameplate";
+import BookVolume from "./BookVolume";
 import { getReaderLayout } from "@/lib/opening-geometry";
 import { afterReaderImagesPaint } from "@/lib/reader-ready";
 
@@ -236,7 +237,11 @@ export default function AlbumBook({
       <div className={`book-case book-case-${album.accent}`}>
         <div className="book-ground-shadow" aria-hidden="true" />
         <AlbumNameplate album={album} />
-        <div className="book-page-edges" aria-hidden="true" />
+        <BookVolume
+          portrait={portrait}
+          firstPage={first}
+          pageCount={pages.length}
+        />
         <FlipBook
           key={`${album.id}:${profileId}`}
           ref={book}

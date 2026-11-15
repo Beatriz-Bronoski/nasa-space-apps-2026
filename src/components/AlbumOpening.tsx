@@ -15,6 +15,7 @@ import {
 } from "@/lib/opening-geometry";
 import AlbumLeaf from "./AlbumLeaf";
 import AlbumNameplate from "./AlbumNameplate";
+import BookVolume from "./BookVolume";
 import "./album-opening.css";
 
 export type AlbumOpeningOrigin = {
@@ -200,7 +201,11 @@ export default function AlbumOpening({
           className={`book-case book-case-${album.accent} opening-reader-case`}
         >
           <div className="book-ground-shadow" />
-          <div className="book-page-edges" />
+          <BookVolume
+            portrait={destination.portrait}
+            firstPage={0}
+            pageCount={totalPages}
+          />
           <div className="opening-spread">
             {rightPage && (
               <div className="album-leaf opf-page--right opening-stationary-leaf">

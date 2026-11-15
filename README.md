@@ -30,7 +30,7 @@ Outside the reader, the astronaut's name appears in the upper-left corner and a 
 
 Choosing a book on the shelf lifts it forward and opens its hardcover over about 1.9 seconds. The opening shows the actual first spread, using the same page renderer and sewn label as the reader. The prepared reader supplies its measured paper/cover bounds, the cover settles fully flat, and a brief 160 ms handoff blends matching pages. Both scenes use one viewport-sized parchment texture plane, so its scale and position stay consistent. The reader still waits for its first layout, photos, and handwriting fonts. **Skip animation** or Escape bypasses the cover motion while preparing the reader. Reduced-motion preference and empty albums go directly to the reading view; a viewport resize safely skips the remaining motion. Direct reply links still open their target page without a shelf animation. These presentation steps do not change delivery or response state.
 
-All contribution pages bend as paper, including the last page of an odd-length album. Only the shelf-opening hardcover remains rigid. The open album has a thick, stepped paper block, a lower cloth cover, and a separate surrounding shadow that lifts it above the surface. Wider margins keep its ambient and cast shadows visible; the shelf books also show their paper block and cover thickness. These layers do not tilt the reading surface or change the page-turn hit areas.
+All contribution pages bend as paper, including the last page of an odd-length album. Only the shelf-opening hardcover remains rigid. A CSS 3D shell gives the open album separate left/right groups of individual paper planes, outer and bottom faces, a recessed spine, and a slim cloth board. The balance of paper changes with the current spread. Contact and cast shadows ground the album on the surface. These decorative layers stay below the aligned reading surface and do not change page counts or turn hit areas.
 
 Use **Add a page** at the bottom of the home or book view. From a book, this opens the composer with the normal navigation restored. **Settings** and **Support** are available in the footer on the other screens; Settings contains the demo profile, connection, and night-mode controls.
 
@@ -65,6 +65,7 @@ For a manual review, follow the album/reply flow above, reload with a saved draf
 - `src/app/layout.tsx`: metadata, document language, and self-hosted fonts.
 - `src/components/AlbumBook.tsx`: chronological book reader, page-turn interaction, and accessible navigation.
 - `src/components/AlbumLeaf.tsx`: shared real contribution page used in the reader and opening.
+- `src/components/BookVolume.tsx` and `book-volume.css`: shared CSS 3D sheet groups, outer faces, and binding geometry beneath the reader and opening.
 - `src/components/AlbumNameplate.tsx`: shared sewn pair-name label for the open book and its opening animation.
 - `src/lib/opening-geometry.ts`: measured and initial responsive geometry for the shelf transition.
 - `src/components/album-book.css`: paper, binding, page shadows, and responsive reader styles.

@@ -1,7 +1,7 @@
 .album-nameplate {
   position: absolute;
   z-index: 6;
-  top: -5px;
+  top: -14px;
   left: 28px;
   max-width: calc(100% - 72px);
   pointer-events: none;
@@ -94,7 +94,7 @@
 }
 @media (max-width: 520px) {
   .album-nameplate {
-    top: -4px;
+    top: -10px;
     left: 16px;
     max-width: calc(100% - 46px);
   }

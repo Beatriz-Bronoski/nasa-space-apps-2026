@@ -121,3 +121,14 @@ The pickup geometry was aligned to the deeper cover: a desktop opening targeted 
 - At 320 × 844, the 243 px paper remained within a 265 px case at x = 20, y = 62. The bottom action and Page details remained separate, and document scrollWidth was 305 px. Both day and night depth layers were reviewed.
 - A timed night-mode opening showed the real reader ready while the presentation remained visible. Both ground-shadow elements had identical computed shadow layers, and the moving case was already within about one pixel of the real case. No local browser warnings or errors were observed.
 - These checks do not measure frame rate or replace physical-device and full accessibility testing.
+
+## CSS 3D book construction
+
+- TypeScript and all 39 tests passed. Geometry tests cover the slimmer 30/24 px bottom cover padding and 194 px desktop height budget.
+- The live reader contains twelve stable decorative sheet planes, six per half, with computed `preserve-3d`, a 1600 px perspective, and rotated side/bottom faces. At 1280 × 720, the volume box matched the live paper exactly. The right fore-edge projected about 6.2 px outward, and its deepest sheet extended about 16.1 px below the reading surface. The previous continuous striped layer is absent.
+- Advancing from spread 1–2 to 3–4 preserved the twelve planes and changed the left/right depth from 11/17 px to 13/15 px. Keyboard navigation focused the new paper. Dragging the upper-right paper corner across the spine also reached spread 3–4; reverse navigation returned to the first spread. No hard contribution leaves were observed.
+- Reply on Lily's fourth page opened the correct continuation and preserved the existing draft text and two decorations. No new page was published during this check.
+- At 390 × 844, the single visible volume group matched the 313 px paper. Portrait navigation reached page 2 and focused its text region. At 320 × 844, the final page of the three-page Sam book remained soft, and document scrollWidth was 305 px. Night materials and the raised nameplate were visually reviewed.
+- During a timed night opening, the real reader was ready while the presentation remained visible. Both volume components used the same initial depth values; their rectangles differed by less than 0.1 px vertically in the sampled late animation.
+- At 1536 × 1024, the case fit within its 40 px side gutters, the volume matched the live paper, and the bottom action ended near y = 1009. Document scrollWidth was 1521 px. The wider projection retained a visible fine outer face. No local browser warnings or errors were observed.
+- These are functional and visual viewport checks, not a frame-rate benchmark, a physical-touch test, or a full accessibility audit. Runtime OS reduced-motion testing remains separate; the new decorative transitions respect its media query.
