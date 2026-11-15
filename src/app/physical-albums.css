@@ -1,14 +1,16 @@
 /* Shared materials keep the shelf, flying cover, and open book in the same world. */
 :root {
+  --typewriter: "Courier New", Courier, monospace;
+  --cover-ochre: #64663c;
   --cloth-texture: url("/textures/cloth-weave.svg");
   --desk-image:
-    linear-gradient(125deg, #fff4d819, #45281324 76%),
-    url("/textures/rustic-wood.jpg");
+    linear-gradient(125deg, #d7b79be0, #d6bda5de 76%),
+    url("/textures/aged-paper.jpg");
 }
 :root[data-theme="night"] {
   --desk-image:
-    linear-gradient(125deg, #1d314a9c, #101f31d9),
-    url("/textures/rustic-wood.jpg");
+    linear-gradient(125deg, #23384be8, #192d40ed),
+    url("/textures/aged-paper.jpg");
 }
 .app-shell.immersive-reader {
   position: relative;
@@ -22,10 +24,10 @@
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: var(--desk-image) center top / cover #81532e;
+  background: var(--desk-image) center top / cover #d7bba1;
 }
 .album-opening .opening-backdrop {
-  background: var(--desk-image) center top / cover #81532e;
+  background: var(--desk-image) center top / cover #d7bba1;
 }
 .album-opening .opening-cover-front {
   background-image:
@@ -72,26 +74,37 @@
   background: transparent;
 }
 .immersive-reader .main-content {
-  max-width: 1220px;
-  padding-bottom: 45px;
+  width: 100%;
+  max-width: none;
+  padding: 0 16px 12px;
 }
-.immersive-reader .main-content > .back-button {
-  background: #f5ead3;
-  color: #3b4d60;
-  padding: 8px 13px;
-  border: 1px solid #fdf5e175;
-  border-radius: 5px;
-  box-shadow: 2px 4px 8px #35200d2b;
+.reader-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 46px;
+  gap: 16px;
+  color: #454b2e;
+  font-family: var(--typewriter);
 }
-.immersive-reader .book-navigation {
-  width: max-content;
-  max-width: 100%;
-  padding: 7px 11px;
-  border: 1px solid var(--line);
-  border-radius: 7px;
-  background: var(--surface);
-  box-shadow: 3px 5px 10px #34200e30;
-  margin-inline: auto;
+.immersive-reader .reader-topbar .back-button {
+  margin: 0;
+  padding: 4px 5px;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  border-radius: 3px;
+  color: inherit;
+  font-family: var(--typewriter);
+  font-weight: 700;
+  font-size: 17px;
+  gap: 9px;
+}
+.reader-signature {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
+  padding-right: 5px;
 }
 .immersive-reader .book-journey {
   border-top: 0;
@@ -118,13 +131,6 @@
 }
 .immersive-reader .book-end-action .primary-button {
   box-shadow: 4px 6px 12px #2e230d42;
-}
-.immersive-reader .book-pagination {
-  color: var(--text);
-}
-.immersive-reader .book-navigation .book-pagination {
-  background: transparent;
-  box-shadow: none;
 }
 .book-case .album-flipbook,
 .book-case .opening-spread {
@@ -258,20 +264,24 @@
   border-radius: 3px 7px 7px 3px;
   pointer-events: none;
 }
-:root[data-theme="night"] .immersive-reader .main-content > .back-button {
-  color: #f0e9dc;
-  background: #2d4051;
-  border-color: #66747c;
+:root[data-theme="night"] .reader-topbar {
+  color: #eee6d1;
 }
 @media (max-width: 520px) {
   .immersive-reader .main-content {
-    padding-inline: 16px;
+    padding-inline: 12px;
   }
   .album-grid .album-card .book-name {
     font-size: 25px;
     margin-top: 14px;
   }
-  .immersive-reader .book-navigation {
-    padding: 5px 8px;
+}
+
+@media (max-width: 520px) {
+  .reader-signature {
+    font-size: 17px;
+  }
+  .immersive-reader .reader-topbar .back-button {
+    font-size: 15px;
   }
 }

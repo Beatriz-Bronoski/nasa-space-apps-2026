@@ -1,0 +1,114 @@
+.album-nameplate {
+  position: absolute;
+  z-index: 6;
+  top: -5px;
+  left: 28px;
+  max-width: calc(100% - 72px);
+  pointer-events: none;
+  isolation: isolate;
+  transform: rotate(-0.7deg);
+}
+.album-nameplate-ribbon {
+  position: absolute;
+  z-index: -1;
+  inset: -1px -44px -7px -23px;
+  border-radius: 10px 1px 13px 3px;
+  background-color: var(--book-cloth, #64663c);
+  background-image:
+    linear-gradient(110deg, #f5ddb126, #23301e30 80%),
+    var(--cloth-texture, url("/textures/cloth-weave.svg"));
+  background-size:
+    auto,
+    21px 21px;
+  clip-path: polygon(0 9%, 100% 0, 92% 63%, 87% 98%, 0 100%);
+  box-shadow: inset 0 -2px 3px #26302055;
+}
+.album-nameplate-tag {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: 5px 10px 6px;
+  color: #42492b;
+  background-color: #f2e4cf;
+  background-image:
+    linear-gradient(110deg, #fff9e6bc, #ead4b58f),
+    url("/textures/aged-paper.jpg");
+  background-size:
+    auto,
+    350px 350px;
+  border: 1px solid #a98e63;
+  border-radius: 2px 3px 2px 1px;
+  box-shadow:
+    2px 4px 3px #30271150,
+    inset 0 1px 1px #fff7debc;
+  font-family: var(--typewriter, "Courier New", Courier, monospace);
+  font-size: clamp(14px, 1.3vw, 18px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.4px;
+  text-shadow: 0.2px 0.3px #42492b20;
+}
+.album-nameplate-tag::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1px dashed #9c8158bf;
+  border-radius: 1px 2px 1px 2px;
+  box-shadow: 0 0 0 0.5px #fff8e566;
+  pointer-events: none;
+}
+.album-nameplate-names {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 1px 0 0;
+}
+.album-nameplate-sprig {
+  display: block;
+  width: 23px;
+  height: 28px;
+  flex: 0 0 auto;
+  stroke: currentColor;
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.9;
+}
+.album-nameplate-sprig.is-mirrored {
+  transform: scaleX(-1);
+}
+:root[data-theme="night"] .album-nameplate-tag {
+  color: #42492b;
+  background-color: #e8d8bc;
+  background-image:
+    linear-gradient(110deg, #ead8b6a8, #d2ba949e),
+    url("/textures/aged-paper.jpg");
+  border-color: #9c845e;
+  box-shadow:
+    2px 4px 4px #09151c80,
+    inset 0 1px 1px #fff7de61;
+}
+@media (max-width: 520px) {
+  .album-nameplate {
+    top: -4px;
+    left: 16px;
+    max-width: calc(100% - 46px);
+  }
+  .album-nameplate-tag {
+    gap: 5px;
+    padding: 4px 7px 5px;
+    font-size: 13px;
+    letter-spacing: 0.2px;
+  }
+  .album-nameplate-sprig {
+    width: 18px;
+    height: 22px;
+  }
+  .album-nameplate-ribbon {
+    inset: -1px -28px -5px -13px;
+  }
+}

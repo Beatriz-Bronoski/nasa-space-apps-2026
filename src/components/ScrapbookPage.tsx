@@ -17,6 +17,7 @@ type Props = {
   photo?: string;
   design?: PageDesign;
   children?: ReactNode;
+  voice?: "earth" | "space";
 };
 
 /** The editor and physical album use exactly the same page composition. */
@@ -26,10 +27,13 @@ export default function ScrapbookPage({
   photo,
   design,
   children,
+  voice = "space",
 }: Props) {
   const layout = design?.layout ?? "classic";
   return (
-    <div className={`scrapbook-page scrapbook-layout-${layout}`}>
+    <div
+      className={`scrapbook-page scrapbook-layout-${layout} scrapbook-voice-${voice}${text.length > 110 ? " scrapbook-dense" : ""}`}
+    >
       <div className="scrapbook-content">
         <h2 className="scrapbook-title">{title}</h2>
         <div className="scrapbook-arrangement">
@@ -51,6 +55,14 @@ export default function ScrapbookPage({
                 alt={`Photo accompanying “${title}”`}
                 draggable={false}
               />
+              {voice === "earth" &&
+                ["tl", "tr", "bl", "br"].map((corner) => (
+                  <span
+                    key={corner}
+                    className={`scrapbook-photo-corner scrapbook-photo-corner-${corner}`}
+                    aria-hidden="true"
+                  />
+                ))}
               <span
                 className="scrapbook-tape scrapbook-tape-bottom"
                 aria-hidden="true"

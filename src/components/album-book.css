@@ -1,22 +1,22 @@
 .album-reader {
-  --paper: #eee0bb;
-  --paper-shade: #c9af78;
-  --paper-wash: #eee0bb55;
-  --paper-crease: #82634138;
+  --paper: #f2e4cf;
+  --paper-shade: #cbb08d;
+  --paper-wash: #f2e4cfb0;
+  --paper-crease: #8d6c4533;
   --book-cloth: var(--cover-olive);
-  --book-ink: #33434a;
-  --book-muted: #586054;
+  --book-ink: #42492b;
+  --book-muted: #60614a;
   --book-thread: #d2b98b;
   --book-edge: #a99063;
-  max-width: 940px;
-  margin: 30px auto 0;
-  padding-bottom: 9px;
+  max-width: var(--reader-case-width, 1500px);
+  margin: 0 auto;
+  padding-bottom: 0;
   outline: none;
 }
 .book-case {
   position: relative;
-  padding: 14px 14px 28px;
-  border-radius: 7px 13px 17px 7px;
+  padding: 16px 18px 24px;
+  border-radius: 25px 32px 29px 23px;
   background-color: var(--book-cloth);
   background-image:
     radial-gradient(ellipse at 2% 12%, #f5d3a53b, transparent 27%),
@@ -41,7 +41,7 @@
   position: absolute;
   inset: 4px -1px -8px 4px;
   z-index: 0;
-  border-radius: 7px 12px 16px 7px;
+  border-radius: 24px 31px 30px 23px;
   background-color: color-mix(in srgb, var(--book-cloth) 83%, #443226);
   background-image: inherit;
   border: 1px solid #3b2b2480;
@@ -56,7 +56,7 @@
   z-index: 4;
   inset: 6px 6px 7px;
   border: 1px dashed color-mix(in srgb, var(--book-thread) 78%, transparent);
-  border-radius: 5px 9px 11px 5px;
+  border-radius: 20px 27px 24px 18px;
   box-shadow: 0 0 0 1px #342b2426;
   pointer-events: none;
 }
@@ -74,8 +74,8 @@
 }
 .book-page-edges {
   position: absolute;
-  inset: 15px 14px 17px;
-  border-radius: 1px 5px 8px 2px;
+  inset: 17px 18px 13px;
+  border-radius: 5px 16px 21px 6px;
   background:
     linear-gradient(90deg, #c4ad7855, transparent 30%, #967a4d33 98%),
     repeating-linear-gradient(
@@ -124,7 +124,7 @@
   background-size:
     auto,
     640px 640px;
-  border-radius: 2px 4px 6px 2px;
+  border-radius: 6px 17px 18px 7px;
   box-shadow:
     3px 7px 7px -3px #4e382a66,
     -1px -1px 1px #fff6;
@@ -142,7 +142,7 @@
   color: var(--book-ink);
   overflow: hidden;
   border: 1px solid #ac895944;
-  border-radius: 1px 3px 4px 1px;
+  border-radius: 4px 13px 16px 5px;
   box-sizing: border-box !important;
 }
 .album-leaf.opf-page--left {
@@ -568,7 +568,7 @@
     margin-top: 23px;
   }
   .book-case {
-    padding: 11px 11px 24px;
+    padding: 16px 18px 24px;
   }
   .book-page-edges {
     inset: 12px 12px 16px;
@@ -596,8 +596,8 @@
     margin-top: 21px;
   }
   .book-case {
-    padding: 9px 9px 21px;
-    border-radius: 7px 11px 11px 7px;
+    padding: 10px 10px 18px;
+    border-radius: 16px 22px 22px 16px;
   }
   .book-page-edges {
     inset: 10px 10px 14px;
@@ -674,8 +674,131 @@
     width: 100%;
   }
 }
+@media (max-width: 360px) {
+  .app-shell .album-reader .book-footer-actions .book-journey {
+    position: relative;
+    top: auto;
+    right: auto;
+    transform: none;
+    margin-top: 8px;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .book-turn-button {
     transition: none;
+  }
+}
+
+/* Wide album composition: controls live on the paper, leaving one quiet bottom row. */
+.app-shell.immersive-reader .album-reader {
+  margin-top: 0;
+}
+.album-reader > .book-pagination.sr-only {
+  min-width: 0;
+  padding: 0;
+  box-shadow: none;
+  background: none;
+}
+.album-reader .book-footer-actions {
+  position: relative;
+  margin-top: 14px;
+  min-height: 38px;
+}
+.album-reader .book-footer-actions .book-add-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: max-content;
+  margin: 0 auto;
+  min-height: 38px;
+  padding: 7px 22px;
+  border-radius: 22px;
+  font-family: var(--typewriter, "Courier New", monospace);
+  font-size: 14px;
+  line-height: 1.5;
+  box-shadow:
+    2px 4px 6px #46311f45,
+    inset 0 1px 0 #f5ecc24d;
+  border: 1px solid #ddc7988c;
+  background: #5b6034;
+  color: #fff5de;
+}
+.album-reader .book-footer-actions .book-add-page:hover {
+  background: #4e562e;
+}
+.album-reader .book-footer-actions .book-journey {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  transform: translateY(-50%);
+  color: var(--book-ink);
+}
+.album-reader .book-footer-actions .book-journey summary {
+  padding: 5px 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  font-family: var(--typewriter, "Courier New", monospace);
+  font-size: 10px;
+  color: inherit;
+}
+.album-reader .book-footer-actions .book-journey[open] {
+  position: relative;
+  top: auto;
+  right: auto;
+  transform: none;
+  margin-top: 14px;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+.album-reader .book-footer-actions .book-journey[open] summary {
+  margin-right: 0;
+}
+:root[data-theme="night"] .album-reader .book-footer-actions .book-journey {
+  color: #eee3cc;
+}
+@media (max-width: 760px) {
+  .album-reader {
+    margin-top: 0;
+  }
+  .book-case {
+    padding: 16px 18px 24px;
+  }
+  .book-page-edges {
+    inset: 17px 18px 13px;
+  }
+  .book-binding {
+    top: 16px;
+    bottom: 24px;
+  }
+}
+@media (max-width: 520px) {
+  .book-case {
+    padding: 10px 10px 18px;
+  }
+  .book-page-edges {
+    inset: 11px 10px 9px;
+    transform: translate(2px, 6px);
+  }
+  .book-binding {
+    top: 10px;
+    bottom: 18px;
+  }
+  .album-reader .book-footer-actions .book-add-page {
+    padding-inline: 18px;
+    font-size: 12px;
+  }
+  .album-reader .book-footer-actions .book-journey {
+    right: 0;
+  }
+  .album-reader .book-footer-actions .book-journey summary {
+    font-size: 8px;
   }
 }

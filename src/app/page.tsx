@@ -814,13 +814,17 @@ export default function Home() {
 
           {view === "story" && (
             <>
-              <button
-                className="back-button"
-                onClick={() => navigate("albums")}
-              >
-                <ArrowLeft size={16} />
-                All albums
-              </button>
+              <div className="reader-topbar">
+                <button
+                  className="back-button"
+                  aria-label="Back to shelf"
+                  onClick={() => navigate("albums")}
+                >
+                  <ArrowLeft size={20} />
+                  Shelf
+                </button>
+                <span className="reader-signature">Still Here</span>
+              </div>
               <h1 className="sr-only" ref={titleRef} tabIndex={-1}>
                 {album.title}
               </h1>
@@ -833,14 +837,6 @@ export default function Home() {
                 onReady={markReaderReady}
                 onCompose={(replyTo) => compose(selected, replyTo)}
               />
-              {visiblePages.length > 0 && (
-                <div className="page-end-action book-end-action">
-                  <button className="primary-button" onClick={() => compose()}>
-                    <Plus size={16} />
-                    Add a page
-                  </button>
-                </div>
-              )}
             </>
           )}
 
@@ -890,6 +886,7 @@ export default function Home() {
                 <ScrapbookEditor
                   key={draftKey}
                   draft={draft}
+                  authorId={profile}
                   onChange={updateDraft}
                   onChoosePhoto={() => fileRef.current?.click()}
                   photoBusy={photoBusy}
@@ -1412,6 +1409,7 @@ export default function Home() {
             target={openingTarget}
             profileId={profile}
             pages={pagesForAlbum(opening.albumId).slice(0, 2)}
+            totalPages={pagesForAlbum(opening.albumId).length}
             onPrepare={prepareOpening}
             readerReady={readerReady}
             onComplete={finishOpening}

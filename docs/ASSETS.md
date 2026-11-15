@@ -24,4 +24,10 @@ The following original material textures were generated with the built-in OpenAI
 
 Both files are self-hosted. The wood texture is a full-frame surface, not a repeating seamless tile. The paper texture is deliberately subtle to preserve readable dark ink. Full generation prompts and the built-in generation method are recorded in [MATERIAL_PROMPTS.md](MATERIAL_PROMPTS.md) and the delivered `material-prompts.txt` artifact.
 
-Handwriting uses self-hosted [Caveat](https://fontsource.org/fonts/caveat) 600 and [Kalam](https://fontsource.org/fonts/kalam) 400 from the pinned Fontsource 5.3.0 packages, under OFL-1.1. Their license files are retained under `public/licenses/` and in the installed packages; no runtime font-service request is needed. The woven cover tile `public/textures/cloth-weave.svg` and the ten stitched applique SVGs in `StickerArt.tsx` are original code-native artwork. Generated image textures are decorative materials, not photographs of an actual participant’s belongings.
+Handwriting uses self-hosted [Caveat](https://fontsource.org/fonts/caveat) 400 and 600 and [Kalam](https://fontsource.org/fonts/kalam) 400 from the pinned Fontsource 5.3.0 packages, under OFL-1.1. Their license files are retained under `public/licenses/` and in the installed packages; no runtime font-service request is needed. The woven cover tile `public/textures/cloth-weave.svg` and the ten stitched applique SVGs in `StickerArt.tsx` are original code-native artwork. Generated image textures are decorative materials, not photographs of an actual participant’s belongings.
+
+## Open-album reference revision
+
+The reference supplied on 15 November 2026 is used as visual guidance only. Its people, plant photographs, Portuguese text, and complete image are not included as application assets. The current reader's tan background reuses `aged-paper.jpg` with a CSS color wash; the former rustic wood file remains in the repository. No new raster generation or external image download was required for this revision.
+
+The added Caveat 400 stylesheet comes from the already installed, pinned Fontsource package under OFL-1.1. The olive sprigs in `AlbumNameplate.tsx` are original code-native artwork. Photo corners, ruled paper, tape, and pencil underlines use CSS or inline vector artwork.

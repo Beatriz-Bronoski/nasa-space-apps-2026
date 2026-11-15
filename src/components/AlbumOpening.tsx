@@ -14,6 +14,7 @@ import {
   type OpeningTarget,
 } from "@/lib/opening-geometry";
 import AlbumLeaf from "./AlbumLeaf";
+import AlbumNameplate from "./AlbumNameplate";
 import "./album-opening.css";
 
 export type AlbumOpeningOrigin = {
@@ -28,6 +29,7 @@ type Props = {
   personName: string;
   origin: AlbumOpeningOrigin;
   pages: Contribution[];
+  totalPages: number;
   profileId: string;
   target: OpeningTarget | null;
   onPrepare: () => void;
@@ -65,6 +67,7 @@ export default function AlbumOpening({
   personName,
   origin,
   pages,
+  totalPages,
   profileId,
   target,
   onPrepare,
@@ -79,7 +82,10 @@ export default function AlbumOpening({
   const completed = useRef(false);
   const skipButton = useRef<HTMLButtonElement>(null);
   const [estimatedTarget] = useState(() =>
-    estimateOpeningTarget(document.documentElement.clientWidth),
+    estimateOpeningTarget(
+      document.body.clientWidth || document.documentElement.clientWidth,
+      window.innerHeight,
+    ),
   );
   const destination = target ?? estimatedTarget;
   const geometry = stageGeometry(origin, destination);
@@ -202,11 +208,15 @@ export default function AlbumOpening({
                   pageIndex={rightIndex}
                   profileId={profileId}
                   presentation
+                  navigation={{ showNext: rightIndex < totalPages - 1 }}
                 />
               </div>
             )}
           </div>
           {!destination.portrait && <div className="book-binding" />}
+        </div>
+        <div className="opening-nameplate-anchor">
+          <AlbumNameplate album={album} presentation />
         </div>
         <div className="opening-hardcover">
           <div className="opening-cover-face opening-cover-front">

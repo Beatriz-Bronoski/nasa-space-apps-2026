@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   estimateOpeningTarget,
+  getReaderLayout,
+  BOOK_PAGE_RATIO,
   measureOpeningTarget,
 } from "./opening-geometry";
 
@@ -64,50 +66,79 @@ test("missing, zero-sized or non-finite reader geometry does not replace the fli
   }
 });
 
-test("fallback flight geometry stays centered and accounts for physical cover padding", () => {
-  const desktop = estimateOpeningTarget(1280);
+test("wide album uses the available viewport while preserving its physical cover insets", () => {
+  const desktop = estimateOpeningTarget(1280, 900);
   assert.equal(desktop.portrait, false);
   assert.equal(desktop.x, 640);
-  assert.equal(desktop.width, 440);
-  assert.equal(desktop.height, 594);
-  assert.deepEqual(desktop.case, {
-    left: 170,
-    top: 92,
-    width: 940,
-    height: 638,
-  });
+  assert.equal(desktop.width, 605);
+  assert.equal(desktop.y, 63);
+  assert.equal(desktop.case.left, 16);
+  assert.equal(desktop.case.top, 46);
+  assert.equal(desktop.case.width, 1248);
+  assert.equal(desktop.case.height, desktop.height + 42);
 
-  const mobile = estimateOpeningTarget(375);
-  assert.equal(mobile.portrait, true);
-  assert.equal(mobile.width, 323);
-  assert.equal(mobile.x, 26);
-  assert.equal(mobile.y, 83);
-  assert.equal(mobile.case.left, 16);
-  assert.equal(mobile.case.top, 73);
-  assert.equal(mobile.case.width, 343);
-  assert.equal(mobile.case.height, mobile.height + 32);
+  const reference = estimateOpeningTarget(1536, 1024);
+  assert.equal(reference.case.width, 1500);
+  assert.equal(reference.case.left, 18);
+  assert.equal(reference.width, 731);
+  assert.equal(reference.height, reference.width * BOOK_PAGE_RATIO);
 });
 
-test("fallback portrait/spread boundary follows available engine width, not a separate media breakpoint", () => {
-  const portrait = estimateOpeningTarget(679);
-  const spread = estimateOpeningTarget(680);
+test("portrait and narrow phone layouts fit their paper and cover inside the viewport", () => {
+  const mobile = estimateOpeningTarget(375, 844);
+  assert.equal(mobile.portrait, true);
+  assert.equal(mobile.width, 329);
+  assert.equal(mobile.height, 387.75);
+  assert.equal(mobile.x, 23);
+  assert.equal(mobile.y, 57);
+  assert.equal(mobile.case.left, 12);
+  assert.equal(mobile.case.top, 46);
+  assert.equal(mobile.case.width, 351);
+  assert.equal(mobile.case.height, mobile.height + 30);
+
+  const smallPhone = getReaderLayout(305, 640);
+  assert.equal(smallPhone.pageWidth, 259);
+  assert.equal(smallPhone.minPageWidth, 259);
+  assert.ok(smallPhone.caseWidth <= 305 - 24);
+  assert.equal(smallPhone.caseWidth, smallPhone.pageWidth + 22);
+});
+
+test("height-limited desktop book leaves room for its toolbar and bottom action", () => {
+  const short = getReaderLayout(1600, 720);
+  const tall = getReaderLayout(1600, 1043);
+  assert.ok(short.caseWidth < tall.caseWidth);
+  assert.equal(short.pageHeight, 566);
+  assert.ok(short.caseHeight + 46 + 52 + 12 <= 720);
+  assert.equal(tall.caseWidth, 1500);
+  assert.equal(tall.maxPageWidth, 740);
+  assert.ok(tall.pageWidth <= tall.maxPageWidth);
+});
+
+test("fallback portrait/spread boundary follows paper width after cover and scene padding", () => {
+  const portrait = estimateOpeningTarget(629, 900);
+  const spread = estimateOpeningTarget(630, 900);
   assert.equal(portrait.portrait, true);
-  assert.equal(portrait.y, 104);
   assert.equal(spread.portrait, false);
   assert.equal(spread.width, 280);
-  assert.equal(spread.x, 340);
-  assert.equal(spread.case.width, 584);
+  assert.equal(spread.x, 315);
+  assert.equal(spread.case.width, 598);
 });
 
-test("fallback geometry remains finite before a usable viewport is available", () => {
+test("initial geometry remains finite when viewport measurements are not yet usable", () => {
   for (const viewport of [0, -10, Number.NaN, Number.POSITIVE_INFINITY]) {
     assert.deepEqual(
-      estimateOpeningTarget(viewport),
-      estimateOpeningTarget(1280),
+      estimateOpeningTarget(viewport, 900),
+      estimateOpeningTarget(1280, 900),
     );
   }
-  const narrow = estimateOpeningTarget(160);
-  assert.equal(narrow.width, 220);
+  for (const height of [0, -10, Number.NaN, Number.POSITIVE_INFINITY]) {
+    assert.deepEqual(
+      estimateOpeningTarget(1280, height),
+      estimateOpeningTarget(1280, 900),
+    );
+  }
+  const narrow = estimateOpeningTarget(160, 400);
+  assert.ok(narrow.width > 0);
   assert.ok(narrow.case.width > 0);
   assert.ok(Object.values(narrow.case).every(Number.isFinite));
 });

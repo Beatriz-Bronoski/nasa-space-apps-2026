@@ -1,7 +1,7 @@
 .scrapbook-page {
-  --scrapbook-paper: #eee0bb;
-  --scrapbook-ink: var(--book-ink, #33434a);
-  --scrapbook-note: #fff3d6;
+  --scrapbook-paper: #f2e4cf;
+  --scrapbook-ink: var(--book-ink, #42492b);
+  --scrapbook-note: #f7ead3;
   position: relative;
   width: 100%;
   display: grid;
@@ -12,60 +12,85 @@
   color: var(--scrapbook-ink);
   background-color: var(--scrapbook-paper);
   background-image:
-    linear-gradient(115deg, #fff4d12b, #9a723516),
+    linear-gradient(115deg, #f8ecd8b3, #e6ccb0a3),
     url("/textures/aged-paper.jpg");
   background-size:
     100% 100%,
     580px auto;
-  background-blend-mode: normal;
 }
-/* The physical leaf owns its paper; a second rectangle would flatten its folds. */
 .album-reader .scrapbook-page {
   background: transparent;
+  min-height: 100%;
 }
 .scrapbook-page::before {
   content: "";
-  grid-area: 1 / 1;
+  grid-area: 1/1;
   width: 100%;
-  aspect-ratio: 0.82;
+  aspect-ratio: 0.95;
   pointer-events: none;
 }
+.album-reader .scrapbook-page::before {
+  aspect-ratio: auto;
+}
 .scrapbook-content {
-  grid-area: 1 / 1;
+  grid-area: 1/1;
   min-width: 0;
   width: 100%;
   box-sizing: border-box;
   position: relative;
-  padding: 4% 5% 7%;
+  padding: 1% 1.5% 5%;
 }
 .scrapbook-page .scrapbook-title {
+  position: relative;
   font-family: var(--hand-title, "Caveat", cursive);
-  font-size: clamp(30px, 9cqw, 47px);
-  font-weight: 600;
+  font-size: clamp(32px, 9cqw, 64px);
+  font-weight: 400;
   font-style: normal;
-  letter-spacing: -0.025em;
-  line-height: 1.08;
-  margin: 0 12% 7% 0;
+  letter-spacing: -0.02em;
+  line-height: 1.06;
+  margin: 0 1% 7% 0;
+  padding-bottom: 9px;
   color: var(--scrapbook-ink);
-  transform: rotate(-1.2deg);
+  transform: rotate(-1.3deg);
   transform-origin: left center;
-  text-shadow: 0.2px 0.3px 0 #33434a0a;
+}
+.scrapbook-title::after {
+  content: "";
+  position: absolute;
+  height: 7px;
+  width: 64%;
+  left: 23%;
+  bottom: -4px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 12' preserveAspectRatio='none'%3E%3Cpath d='M2 9Q176 0 398 6M8 11Q188 3 391 8' stroke='%23828a43' stroke-opacity='.8' stroke-width='1.1' fill='none'/%3E%3C/svg%3E")
+    center/100% 100% no-repeat;
+  transform: rotate(-1deg);
+  pointer-events: none;
 }
 .scrapbook-arrangement {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: clamp(16px, 4cqw, 27px);
+}
+.scrapbook-dense .scrapbook-title {
+  margin-bottom: 5%;
+  padding-bottom: 5px;
+}
+.scrapbook-dense .scrapbook-arrangement {
+  gap: 16px;
+}
+.scrapbook-dense.scrapbook-layout-classic .scrapbook-photo img {
+  aspect-ratio: 1.7;
 }
 .scrapbook-photo {
   position: relative;
-  width: 88%;
+  width: 97%;
   margin: 1% auto 0;
-  padding: 2.6% 2.6% 7.2%;
-  background: linear-gradient(120deg, #fffef5, #f2ead9);
+  padding: 1.6% 1.6% 2.4%;
+  background: linear-gradient(120deg, #fffdf4, #f1e8d7);
   box-shadow:
-    2px 5px 8px #46321732,
-    1px 1px 1px #fff9e5 inset,
-    0 0 1px 1px #765c3125;
+    3px 6px 9px #46321732,
+    inset 1px 1px 1px #fff9e5,
+    0 0 1px 1px #765c3136;
   transform: rotate(var(--photo-tilt, -2deg));
   border: 1px solid #d9ceb5;
   border-radius: 1px 2px 2px 1px;
@@ -76,29 +101,69 @@
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(
-    110deg,
-    #fff7df12 0%,
-    transparent 45%,
-    #79582f08 100%
-  );
+  background: linear-gradient(110deg, #fff7df0d, transparent 45%, #79582f09);
 }
 .scrapbook-photo img {
-  width: 100%;
-  aspect-ratio: 1.55;
-  object-fit: cover;
   display: block;
+  width: 100%;
+  aspect-ratio: 1.5;
+  object-fit: cover;
   pointer-events: none;
   border: 1px solid #52616a24;
+}
+.scrapbook-photo-corner {
+  position: absolute;
+  z-index: 4;
+  width: 8%;
+  max-width: 37px;
+  aspect-ratio: 1;
+  background: linear-gradient(
+    135deg,
+    #746244 1%,
+    #473b2b 28%,
+    #655139 48%,
+    #9c8765 51%,
+    #4a3c2c 58%
+  );
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+  filter: drop-shadow(1px 2px 1px #35291d66);
+  pointer-events: none;
+}
+.scrapbook-photo-corner::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-top: 1px dashed #b6a07988;
+  border-left: 1px dashed #b6a07988;
+}
+.scrapbook-photo-corner-tl {
+  top: -2px;
+  left: -2px;
+  transform: rotate(-3deg);
+}
+.scrapbook-photo-corner-tr {
+  top: -2px;
+  right: -2px;
+  transform: rotate(93deg);
+}
+.scrapbook-photo-corner-bl {
+  bottom: -2px;
+  left: -2px;
+  transform: rotate(-89deg);
+}
+.scrapbook-photo-corner-br {
+  bottom: -2px;
+  right: -2px;
+  transform: rotate(183deg);
 }
 .scrapbook-tape {
   --tape-color: #c8ac72;
   position: absolute;
-  z-index: 2;
-  width: 30%;
-  height: 9%;
+  z-index: 3;
+  width: 28%;
+  height: 8%;
   min-height: 14px;
-  max-height: 26px;
+  max-height: 27px;
   background-color: var(--tape-color);
   background-image:
     repeating-linear-gradient(45deg, #fff8e92b 0 1px, transparent 1px 5px),
@@ -125,15 +190,15 @@
   opacity: 0.74;
 }
 .scrapbook-tape-top {
-  top: -4%;
-  left: 30%;
-  transform: rotate(5deg);
+  top: -3.5%;
+  left: 35%;
+  transform: rotate(3deg);
 }
 .scrapbook-tape-bottom {
-  bottom: 1%;
-  left: -6%;
+  bottom: -3%;
+  left: 46%;
   width: 25%;
-  transform: rotate(31deg);
+  transform: rotate(5deg);
 }
 .scrapbook-tape-midnight .scrapbook-tape {
   --tape-color: #57707c;
@@ -141,55 +206,136 @@
 }
 .scrapbook-tape-linen .scrapbook-tape {
   --tape-color: #c6ad78;
-  opacity: 0.71;
+  opacity: 0.66;
 }
 .scrapbook-tape-sage .scrapbook-tape {
   --tape-color: #8e9c79;
   opacity: 0.8;
 }
+.scrapbook-voice-earth .scrapbook-photo .scrapbook-tape-top {
+  opacity: 0.42;
+  width: 25%;
+  left: 35%;
+}
+.scrapbook-voice-earth .scrapbook-photo .scrapbook-tape-bottom {
+  display: none;
+}
 .scrapbook-note {
   position: relative;
-  width: 97%;
-  margin: 1% auto 0;
-  padding: 6% 5% 5%;
+  width: 96%;
+  margin: 2% auto 0;
+  padding: 4% 5% 5% 9%;
+  font-size: clamp(18px, 4cqw, 30px);
   background-color: var(--scrapbook-note);
   background-image:
-    linear-gradient(120deg, #fff9e8c7, #f4e6c6b5),
+    linear-gradient(
+      90deg,
+      transparent 0 6%,
+      #b98b7766 6% calc(6% + 1px),
+      transparent calc(6% + 1px)
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0 calc(1.35em - 1px),
+      #8eabb44d calc(1.35em - 1px) 1.35em
+    ),
+    linear-gradient(120deg, #fff7e58c, #eedcc1a8),
     url("/textures/aged-paper.jpg");
   background-size:
     100% 100%,
+    100% 1.35em,
+    100% 100%,
     350px auto;
-  border: 1px solid #ba9b5f32;
+  background-position:
+    0 0,
+    0 0.7em,
+    0 0,
+    0 0;
+  border: 1px solid #ba9b5f38;
   border-radius: 1px 3px 2px 1px;
   box-shadow:
     2px 4px 5px #6d51252a,
     inset 0 1px 0 #fffae999;
-  transform: rotate(-0.7deg);
+  transform: rotate(0.5deg);
+}
+.scrapbook-note::before {
+  content: "";
+  position: absolute;
+  left: -2px;
+  top: 9px;
+  bottom: 7px;
+  width: 13px;
+  background: radial-gradient(
+      circle at 4px 7px,
+      var(--scrapbook-paper) 0 4px,
+      #a48a5e6b 4px 4.8px,
+      transparent 5px
+    )
+    0 0/13px 28px repeat-y;
+  pointer-events: none;
+}
+.scrapbook-note::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid #b799674f;
+  clip-path: polygon(
+    0 0.8%,
+    14% 0,
+    28% 0.7%,
+    42% 0,
+    61% 0.6%,
+    78% 0,
+    100% 0.5%,
+    99.5% 19%,
+    100% 41%,
+    99.6% 69%,
+    100% 100%,
+    77% 99.5%,
+    59% 100%,
+    33% 99.5%,
+    12% 100%,
+    0 99.5%,
+    0.5% 74%,
+    0 51%,
+    0.5% 23%
+  );
+  pointer-events: none;
 }
 .scrapbook-note-tape {
   top: -9px;
-  left: 35%;
-  width: 31%;
-  height: 18px;
+  left: 37%;
+  width: 29%;
+  height: 19px;
   min-height: 14px;
-  transform: rotate(-5deg);
+  transform: rotate(-4deg);
 }
 .scrapbook-note p {
-  font-family: var(--hand, "Kalam", cursive);
-  font-size: clamp(15px, 4.2cqw, 20px);
+  font-family: var(--hand-title, "Caveat", cursive);
+  font-size: inherit;
   font-weight: 400;
-  line-height: 1.58;
+  line-height: 1.35;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   margin: 0;
   color: var(--scrapbook-ink);
-  text-shadow: 0.15px 0.25px 0 #33434a0d;
 }
-.scrapbook-layout-postcard .scrapbook-title {
-  margin-bottom: 7%;
+.scrapbook-voice-earth .scrapbook-note {
+  width: 98%;
+  margin: 0 auto;
+  padding: 0 1%;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  transform: rotate(-0.8deg);
+}
+.scrapbook-voice-earth .scrapbook-note::before,
+.scrapbook-voice-earth .scrapbook-note::after,
+.scrapbook-voice-earth .scrapbook-note-tape {
+  display: none;
 }
 .scrapbook-layout-postcard .scrapbook-photo {
-  width: 76%;
+  width: 91%;
   align-self: flex-start;
   margin-left: 1%;
 }
@@ -197,9 +343,9 @@
   aspect-ratio: 1.35;
 }
 .scrapbook-layout-postcard .scrapbook-note {
-  width: 86%;
+  width: 87%;
   align-self: flex-end;
-  margin-top: -2%;
+  margin-top: 0;
   margin-right: 1%;
   transform: rotate(1deg);
 }
@@ -216,9 +362,9 @@
   transform: rotate(0.7deg);
 }
 .scrapbook-layout-letter .scrapbook-photo {
-  width: 78%;
+  width: 89%;
   margin-top: 5%;
-  margin-left: 15%;
+  margin-left: 9%;
 }
 .scrapbook-layout-letter .scrapbook-tape-top {
   left: 55%;
@@ -252,18 +398,34 @@
   --scrapbook-note: #3d4d55;
   background-image:
     linear-gradient(#2b3e4bdb, #263947e8), url("/textures/aged-paper.jpg");
-  background-blend-mode: normal;
 }
 :root[data-theme="night"] .album-reader .scrapbook-page {
   background: transparent;
 }
 :root[data-theme="night"] .scrapbook-note {
+  background-color: #3d4d55;
   background-image:
+    linear-gradient(
+      90deg,
+      transparent 0 6%,
+      #c1a38c55 6% calc(6% + 1px),
+      transparent calc(6% + 1px)
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0 calc(1.35em - 1px),
+      #b2c8d629 calc(1.35em - 1px) 1.35em
+    ),
     linear-gradient(#3d4d55ed, #394950f2), url("/textures/aged-paper.jpg");
   border-color: #9d9c7d25;
   box-shadow:
     2px 4px 6px #0d1a2459,
     inset 0 1px 0 #cbd3c61a;
+}
+:root[data-theme="night"] .scrapbook-voice-earth .scrapbook-note {
+  background: none;
+  border: 0;
+  box-shadow: none;
 }
 :root[data-theme="night"] .scrapbook-photo {
   background: linear-gradient(115deg, #e5ddc9, #c7bfae);
@@ -272,4 +434,8 @@
 }
 :root[data-theme="night"] .scrapbook-tape-linen .scrapbook-tape {
   --tape-color: #bca575;
+}
+:root[data-theme="night"] .scrapbook-title::after {
+  opacity: 0.8;
+  filter: brightness(1.5);
 }

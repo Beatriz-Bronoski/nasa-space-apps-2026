@@ -45,35 +45,86 @@ export function measureOpeningTarget(
   };
 }
 
-/** Initial flight estimate, replaced by measured reader geometry before handoff. */
-export function estimateOpeningTarget(viewport: number): OpeningTarget {
-  const viewportWidth =
-    Number.isFinite(viewport) && viewport > 0 ? viewport : 1280;
-  const mobile = viewportWidth <= 520;
-  const medium = viewportWidth <= 760;
-  const topPadding = mobile ? 9 : medium ? 11 : 14;
-  const bottomPadding = mobile ? 21 : medium ? 24 : 28;
-  const mainWidth = Math.min(1220, viewportWidth) - (mobile ? 32 : 96);
-  const caseWidth = Math.max(1, Math.min(940, mainWidth));
-  const available = caseWidth - topPadding * 2 - 2;
-  const portrait = available < 560;
-  const width = Math.max(
-    220,
-    Math.min(440, portrait ? available : available / 2),
+export const BOOK_PAGE_RATIO = 660 / 560;
+
+export type ReaderLayout = {
+  caseWidth: number;
+  caseHeight: number;
+  pageWidth: number;
+  pageHeight: number;
+  portrait: boolean;
+  maxPageWidth: number;
+  minPageWidth: number;
+  horizontalPadding: number;
+  topPadding: number;
+  bottomPadding: number;
+};
+
+/** One sizing rule for the live book and the opening's initial flight estimate. */
+export function getReaderLayout(
+  viewportWidth: number,
+  viewportHeight = 900,
+): ReaderLayout {
+  const width =
+    Number.isFinite(viewportWidth) && viewportWidth > 0 ? viewportWidth : 1280;
+  const height =
+    Number.isFinite(viewportHeight) && viewportHeight > 0
+      ? viewportHeight
+      : 900;
+  const mobile = width <= 520;
+  const horizontalPadding = mobile ? 10 : 18;
+  const topPadding = mobile ? 10 : 16;
+  const bottomPadding = mobile ? 18 : 24;
+  const mainWidth = Math.max(1, width - (mobile ? 24 : 32));
+  const coverWidth = horizontalPadding * 2 + 2;
+  const portrait = mainWidth - coverWidth < 560;
+  const maxPageWidth = Math.min(
+    740,
+    Math.max(300, (height - 154) / BOOK_PAGE_RATIO),
   );
-  const height = width * 1.35;
-  const y = mobile ? 83 : medium ? 104 : 107;
+  const caseWidth = Math.max(
+    1,
+    Math.min(1500, mainWidth, maxPageWidth * (portrait ? 1 : 2) + coverWidth),
+  );
+  const pageWidth = Math.max(
+    1,
+    Math.min(maxPageWidth, (caseWidth - coverWidth) / (portrait ? 1 : 2)),
+  );
+  const pageHeight = pageWidth * BOOK_PAGE_RATIO;
   return {
-    x: portrait ? (viewportWidth - width) / 2 : viewportWidth / 2,
-    y,
-    width,
-    height,
+    caseWidth,
+    caseHeight: pageHeight + topPadding + bottomPadding + 2,
+    pageWidth,
+    pageHeight,
     portrait,
+    maxPageWidth,
+    minPageWidth: Math.min(280, pageWidth),
+    horizontalPadding,
+    topPadding,
+    bottomPadding,
+  };
+}
+
+/** Initial flight estimate, replaced by measured reader geometry before handoff. */
+export function estimateOpeningTarget(
+  viewportWidth: number,
+  viewportHeight = 900,
+): OpeningTarget {
+  const width =
+    Number.isFinite(viewportWidth) && viewportWidth > 0 ? viewportWidth : 1280;
+  const layout = getReaderLayout(width, viewportHeight);
+  const y = width <= 520 ? 57 : 63;
+  return {
+    x: layout.portrait ? (width - layout.pageWidth) / 2 : width / 2,
+    y,
+    width: layout.pageWidth,
+    height: layout.pageHeight,
+    portrait: layout.portrait,
     case: {
-      left: (viewportWidth - caseWidth) / 2,
-      top: y - topPadding - 1,
-      width: caseWidth,
-      height: height + topPadding + bottomPadding + 2,
+      left: (width - layout.caseWidth) / 2,
+      top: y - layout.topPadding - 1,
+      width: layout.caseWidth,
+      height: layout.caseHeight,
     },
   };
 }
