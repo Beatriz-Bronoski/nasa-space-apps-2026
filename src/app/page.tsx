@@ -52,6 +52,7 @@ import {
 import { STORAGE_KEY, compressPhoto, parseStoredData } from "@/lib/storage";
 import AlbumBook from "@/components/AlbumBook";
 import AlbumOpening from "@/components/AlbumOpening";
+import ScrapbookEditor from "@/components/ScrapbookEditor";
 import "./bookshelf.css";
 
 type View = "albums" | "story" | "compose" | "checkin" | "replies";
@@ -855,68 +856,31 @@ export default function Home() {
                     </button>
                   </div>
                 )}
-                <label className="field-label" htmlFor="page-title">
-                  Title <span>(optional)</span>
-                </label>
-                <input
-                  id="page-title"
-                  className="title-input"
-                  placeholder="A little moment worth keeping…"
-                  maxLength={120}
-                  value={draft.title}
-                  onChange={(e) => updateDraft({ title: e.target.value })}
+                <ScrapbookEditor
+                  key={draftKey}
+                  draft={draft}
+                  onChange={updateDraft}
+                  onChoosePhoto={() => fileRef.current?.click()}
+                  photoBusy={photoBusy}
+                  support={
+                    hasCrisisLanguage(draft.text + " " + draft.title) ? (
+                      <div className="immediate-support" role="alert">
+                        <Support compact />
+                      </div>
+                    ) : undefined
+                  }
                 />
-                <label className="sr-only" htmlFor="page-text">
-                  Your story
-                </label>
-                <textarea
-                  id="page-text"
-                  className="story-input"
-                  placeholder="I thought of you today when…"
-                  maxLength={10000}
-                  value={draft.text}
-                  onChange={(e) => updateDraft({ text: e.target.value })}
-                />
-                {hasCrisisLanguage(draft.text + " " + draft.title) && (
-                  <div className="immediate-support" role="alert">
-                    <Support compact />
-                  </div>
-                )}
-                {draft.photo ? (
-                  <div className="draft-photo">
-                    <img src={draft.photo} alt="Your selected photo" />
-                    <button
-                      type="button"
-                      className="secondary-button"
-                      onClick={() => updateDraft({ photo: undefined })}
-                    >
-                      <Trash2 size={14} />
-                      Remove photo
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    className="photo-upload"
-                    onClick={() => fileRef.current?.click()}
-                    disabled={photoBusy}
-                  >
-                    <ImagePlus size={22} />
-                    <span>
-                      <strong>
-                        {photoBusy ? "Preparing your photo…" : "Add a photo"}
-                      </strong>
-                      <small>JPEG, PNG, or WebP · up to 10 MB</small>
-                    </span>
-                    <Plus size={17} />
-                  </button>
-                )}
                 <input
                   ref={fileRef}
                   type="file"
+                  tabIndex={-1}
+                  aria-label="Choose a photo"
                   className="sr-only"
                   accept="image/jpeg,image/png,image/webp"
-                  onChange={(e) => handlePhoto(e.target.files?.[0])}
+                  onChange={(e) => {
+                    void handlePhoto(e.target.files?.[0]);
+                    e.target.value = "";
+                  }}
                 />
                 {photoError && (
                   <p className="field-error" role="alert">

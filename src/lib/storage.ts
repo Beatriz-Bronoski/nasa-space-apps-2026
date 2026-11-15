@@ -6,6 +6,7 @@ import {
   type CheckIn,
   type Draft,
 } from "./model";
+import { isPageDesign } from "./scrapbook";
 
 export const STORAGE_KEY = "still-here:albums:v1";
 const isObject = (x: unknown): x is Record<string, unknown> =>
@@ -40,6 +41,7 @@ const validPage = (p: unknown): p is Contribution =>
   text(p.title, 120) &&
   text(p.text, 10000) &&
   photo(p.photo) &&
+  (p.design === undefined || isPageDesign(p.design)) &&
   date(p.createdAt) &&
   ["recorded", "sent", "delivered", "answered"].includes(p.status as string) &&
   [p.sentAt, p.deliveredAt, p.answeredAt].every(
@@ -65,6 +67,7 @@ const validDraft = (d: unknown): d is Draft =>
   text(d.title, 120) &&
   text(d.text, 10000) &&
   photo(d.photo) &&
+  (d.design === undefined || isPageDesign(d.design)) &&
   (d.replyTo === undefined || identifier(d.replyTo));
 
 /**

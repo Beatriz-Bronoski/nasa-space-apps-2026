@@ -1,3 +1,6 @@
+import { clonePageDesign, isPageDesign, type PageDesign } from "./scrapbook";
+export type { PageDesign, PageSticker, StickerKind } from "./scrapbook";
+
 /** Local demonstration data and transport. No timer ever invents a human reply. */
 export type Person = {
   id: string;
@@ -25,6 +28,7 @@ export type Contribution = {
   title: string;
   text: string;
   photo?: string;
+  design?: PageDesign;
   createdAt: string;
   status: ContributionStatus;
   sentAt?: string;
@@ -37,6 +41,7 @@ export type Draft = {
   title: string;
   text: string;
   photo?: string;
+  design?: PageDesign;
   replyTo?: string;
 };
 export type CheckIn = {
@@ -236,7 +241,7 @@ export function advanceDelivery(
 
 export type NewContribution = Pick<
   Contribution,
-  "albumId" | "authorId" | "title" | "text" | "photo" | "replyTo"
+  "albumId" | "authorId" | "title" | "text" | "photo" | "replyTo" | "design"
 >;
 
 export function addContribution(
@@ -253,6 +258,10 @@ export function addContribution(
   }
   if (!input.text.trim() && !input.photo)
     throw new Error("Add a few words or a photo to your page.");
+  if (input.design !== undefined && !isPageDesign(input.design))
+    throw new Error(
+      "This page design could not be saved. Please adjust its decorations.",
+    );
   if (input.replyTo) {
     const parent = data.pages.find((page) => page.id === input.replyTo);
     if (
@@ -268,6 +277,7 @@ export function addContribution(
   }
   const page: Contribution = {
     ...input,
+    ...(input.design ? { design: clonePageDesign(input.design) } : {}),
     id:
       globalThis.crypto?.randomUUID?.() ??
       `page-${now.getTime()}-${Math.random().toString(36).slice(2)}`,

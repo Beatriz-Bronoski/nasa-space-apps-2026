@@ -33,7 +33,7 @@ Choosing a book on the shelf starts a presentation-only transition of about 1.78
 Use **Add a page** at the bottom of the home or book view. From a book, this opens the composer with the normal navigation restored. **Settings** and **Support** are available in the footer on the other screens; Settings contains the demo profile, connection, and night-mode controls.
 
 1. Open a person's album as a book. The surrounding navigation disappears, leaving the book, its controls, the bottom creation action, and **All albums** to return. Each contribution occupies a page in chronological order. Turn pages forward or backward with the navigation controls, arrow keys, or a corner drag; narrow screens show one page at a time. Reduced-motion mode is implemented to navigate without the page-turn animation. Longer contributions remain inside a focusable region with native scrolling on the paper page; there is no separate full-text modal.
-2. Add a written moment or a photo, then leave the editor to check that its draft is saved.
+2. Choose **Reply** or **Add a page** to open the scrapbook editor. Write a moment, attach a photo held by electrical tape, and choose Classic, Postcard, or Letter. Drag a sticker from the tray onto the paper, or tap it to add; select it to move, rotate, resize, or remove it. Arrow keys move a focused sticker, Shift moves in larger steps, and Delete removes it. Across/Down sliders provide another way to position stickers. On narrow screens the sticker tray stays above the preview while scrolling. Up to 24 decorations, the layout, tape, photo angle, and writing are saved in the draft and published with the page.
 3. Use connection settings to pause simulated delivery. A recorded page stays in this browser until the simulator can advance it. Resume to see **Recorded → Sent → Delivered**. Delivery uses a 12-second simulated deadline; an offline or paused simulator makes no transitions. If the deadline passes during a pause, pending delivery can complete on reconnection. This is not a real network guarantee or a promised arrival time.
 4. In connection settings, switch from Alex to Lily, Sam, Maya, or June. Open the relevant book and manually reply to a delivered page. Switch back after that reply is delivered to see its notification and the original page marked **Answered**. Opening a reply takes you to that contribution in the book. A timer never writes a human reply.
 5. Open the weekly check-in. Connection, loneliness, and support are separate labeled 1–5 responses. The current week's check-in can be edited; there is no composite health score, diagnosis, or automatic third-party alert.
@@ -63,6 +63,9 @@ For a manual review, follow the album/reply flow above, reload with a saved draf
 - `src/app/layout.tsx`: metadata, document language, and self-hosted fonts.
 - `src/components/AlbumBook.tsx`: chronological book reader, page-turn interaction, and accessible navigation.
 - `src/components/album-book.css`: paper, binding, page shadows, and responsive reader styles.
+- `src/components/ScrapbookEditor.tsx`: pointer and keyboard composition controls.
+- `src/components/ScrapbookPage.tsx` and `StickerArt.tsx`: shared page rendering and ten original SVG stickers.
+- `src/lib/scrapbook.ts`: bounded, validated decoration metadata.
 - `src/components/AlbumOpening.tsx` and `src/components/album-opening.css`: shelf-to-reader lift, forward motion, hardcover opening, and accessible skip/cleanup behavior.
 - `src/lib/model.ts`: domain types, sample data, delivery reducer, notifications, and check-in/date helpers.
 - `src/lib/model.test.ts` and `src/lib/storage.test.ts`: model, transport, and persistence behavior tests.

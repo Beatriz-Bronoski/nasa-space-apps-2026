@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createInitialData, type AppData } from "./model";
+import { createInitialData, type AppData, type PageDesign } from "./model";
 import { parseStoredData } from "./storage";
 
 const now = new Date("2026-11-14T15:00:00Z");
@@ -30,6 +30,15 @@ const saved = (): AppData => ({
   readReplyIds: ["lily-4"],
 });
 const parse = (data: unknown) => parseStoredData(JSON.stringify(data));
+const design = (): PageDesign => ({
+  layout: "postcard",
+  tape: "midnight",
+  photoTilt: -3,
+  stickers: [
+    { id: "planet-1", kind: "planet", x: 80, y: 15, rotation: -18, scale: 1.2 },
+    { id: "heart-1", kind: "heart", x: 20, y: 80, rotation: 9, scale: 0.8 },
+  ],
+});
 
 test("a valid saved snapshot round-trips with every page, draft, reflection and read marker intact", () => {
   const data = saved();
@@ -38,6 +47,79 @@ test("a valid saved snapshot round-trips with every page, draft, reflection and 
   assert.equal(restored.pages.length, 10);
   assert.equal(Object.keys(restored.drafts).length, 2);
   assert.equal(restored.checkIns[0].note, "A quiet but good week.");
+});
+
+test("scrapbook designs round-trip on both published pages and unfinished drafts", () => {
+  const data = saved();
+  data.pages[0].design = design();
+  data.drafts["alex:lily"].design = {
+    ...design(),
+    layout: "letter",
+    tape: "sage",
+  };
+  const restored = parse(data);
+  assert.deepEqual(restored, data);
+  assert.equal(restored.pages[0].design!.stickers[0].x, 80);
+  assert.equal(restored.drafts["alex:lily"].design!.tape, "sage");
+});
+
+test("legacy version-one snapshots without design metadata still load unchanged", () => {
+  const data = saved();
+  const restored = parse(data);
+  assert.deepEqual(restored, data);
+  assert.equal(Object.hasOwn(restored.pages[0], "design"), false);
+  assert.equal(Object.hasOwn(restored.drafts["alex:lily"], "design"), false);
+});
+
+test("invalid scrapbook metadata rejects the whole snapshot for pages and drafts", () => {
+  const valid = design();
+  const invalidDesigns: unknown[] = [
+    null,
+    [],
+    { ...valid, layout: "html" },
+    { ...valid, tape: "external-url" },
+    { ...valid, photoTilt: 13 },
+    { ...valid, photoTilt: -13 },
+    { ...valid, photoTilt: Number.NaN },
+    { ...valid, stickers: null },
+    {
+      ...valid,
+      stickers: Array.from({ length: 25 }, (_, i) => ({
+        ...valid.stickers[0],
+        id: `s-${i}`,
+      })),
+    },
+    { ...valid, stickers: [valid.stickers[0], { ...valid.stickers[0] }] },
+    ...[
+      { id: "" },
+      { id: "x".repeat(101) },
+      { kind: "script" },
+      { x: -1 },
+      { x: 101 },
+      { x: "40" },
+      { x: Number.POSITIVE_INFINITY },
+      { y: -1 },
+      { y: 101 },
+      { rotation: -181 },
+      { rotation: 181 },
+      { scale: 0.59 },
+      { scale: 1.61 },
+    ].map((patch) => ({
+      ...valid,
+      stickers: [{ ...valid.stickers[0], ...patch }],
+    })),
+  ];
+  for (const invalidDesign of invalidDesigns) {
+    const pageData = saved();
+    (pageData.pages[0] as unknown as Record<string, unknown>).design =
+      invalidDesign;
+    assert.throws(() => parse(pageData), /invalid or duplicate/);
+    const draftData = saved();
+    (
+      draftData.drafts["alex:lily"] as unknown as Record<string, unknown>
+    ).design = invalidDesign;
+    assert.throws(() => parse(draftData), /invalid or duplicate/);
+  }
 });
 
 test("malformed JSON or an unsupported root schema is rejected rather than repaired", () => {

@@ -11,6 +11,7 @@ import {
   weekKey,
   type AppData,
   type Contribution,
+  type PageDesign,
 } from "./model";
 
 const now = new Date("2026-11-14T15:00:00Z");
@@ -190,6 +191,72 @@ test("new pages are always recorded, validate their album, and sort chronologica
       }),
     /few words/,
   );
+});
+
+test("publishing preserves a design independently from subsequent draft edits", () => {
+  const design: PageDesign = {
+    layout: "classic",
+    tape: "linen",
+    photoTilt: 2,
+    stickers: [
+      { id: "moon-1", kind: "moon", x: 80, y: 20, rotation: -15, scale: 1 },
+    ],
+  };
+  const next = addContribution(
+    empty(),
+    {
+      albumId: "lily",
+      authorId: "alex",
+      title: "Under the same moon",
+      text: "Thinking of you.",
+      design,
+    },
+    now,
+  );
+  assert.deepEqual(next.pages[0].design, design);
+  design.stickers[0].x = 10;
+  design.stickers.push({
+    id: "star-1",
+    kind: "star",
+    x: 25,
+    y: 30,
+    rotation: 0,
+    scale: 1,
+  });
+  design.tape = "midnight";
+  assert.equal(next.pages[0].design!.stickers[0].x, 80);
+  assert.equal(next.pages[0].design!.stickers.length, 1);
+  assert.equal(next.pages[0].design!.tape, "linen");
+});
+
+test("publishing rejects non-finite and malformed design coordinates before creating a page", () => {
+  const data = empty();
+  assert.throws(
+    () =>
+      addContribution(data, {
+        albumId: "lily",
+        authorId: "alex",
+        title: "Hello",
+        text: "A moment",
+        design: {
+          layout: "classic",
+          tape: "sage",
+          photoTilt: 0,
+          stickers: [
+            {
+              id: "star",
+              kind: "star",
+              x: Number.NaN,
+              y: 25,
+              rotation: 0,
+              scale: 1,
+            },
+          ],
+        },
+      }),
+    /page design could not be saved/,
+  );
+  assert.equal(data.pages.length, 0);
 });
 
 test("weekly check-in keys use Monday in UTC, including a year boundary", () => {

@@ -22,6 +22,7 @@ import {
 } from "@/lib/model";
 import "@openpageflip/core/styles.css";
 import "./album-book.css";
+import ScrapbookPage from "./ScrapbookPage";
 
 type Props = {
   pages: Contribution[];
@@ -202,23 +203,12 @@ export default function AlbumBook({
                     role="region"
                     aria-label={`Read page ${pageIndex + 1} by ${authorName(page.authorId)}`}
                   >
-                    <h2>{page.title}</h2>
-                    {page.photo && (
-                      <figure className="leaf-photo">
-                        <span className="leaf-photo-tape" aria-hidden="true" />
-                        <img
-                          src={page.photo}
-                          alt={`Photo accompanying “${page.title}”`}
-                          draggable={false}
-                        />
-                      </figure>
-                    )}
-                    <p className="leaf-story">{page.text}</p>
-                    {!page.photo && (
-                      <div className="leaf-flourish" aria-hidden="true">
-                        <span />✧<span />
-                      </div>
-                    )}
+                    <ScrapbookPage
+                      title={page.title}
+                      text={page.text}
+                      photo={page.photo}
+                      design={page.design}
+                    />
                   </div>
                   <footer className="leaf-footer">
                     <time dateTime={page.createdAt}>

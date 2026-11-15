@@ -100,3 +100,13 @@ Manual acceptance should follow complete flows: open a book; navigate to its fir
 - Evaluation with intended users of perceived connection, usability, accessibility, privacy, and effects over time. A successful demonstration or busy album does not establish a health benefit.
 
 Concurrent tabs are intentionally guarded rather than merged: an external storage change pauses writes in the stale tab, keeps that session visible, and asks the reviewer to keep unsaved words before reloading. Use one editing tab at a time. Invalid stored snapshots are rejected as a whole and left untouched rather than silently filtered.
+
+## Scrapbook composition
+
+A reply is a new chronological page composed by its author. Classic, Postcard, and Letter provide readable text/photo arrangements; ten original code-native SVG stickers can be placed freely on top. Photos use a Polaroid frame and electrical tape by default, with linen and sage alternatives. This follows the supplied visual reference without copying its people, text, or imagery. Audio recording is outside this change.
+
+The editor and book use the same renderer. Text grows the paper as necessary and remains accessible through the reader’s native scrolling region. Sticker positions are percentages of that paper, with bounded rotation/scale and a maximum of 24 per page. Artwork that crosses a paper edge is clipped consistently in the preview and book. Text is always retained separately from decoration, so a sticker never deletes or rewrites it.
+
+Pointer capture supports mouse/touch dragging; tap-to-add, arrow keys, Delete, labeled position sliders, and transform buttons provide alternatives. The narrow-screen tray stays accessible above the preview. Deleting a sticker returns focus to the tray. Physical touchscreen and assistive-technology verification are separate from viewport and keyboard checks.
+
+Optional `design` metadata extends version-one pages/drafts without changing existing records. Strict validation rejects unknown kinds/layouts, duplicate sticker IDs, excessive counts, and nonfinite/out-of-range values. Publication copies the design independently of later draft changes. Designs contain no executable markup or remote assets. Existing delivery, replies, and private check-ins retain their original semantics. Crisis support remains immediately beneath the writing field, without disabling publication.

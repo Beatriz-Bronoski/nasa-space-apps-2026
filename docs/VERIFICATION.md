@@ -56,3 +56,12 @@ The cream/bookshelf refinement was checked in the browser: the body background c
 Layout refinement was checked in the browser on desktop and at 390 × 844: the global header and visible book heading are removed, the astronaut name remains in the upper-left (including after switching to Lily), exactly one Add a page control follows the reader, and that control opens the editor. Footer Settings retains profile selection, simulated connection controls, and the working night-mode switch. No horizontal overflow was observed at the mobile width.
 
 All delivery tests use the clearly labeled simulator. They do not verify communication between devices, secure accounts, encryption, backups, or real spacecraft transport. The support heuristic has false positives and false negatives. See [DECISIONS.md](DECISIONS.md) for the production work required.
+
+## Scrapbook editor revision
+
+- TypeScript and all 21 model/persistence tests passed. New tests cover legacy snapshots, page/draft design roundtrips, malformed metadata, and independent published designs.
+- In the browser, a mouse drag added a sticker from the tray at the drop position, and dragging an existing sticker changed its normalized position. Rotation, resize, tap/click addition, Enter addition, arrow-key movement, and Delete were exercised; deletion restored tray focus.
+- A compressed local example photo appeared with navy electrical tape. Postcard selection changed the live composition. After a reload, the title, text, photo, layout, and stickers remained in the draft. Publishing opened the new chronological page with all five saved stickers and its photo/tape. Delivery advanced independently of decoration.
+- A 390 × 844 viewport had no horizontal page overflow. The mobile tray remained available above the preview; dragging from it onto the paper added a sticker. The paper expanded to preserve the complete note. This is viewport/pointer verification, not a physical touchscreen test.
+- A crisis cue displayed support next to the text field while Publish remained enabled. Removing the cue removed the panel. No browser warnings/errors were observed in these flows.
+- Physical-device touch, runtime OS reduced-motion changes, a full assistive-technology audit, and clinical review remain unverified.

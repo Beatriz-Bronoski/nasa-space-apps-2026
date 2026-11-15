@@ -1,0 +1,82 @@
+import type { CSSProperties, ReactNode } from "react";
+import type { PageDesign, PageSticker } from "@/lib/model";
+import { StickerArt } from "./StickerArt";
+import "./scrapbook.css";
+
+export function stickerStyle(sticker: PageSticker): CSSProperties {
+  return {
+    left: `${sticker.x}%`,
+    top: `${sticker.y}%`,
+    transform: `translate(-50%, -50%) rotate(${sticker.rotation}deg) scale(${sticker.scale})`,
+  };
+}
+
+type Props = {
+  title: string;
+  text: string;
+  photo?: string;
+  design?: PageDesign;
+  children?: ReactNode;
+};
+
+/** The editor and physical album use exactly the same page composition. */
+export default function ScrapbookPage({
+  title,
+  text,
+  photo,
+  design,
+  children,
+}: Props) {
+  const layout = design?.layout ?? "classic";
+  return (
+    <div className={`scrapbook-page scrapbook-layout-${layout}`}>
+      <div className="scrapbook-content">
+        <h2 className="scrapbook-title">{title}</h2>
+        <div className="scrapbook-arrangement">
+          {photo && (
+            <figure
+              className={`scrapbook-photo scrapbook-tape-${design?.tape ?? "midnight"}`}
+              style={
+                {
+                  "--photo-tilt": `${design?.photoTilt ?? -2}deg`,
+                } as CSSProperties
+              }
+            >
+              <span
+                className="scrapbook-tape scrapbook-tape-top"
+                aria-hidden="true"
+              />
+              <img
+                src={photo}
+                alt={`Photo accompanying “${title}”`}
+                draggable={false}
+              />
+              <span
+                className="scrapbook-tape scrapbook-tape-bottom"
+                aria-hidden="true"
+              />
+            </figure>
+          )}
+          {text && (
+            <div className="scrapbook-note">
+              <p>{text}</p>
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="scrapbook-sticker-layer">
+        {children !== undefined
+          ? children
+          : design?.stickers.map((sticker) => (
+              <span
+                key={sticker.id}
+                className="scrapbook-sticker"
+                style={stickerStyle(sticker)}
+              >
+                <StickerArt kind={sticker.kind} />
+              </span>
+            ))}
+      </div>
+    </div>
+  );
+}
