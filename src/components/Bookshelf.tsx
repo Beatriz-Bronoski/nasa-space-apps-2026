@@ -98,14 +98,15 @@ export default function Bookshelf({
       const rowStyle = getComputedStyle(row);
       const spineWidth = parseFloat(getComputedStyle(trigger).width);
       const gap = parseFloat(rowStyle.columnGap) || 0;
-      // The row consumes this reserve while a cover is revealed. Measure the
-      // unchanged physical cover instead, so hover never changes row capacity.
+      // Leave enough distributed free space for one expanded cover. Measuring
+      // the unchanged physical cover keeps hover from changing row capacity.
       const reserve = Math.max(
         0,
         Math.ceil(cover.offsetWidth - spineWidth * 0.55),
       );
       const max =
-        parseInt(rowStyle.getPropertyValue("--shelf-max-row"), 10) || 6;
+        parseInt(rowStyle.getPropertyValue("--shelf-max-row"), 10) ||
+        albums.length;
       const count = Math.max(
         1,
         Math.min(

@@ -159,3 +159,10 @@ The pickup geometry was aligned to the deeper cover: a desktop opening targeted 
 - Through the UI, created a fictional Milo album with a chosen JPEG cover. The preview appeared, submission added the book, and a reload retained its cover/person/album. Switched to Milo in Settings and published a first page; the reader displayed Milo in its author, accessible region, and sewn pair label.
 - At 320 × 844, the new-person form fit without horizontal overflow (dialog client and scroll widths both 273 px). Reviewed its night palette, labels, photo control, preview, and submit control. Restored the normal viewport and day theme afterward.
 - No warnings or errors were captured from the local tab. Real-device touch, OS reduced-motion, exhaustive image-decoder failures, and a full accessibility audit remain outside this verification.
+
+## Full-width bookshelf distribution — 15 November 2026
+
+- Removed the desktop six-book cap and permanent preview padding. Rows now distribute their books from edge to edge while retaining capacity for one expanded cover.
+- At a 1280px desktop viewport with existing custom books, the first row held eight books; both outer gaps measured 0px across an 895px row. The last book's keyboard preview remained inside the row (cover right 1190px, row right 1194px).
+- At 320 × 844, the two-book arrangement and last-book preview stayed within the cabinet (cover right 266px, row right 271px). Document width was 305px within a 320px viewport. No browser warnings or errors were captured; the temporary viewport was reset.
+- No data model or storage changes. Existing automated model tests were not rerun for this layout-only change. Production build includes TypeScript validation; real-device touch and exhaustive animation timing remain separate checks.
