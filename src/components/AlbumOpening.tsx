@@ -30,22 +30,27 @@ type Props = {
 function stageGeometry(origin: AlbumOpeningOrigin): CSSProperties {
   const viewport =
     typeof window === "undefined" ? 1280 : document.documentElement.clientWidth;
-  const portrait = viewport < 686;
-  const caseWidth = Math.min(940, viewport - (viewport <= 520 ? 36 : 96));
+  // Match the material cover padding and engine's 280px minimum page width.
+  const mainWidth = Math.min(1220, viewport) - (viewport <= 520 ? 32 : 96);
+  const caseWidth = Math.min(940, mainWidth);
+  const coverPadding = viewport <= 520 ? 20 : viewport <= 760 ? 24 : 30;
+  const available = caseWidth - coverPadding;
+  const portrait = available < 560;
   const pageWidth = Math.max(
     220,
-    Math.min(440, portrait ? caseWidth - 20 : (caseWidth - 26) / 2),
+    Math.min(440, portrait ? available : available / 2),
   );
   const pageHeight = pageWidth * 1.35;
   return {
     "--opening-width": `${pageWidth}px`,
     "--opening-height": `${pageHeight}px`,
+    "--opening-left-display": portrait ? "none" : "block",
     "--opening-from-x": `${origin.left}px`,
     "--opening-from-y": `${origin.top}px`,
     "--opening-scale-x": Math.max(1, origin.width) / pageWidth,
     "--opening-scale-y": Math.max(1, origin.height) / pageHeight,
     "--opening-to-x": `${portrait ? (viewport - pageWidth) / 2 : viewport / 2}px`,
-    "--opening-to-y": `${viewport <= 520 ? 56 : 76}px`,
+    "--opening-to-y": `${viewport <= 520 ? 83 : viewport <= 760 ? 104 : 107}px`,
   } as CSSProperties;
 }
 

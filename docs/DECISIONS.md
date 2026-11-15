@@ -103,7 +103,7 @@ Concurrent tabs are intentionally guarded rather than merged: an external storag
 
 ## Scrapbook composition
 
-A reply is a new chronological page composed by its author. Classic, Postcard, and Letter provide readable text/photo arrangements; ten original code-native SVG stickers can be placed freely on top. Photos use a Polaroid frame and electrical tape by default, with linen and sage alternatives. This follows the supplied visual reference without copying its people, text, or imagery. Audio recording is outside this change.
+A reply is a new chronological page composed by its author. Classic, Postcard, and Letter provide readable text/photo arrangements; ten original code-native SVG stickers can be placed freely on top. Photos use a Polaroid frame and patterned washi tape, with linen, midnight, and sage colors. This follows the supplied visual reference without copying its people, text, or imagery. Audio recording is outside this change.
 
 The editor and book use the same renderer. Text grows the paper as necessary and remains accessible through the reader’s native scrolling region. Sticker positions are percentages of that paper, with bounded rotation/scale and a maximum of 24 per page. Artwork that crosses a paper edge is clipped consistently in the preview and book. Text is always retained separately from decoration, so a sticker never deletes or rewrites it.
 
@@ -118,3 +118,13 @@ The earlier transition removed its overlay and mounted the page-turn engine in t
 `AlbumBook` reports readiness after its first engine initialization, the initial visible spread’s image load/decode (including failures), and two animation frames. Image waiting has a 1.8-second ceiling, stale callbacks are cancelled, and empty albums also become ready. The animation’s completion and reader readiness jointly release a 200 ms opacity transition. Offscreen photos never gate opening. The hardcover no longer has a deliberately stationary final 160 ms segment.
 
 Skip, Escape, and viewport changes request the real reader immediately and hide the flying cover while it prepares. The overlay owns focus and the application stays inert until release; the reader heading receives focus afterward. Cancellation and final cleanup restore body scrolling. A seven-second recovery timer covers an interrupted animation or missing callback. These are presentation safeguards, not real-time performance guarantees. Reduced-motion state initializes before creating the page-turn engine to avoid rebuilding it immediately after mount.
+
+## Physical album materials
+
+The reader now places the album on a self-hosted photographic rustic wood material. Cloth weave, stitched covers/spines, offset leaf stacks, uneven outer paper contours, a shaded gutter, and soft directional shadows create volume without transforming the page-turn engine or its input coordinates. The shelf pickup uses the same wood/paper/cloth materials, preserving the prepared-reader handoff. Generated wood and paper textures total about 320 KB; no remote texture service is used. Prompts and provenance are kept in MATERIAL_PROMPTS.md and ASSETS.md.
+
+Caveat 600 and Kalam 400 are self-hosted for album handwriting; application controls keep the existing legible sans-serif. The reader readiness gate waits for visible photos and the active fonts under the same bounded 1.8-second deadline, followed by two paint frames. That avoids revealing a temporary fallback font before the handwritten page has settled.
+
+Every photo and text card has visible patterned washi tape, organic angles, raised paper shadows, and an aged surface. The ten vector sticker kinds retain their saved identity/position/rotation/scale, while unique per-instance SVG masks add woven threads and stitched hems. New designs default to linen tape; all previously saved tape colors/layouts remain supported. The shared renderer keeps editor and reader in sync. Text remains text, grows its paper, and is scrollable within the book; no message or decoration is rasterized into the background.
+
+Night mode dims the table and retains textured blue paper with light ink. Texture/shadow layers are static, and book depth is drawn behind the engine, avoiding per-frame image filters. The previously published backup tag backup-before-major-changes-2026-11-15 preserves the earlier visual design at commit 204ba37.

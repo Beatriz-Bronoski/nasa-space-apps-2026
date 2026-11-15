@@ -1,7 +1,7 @@
 .scrapbook-page {
-  --scrapbook-paper: #f8eed9;
-  --scrapbook-ink: #3b4d60;
-  --scrapbook-note: #f6e6c8;
+  --scrapbook-paper: #eee0bb;
+  --scrapbook-ink: var(--book-ink, #33434a);
+  --scrapbook-note: #fff3d6;
   position: relative;
   width: 100%;
   display: grid;
@@ -10,7 +10,18 @@
   isolation: isolate;
   overflow: hidden;
   color: var(--scrapbook-ink);
-  background: var(--scrapbook-paper);
+  background-color: var(--scrapbook-paper);
+  background-image:
+    linear-gradient(115deg, #fff4d12b, #9a723516),
+    url("/textures/aged-paper.jpg");
+  background-size:
+    100% 100%,
+    580px auto;
+  background-blend-mode: normal;
+}
+/* The physical leaf owns its paper; a second rectangle would flatten its folds. */
+.album-reader .scrapbook-page {
+  background: transparent;
 }
 .scrapbook-page::before {
   content: "";
@@ -25,151 +36,199 @@
   width: 100%;
   box-sizing: border-box;
   position: relative;
-  padding: 4% 5% 6%;
+  padding: 4% 5% 7%;
 }
 .scrapbook-page .scrapbook-title {
-  font-family: var(--serif);
-  font-size: clamp(22px, 7.5cqw, 38px);
-  font-weight: 500;
-  font-style: italic;
-  letter-spacing: -0.04em;
-  line-height: 1.24;
-  margin: 0 13% 6% 0;
+  font-family: var(--hand-title, "Caveat", cursive);
+  font-size: clamp(30px, 9cqw, 47px);
+  font-weight: 600;
+  font-style: normal;
+  letter-spacing: -0.025em;
+  line-height: 1.08;
+  margin: 0 12% 7% 0;
   color: var(--scrapbook-ink);
+  transform: rotate(-1.2deg);
+  transform-origin: left center;
+  text-shadow: 0.2px 0.3px 0 #33434a0a;
 }
 .scrapbook-arrangement {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 .scrapbook-photo {
   position: relative;
-  width: 91%;
+  width: 88%;
   margin: 1% auto 0;
-  padding: 2.5% 2.5% 7%;
-  background: #fff8e9;
+  padding: 2.6% 2.6% 7.2%;
+  background: linear-gradient(120deg, #fffef5, #f2ead9);
   box-shadow:
-    0 3px 8px #51422d26,
-    0 1px 2px #51422d20;
+    2px 5px 8px #46321732,
+    1px 1px 1px #fff9e5 inset,
+    0 0 1px 1px #765c3125;
   transform: rotate(var(--photo-tilt, -2deg));
-  border: 1px solid #ddcfb6;
+  border: 1px solid #d9ceb5;
+  border-radius: 1px 2px 2px 1px;
+}
+.scrapbook-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    110deg,
+    #fff7df12 0%,
+    transparent 45%,
+    #79582f08 100%
+  );
 }
 .scrapbook-photo img {
   width: 100%;
-  aspect-ratio: 1.45;
+  aspect-ratio: 1.55;
   object-fit: cover;
   display: block;
   pointer-events: none;
+  border: 1px solid #52616a24;
 }
 .scrapbook-tape {
-  --tape-color: #394c62;
+  --tape-color: #c8ac72;
   position: absolute;
-  z-index: 1;
-  width: 29%;
-  height: 8%;
-  min-height: 12px;
-  max-height: 25px;
+  z-index: 2;
+  width: 30%;
+  height: 9%;
+  min-height: 14px;
+  max-height: 26px;
   background-color: var(--tape-color);
   background-image:
-    repeating-linear-gradient(89deg, transparent 0 3px, #fff1 3px 4px),
-    linear-gradient(0deg, #17243822, transparent 40%, #ffffff14);
-  box-shadow: 0 1px 1px #3e3c3720;
+    repeating-linear-gradient(45deg, #fff8e92b 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(-45deg, #fff8e925 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(88deg, transparent 0 2px, #3b4d6010 2px 3px),
+    linear-gradient(90deg, #fff4d92e, transparent 30%, #805f2920);
+  box-shadow: 1px 2px 2px #51432919;
   clip-path: polygon(
-    2% 0,
-    96% 2%,
-    100% 18%,
-    97% 33%,
-    100% 52%,
-    97% 77%,
-    100% 98%,
-    3% 100%,
-    0 78%,
-    3% 65%,
-    0 37%,
-    3% 22%
+    3% 1%,
+    96% 0,
+    99% 14%,
+    97% 29%,
+    100% 44%,
+    97% 63%,
+    100% 85%,
+    96% 100%,
+    3% 97%,
+    0 82%,
+    3% 63%,
+    0 44%,
+    3% 26%,
+    0 10%
   );
-  opacity: 0.94;
+  opacity: 0.74;
 }
 .scrapbook-tape-top {
   top: -4%;
-  left: 35%;
-  transform: rotate(4deg);
+  left: 30%;
+  transform: rotate(5deg);
 }
 .scrapbook-tape-bottom {
   bottom: 1%;
-  left: -5%;
-  width: 24%;
-  transform: rotate(29deg);
+  left: -6%;
+  width: 25%;
+  transform: rotate(31deg);
+}
+.scrapbook-tape-midnight .scrapbook-tape {
+  --tape-color: #57707c;
+  opacity: 0.83;
 }
 .scrapbook-tape-linen .scrapbook-tape {
-  --tape-color: #d8bf8d;
-  opacity: 0.76;
+  --tape-color: #c6ad78;
+  opacity: 0.71;
 }
 .scrapbook-tape-sage .scrapbook-tape {
-  --tape-color: #809076;
+  --tape-color: #8e9c79;
+  opacity: 0.8;
 }
 .scrapbook-note {
   position: relative;
-  margin: 0;
+  width: 97%;
+  margin: 1% auto 0;
+  padding: 6% 5% 5%;
+  background-color: var(--scrapbook-note);
+  background-image:
+    linear-gradient(120deg, #fff9e8c7, #f4e6c6b5),
+    url("/textures/aged-paper.jpg");
+  background-size:
+    100% 100%,
+    350px auto;
+  border: 1px solid #ba9b5f32;
+  border-radius: 1px 3px 2px 1px;
+  box-shadow:
+    2px 4px 5px #6d51252a,
+    inset 0 1px 0 #fffae999;
+  transform: rotate(-0.7deg);
+}
+.scrapbook-note-tape {
+  top: -9px;
+  left: 35%;
+  width: 31%;
+  height: 18px;
+  min-height: 14px;
+  transform: rotate(-5deg);
 }
 .scrapbook-note p {
-  font-family: var(--sans);
-  font-size: clamp(12px, 3.8cqw, 18px);
-  line-height: 1.85;
+  font-family: var(--hand, "Kalam", cursive);
+  font-size: clamp(15px, 4.2cqw, 20px);
+  font-weight: 400;
+  line-height: 1.58;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   margin: 0;
   color: var(--scrapbook-ink);
+  text-shadow: 0.15px 0.25px 0 #33434a0d;
 }
 .scrapbook-layout-postcard .scrapbook-title {
   margin-bottom: 7%;
 }
 .scrapbook-layout-postcard .scrapbook-photo {
-  width: 75%;
+  width: 76%;
   align-self: flex-start;
   margin-left: 1%;
 }
 .scrapbook-layout-postcard .scrapbook-photo img {
-  aspect-ratio: 1.3;
+  aspect-ratio: 1.35;
 }
 .scrapbook-layout-postcard .scrapbook-note {
-  width: 83%;
+  width: 86%;
   align-self: flex-end;
-  padding: 5% 6%;
   margin-top: -2%;
-  background: var(--scrapbook-note);
-  box-shadow: 1px 3px 5px #51422d20;
+  margin-right: 1%;
   transform: rotate(1deg);
 }
-.scrapbook-layout-postcard .scrapbook-note::before {
-  content: "";
-  position: absolute;
-  top: -6px;
-  left: 33%;
-  width: 34%;
-  height: 15px;
-  transform: rotate(-2deg);
-  background: #d8bf8d99;
+.scrapbook-layout-postcard .scrapbook-tape-top {
+  left: 23%;
+  transform: rotate(-6deg);
+}
+.scrapbook-layout-postcard .scrapbook-note-tape {
+  left: 43%;
+  transform: rotate(4deg);
 }
 .scrapbook-layout-letter .scrapbook-note {
   order: -1;
-}
-.scrapbook-layout-letter .scrapbook-note p {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: clamp(14px, 4.8cqw, 21px);
-  line-height: 1.8;
+  transform: rotate(0.7deg);
 }
 .scrapbook-layout-letter .scrapbook-photo {
   width: 78%;
-  margin-top: 6%;
+  margin-top: 5%;
   margin-left: 15%;
+}
+.scrapbook-layout-letter .scrapbook-tape-top {
+  left: 55%;
+  transform: rotate(-4deg);
 }
 .scrapbook-sticker-layer {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 2;
+  z-index: 3;
 }
 .scrapbook-sticker {
   position: absolute;
@@ -177,7 +236,7 @@
   width: 18%;
   aspect-ratio: 1;
   transform-origin: center;
-  filter: drop-shadow(1px 3px 1px #574a322d);
+  filter: drop-shadow(2px 4px 1.5px #49371938);
   user-select: none;
   -webkit-user-select: none;
 }
@@ -188,11 +247,29 @@
   overflow: visible;
 }
 :root[data-theme="night"] .scrapbook-page {
-  --scrapbook-paper: #2b3d50;
-  --scrapbook-ink: #f0e9dc;
-  --scrapbook-note: #37495b;
+  --scrapbook-paper: #2b3e4b;
+  --scrapbook-ink: #f0e6cd;
+  --scrapbook-note: #3d4d55;
+  background-image:
+    linear-gradient(#2b3e4bdb, #263947e8), url("/textures/aged-paper.jpg");
+  background-blend-mode: normal;
+}
+:root[data-theme="night"] .album-reader .scrapbook-page {
+  background: transparent;
+}
+:root[data-theme="night"] .scrapbook-note {
+  background-image:
+    linear-gradient(#3d4d55ed, #394950f2), url("/textures/aged-paper.jpg");
+  border-color: #9d9c7d25;
+  box-shadow:
+    2px 4px 6px #0d1a2459,
+    inset 0 1px 0 #cbd3c61a;
 }
 :root[data-theme="night"] .scrapbook-photo {
-  background: #d9d2c1;
-  border-color: #a9a89d;
+  background: linear-gradient(115deg, #e5ddc9, #c7bfae);
+  border-color: #a8a28c;
+  box-shadow: 2px 5px 9px #09151c65;
+}
+:root[data-theme="night"] .scrapbook-tape-linen .scrapbook-tape {
+  --tape-color: #bca575;
 }

@@ -22,7 +22,7 @@ import "./scrapbook-editor.css";
 
 const freshDesign = (): PageDesign => ({
   layout: "classic",
-  tape: "midnight",
+  tape: "linen",
   photoTilt: -2,
   stickers: [],
 });

@@ -227,3 +227,96 @@ test(
     });
   },
 );
+
+test(
+  "reader readiness waits for handwriting fonts as well as decoded photos",
+  { concurrency: false },
+  async () => {
+    await withWindow(async (clock) => {
+      const image = new FakeImage(true);
+      const fonts = deferred();
+      let calls = 0;
+      afterReaderImagesPaint(
+        [image.element],
+        () => {
+          calls += 1;
+        },
+        fonts.promise,
+      );
+      image.decoding.resolve();
+      await Promise.resolve();
+      assert.equal(
+        clock.frames.size,
+        0,
+        "decoded photos do not release still-loading fonts",
+      );
+      fonts.resolve();
+      await Promise.resolve();
+      assert.equal(clock.timers.size, 0);
+      assert.equal(clock.frames.size, 1);
+      clock.paintFrame();
+      assert.equal(calls, 0);
+      clock.paintFrame();
+      assert.equal(calls, 1);
+    });
+  },
+);
+
+test(
+  "fonts without photos use the shared deadline and late font promises cannot reveal again",
+  { concurrency: false },
+  async () => {
+    await withWindow(async (clock) => {
+      const fonts = deferred();
+      let calls = 0;
+      afterReaderImagesPaint(
+        [],
+        () => {
+          calls += 1;
+        },
+        fonts.promise,
+      );
+      clock.advance(1799);
+      assert.equal(clock.frames.size, 0);
+      clock.advance(1);
+      clock.paintFrame();
+      assert.equal(calls, 0);
+      clock.paintFrame();
+      assert.equal(calls, 1);
+      fonts.resolve();
+      await Promise.resolve();
+      assert.equal(clock.frames.size, 0);
+      assert.equal(calls, 1);
+
+      const cancelledFonts = deferred();
+      const cancel = afterReaderImagesPaint(
+        [],
+        () => {
+          calls += 1;
+        },
+        cancelledFonts.promise,
+      );
+      cancel();
+      cancelledFonts.reject(new Error("An interrupted font load is harmless"));
+      await Promise.resolve();
+      assert.equal(clock.timers.size, 0);
+      assert.equal(clock.frames.size, 0);
+      assert.equal(calls, 1);
+
+      const failedFonts = deferred();
+      afterReaderImagesPaint(
+        [],
+        () => {
+          calls += 1;
+        },
+        failedFonts.promise,
+      );
+      failedFonts.reject(new Error("Use the fallback font"));
+      await Promise.resolve();
+      assert.equal(clock.timers.size, 0);
+      clock.paintFrame();
+      clock.paintFrame();
+      assert.equal(calls, 2);
+    });
+  },
+);

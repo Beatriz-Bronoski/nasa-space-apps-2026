@@ -1,11 +1,12 @@
-/** Wait only for the opening spread, then let its final layout paint before revealing it. */
+/** Wait for the opening spread and its fonts, then let final layout paint before reveal. */
 export function afterReaderImagesPaint(
   images: HTMLImageElement[],
   onReady: () => void,
+  fontsReady?: Promise<unknown>,
 ): () => void {
   let cancelled = false;
   let painting = false;
-  let remaining = images.length;
+  let remaining = images.length + (fontsReady ? 1 : 0);
   let firstFrame = 0;
   let secondFrame = 0;
   let deadline = 0;
@@ -37,15 +38,20 @@ export function afterReaderImagesPaint(
     return clean;
   }
 
-  // Offline photos and decode failures must never leave the opening overlay stuck.
+  // Offline photos or unavailable fonts share one bounded readiness wait.
   deadline = window.setTimeout(paint, 1800);
+  const settleResource = () => {
+    if (cancelled || painting) return;
+    remaining -= 1;
+    if (!remaining) paint();
+  };
+  if (fontsReady) void fontsReady.then(settleResource, settleResource);
   for (const image of images) {
     let settled = false;
     const settle = () => {
       if (cancelled || settled) return;
       settled = true;
-      remaining -= 1;
-      if (!remaining) paint();
+      settleResource();
     };
     const decode = () => {
       if (cancelled) return;

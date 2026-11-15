@@ -35,7 +35,7 @@ export default function ScrapbookPage({
         <div className="scrapbook-arrangement">
           {photo && (
             <figure
-              className={`scrapbook-photo scrapbook-tape-${design?.tape ?? "midnight"}`}
+              className={`scrapbook-photo scrapbook-tape-${design?.tape ?? "linen"}`}
               style={
                 {
                   "--photo-tilt": `${design?.photoTilt ?? -2}deg`,
@@ -58,7 +58,13 @@ export default function ScrapbookPage({
             </figure>
           )}
           {text && (
-            <div className="scrapbook-note">
+            <div
+              className={`scrapbook-note scrapbook-tape-${design?.tape ?? "linen"}`}
+            >
+              <span
+                className="scrapbook-tape scrapbook-note-tape"
+                aria-hidden="true"
+              />
               <p>{text}</p>
             </div>
           )}

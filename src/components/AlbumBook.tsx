@@ -93,10 +93,14 @@ export default function AlbumBook({
         ),
       ),
     );
-    return afterReaderImagesPaint(images, () => {
-      setReaderReady(true);
-      readyCallback.current?.();
-    });
+    return afterReaderImagesPaint(
+      images,
+      () => {
+        setReaderReady(true);
+        readyCallback.current?.();
+      },
+      document.fonts?.ready,
+    );
   }, [initialLayout, hasPages, readerReady]);
 
   useEffect(() => {

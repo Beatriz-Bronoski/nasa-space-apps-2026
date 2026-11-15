@@ -65,6 +65,7 @@
 }
 .opening-paper,
 .opening-left-paper {
+  display: var(--opening-left-display, block);
   position: absolute;
   inset: 4px 2px 3px 3px;
   padding: 9% 8% 7%;
@@ -344,9 +345,6 @@
   --opening-paper-shade: #203141;
 }
 @media (max-width: 685px) {
-  .opening-left-paper {
-    display: none;
-  }
   .opening-skip {
     right: 16px;
     bottom: 18px;

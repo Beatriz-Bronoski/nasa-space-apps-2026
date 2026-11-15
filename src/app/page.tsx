@@ -54,6 +54,7 @@ import AlbumBook from "@/components/AlbumBook";
 import AlbumOpening from "@/components/AlbumOpening";
 import ScrapbookEditor from "@/components/ScrapbookEditor";
 import "./bookshelf.css";
+import "./physical-albums.css";
 
 type View = "albums" | "story" | "compose" | "checkin" | "replies";
 type Dialog = "connection" | "help" | "about" | "choose" | null;
