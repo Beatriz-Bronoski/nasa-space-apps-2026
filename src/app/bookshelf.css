@@ -359,3 +359,8 @@
     transform: rotateY(-7deg);
   }
 }
+
+/* Keep the shelf footprint while its real cover is carried into the reader. */
+.album-card.opening-source .album-book {
+  visibility: hidden;
+}

@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { createPortal } from "react-dom";
 import {
   ArrowLeft,
   ArrowRight,
@@ -50,6 +51,7 @@ import {
 } from "@/lib/model";
 import { STORAGE_KEY, compressPhoto, parseStoredData } from "@/lib/storage";
 import AlbumBook from "@/components/AlbumBook";
+import AlbumOpening from "@/components/AlbumOpening";
 import "./bookshelf.css";
 
 type View = "albums" | "story" | "compose" | "checkin" | "replies";
@@ -223,6 +225,11 @@ export default function Home() {
   const [photoError, setPhotoError] = useState("");
   const [photoBusy, setPhotoBusy] = useState(false);
   const [highlight, setHighlight] = useState("");
+  const [opening, setOpening] = useState<{
+    albumId: string;
+    origin: { left: number; top: number; width: number; height: number };
+  } | null>(null);
+  const openingLock = useRef(false);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const lastStored = useRef<string | null>(null);
@@ -361,10 +368,39 @@ export default function Home() {
         [draftKey]: { ...(d.drafts[draftKey] ?? emptyDraft), ...changes },
       },
     }));
-  const openAlbum = (id: string) => {
-    setSelected(id);
-    navigate("story");
+  const openAlbum = (id: string, trigger?: HTMLElement) => {
+    if (openingLock.current) return;
+    const source = trigger?.querySelector<HTMLElement>(".album-book");
+    const bounds = source?.getBoundingClientRect();
+    if (
+      !bounds?.width ||
+      !bounds.height ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      setSelected(id);
+      navigate("story");
+      return;
+    }
+    openingLock.current = true;
+    setOpening({
+      albumId: id,
+      origin: {
+        left: bounds.left,
+        top: bounds.top,
+        width: bounds.width,
+        height: bounds.height,
+      },
+    });
   };
+  const finishOpening = useCallback(() => {
+    if (!opening || !openingLock.current) return;
+    openingLock.current = false;
+    setSelected(opening.albumId);
+    setHighlight("");
+    setView("story");
+    setOpening(null);
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [opening]);
   const compose = (id = selected, replyTo?: string) => {
     setSelected(id);
     if (replyTo)
@@ -466,6 +502,7 @@ export default function Home() {
   return (
     <div
       className={view === "story" ? "app-shell immersive-reader" : "app-shell"}
+      inert={opening ? true : undefined}
     >
       <a className="skip-link" href="#main-content">
         Skip to content
@@ -604,9 +641,11 @@ export default function Home() {
                     const ownDraft = data.drafts[`${profile}:${a.id}`];
                     return (
                       <button
-                        className={`album-card ${a.accent}`}
+                        className={`album-card ${a.accent}${opening?.albumId === a.id ? " opening-source" : ""}`}
                         key={a.id}
-                        onClick={() => openAlbum(a.id)}
+                        onClick={(event) =>
+                          openAlbum(a.id, event.currentTarget)
+                        }
                         aria-label={`Open ${p.name}'s album, ${a.title}`}
                       >
                         <div className="album-book">
@@ -1367,6 +1406,18 @@ export default function Home() {
           </div>
         </Modal>
       )}
+      {opening &&
+        createPortal(
+          <AlbumOpening
+            album={ALBUMS.find((item) => item.id === opening.albumId)!}
+            personName={
+              profile === "alex" ? person(opening.albumId).name : "Alex & you"
+            }
+            origin={opening.origin}
+            onComplete={finishOpening}
+          />,
+          document.body,
+        )}
     </div>
   );
 }

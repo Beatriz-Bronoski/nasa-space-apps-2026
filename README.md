@@ -28,6 +28,8 @@ npm run preview
 
 Outside the reader, the astronaut's name appears in the upper-left corner and a slate-blue navigation bar separates navigation from the cream canvas. Opening an album enters an immersive book view without the sidebar, mobile navigation, astronaut label, or global footer. Use **All albums** to leave the book and restore the main navigation.
 
+Choosing a book on the shelf starts a presentation-only transition of about 1.78 seconds: the selected book lifts from its position, moves forward, and opens its hardcover at the spine before revealing the reader. **Skip animation** or Escape opens the reader immediately. Reduced-motion preference bypasses the transition; a viewport resize safely finishes it. Direct reply links still open their target page without a shelf animation. None of these presentation steps changes page delivery or response state.
+
 Use **Add a page** at the bottom of the home or book view. From a book, this opens the composer with the normal navigation restored. **Settings** and **Support** are available in the footer on the other screens; Settings contains the demo profile, connection, and night-mode controls.
 
 1. Open a person's album as a book. The surrounding navigation disappears, leaving the book, its controls, the bottom creation action, and **All albums** to return. Each contribution occupies a page in chronological order. Turn pages forward or backward with the navigation controls, arrow keys, or a corner drag; narrow screens show one page at a time. Reduced-motion mode is implemented to navigate without the page-turn animation. Longer contributions remain inside a focusable region with native scrolling on the paper page; there is no separate full-text modal.
@@ -61,6 +63,7 @@ For a manual review, follow the album/reply flow above, reload with a saved draf
 - `src/app/layout.tsx`: metadata, document language, and self-hosted fonts.
 - `src/components/AlbumBook.tsx`: chronological book reader, page-turn interaction, and accessible navigation.
 - `src/components/album-book.css`: paper, binding, page shadows, and responsive reader styles.
+- `src/components/AlbumOpening.tsx` and `src/components/album-opening.css`: shelf-to-reader lift, forward motion, hardcover opening, and accessible skip/cleanup behavior.
 - `src/lib/model.ts`: domain types, sample data, delivery reducer, notifications, and check-in/date helpers.
 - `src/lib/model.test.ts` and `src/lib/storage.test.ts`: model, transport, and persistence behavior tests.
 - `next.config.ts`: static export configuration.
