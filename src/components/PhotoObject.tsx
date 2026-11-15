@@ -27,6 +27,8 @@ export function PhotoObject({
   const [shown, setShown] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const ask = useRef<HTMLDialogElement>(null);
+  const review = useRef<HTMLDialogElement>(null);
+  const [resetVersion, setResetVersion] = useState(0);
   const serial = useRef(0);
   useEffect(
     () => () => {
@@ -53,11 +55,12 @@ export function PhotoObject({
     return () => clearTimeout(timer);
   }, [transition]);
 
-  async function apply(next: Keepsake | undefined) {
+  async function apply(next: Keepsake | undefined, closeReview = false) {
     setError("");
     setBusy(true);
     try {
       await onChange(next);
+      if (closeReview) review.current?.close();
     } catch (e) {
       setError(
         e instanceof Error ? e.message : "Não foi possível salvar a alteração.",
@@ -108,7 +111,7 @@ export function PhotoObject({
       ref={root}
       lang="pt-BR"
       className={"page-object " + (model ? "object-present" : "photo-present")}
-      data-opf-no-flip=""
+      data-opf-no-flip={model ? undefined : ""}
       onKeyDown={(e) => {
         if (e.key.startsWith("Arrow")) e.stopPropagation();
       }}
@@ -119,7 +122,14 @@ export function PhotoObject({
             className={"page-object-surface motion-" + transition}
             aria-busy={busy}
           >
-            {shown && <Viewer model={model} onDraw={onDraw} />}
+            {shown && (
+              <Viewer
+                model={model}
+                onDraw={onDraw}
+                resetVersion={resetVersion}
+                onReview={() => review.current?.showModal()}
+              />
+            )}
             {transition !== "idle" && (
               <div className="photo-facets" aria-hidden="true">
                 {[0, 1, 2, 3, 4, 5].map((i) => (
@@ -134,12 +144,13 @@ export function PhotoObject({
               </div>
             )}
           </div>
-          <p className="object-caption">
-            <Box size={13} aria-hidden="true" />
-            {LABELS[model.kind]} · 3D facetado
-          </p>
-          <details className="object-review">
-            <summary>Avaliar ou ajustar</summary>
+          <dialog
+            ref={review}
+            className="object-dialog object-review"
+            data-opf-no-flip=""
+            aria-label="Avaliar ou ajustar a miniatura"
+          >
+            <h2>{LABELS[model.kind]} em 3D</h2>
             <label>
               Avalie o resultado
               <select
@@ -167,12 +178,15 @@ export function PhotoObject({
                 disabled={busy}
                 className="object-link"
                 onClick={() =>
-                  void apply({
-                    ...model,
-                    style: "faceted",
-                    variant: (model.variant + 1) % 256,
-                    rating: undefined,
-                  })
+                  void apply(
+                    {
+                      ...model,
+                      style: "faceted",
+                      variant: (model.variant + 1) % 256,
+                      rating: undefined,
+                    },
+                    true,
+                  )
                 }
               >
                 <RefreshCw size={14} /> Gerar outra versão
@@ -181,12 +195,36 @@ export function PhotoObject({
                 type="button"
                 disabled={busy}
                 className="plain-object"
-                onClick={() => void apply(undefined)}
+                onClick={() => void apply(undefined, true)}
               >
                 Voltar à foto
               </button>
             </div>
-          </details>
+            <div className="object-entry">
+              <button
+                type="button"
+                className="plain-object"
+                onClick={() => {
+                  setResetVersion((version) => version + 1);
+                  review.current?.close();
+                }}
+              >
+                Restaurar orientação
+              </button>
+              <button
+                type="button"
+                className="object-link"
+                onClick={() => review.current?.close()}
+              >
+                Fechar
+              </button>
+            </div>
+            {error && (
+              <p className="object-error" role="alert">
+                {error}
+              </p>
+            )}
+          </dialog>
         </>
       ) : (
         <>
@@ -214,7 +252,8 @@ export function PhotoObject({
           >
             <h2>Transformar esta foto em 3D?</h2>
             <p>
-              O objeto reconhecido vira uma miniatura facetada sobre a página.
+              A miniatura fica apoiada no lugar da foto. Clique e arraste sobre
+              ela para girar. Um clique simples abre a avaliação.
             </p>
             <div className="object-entry">
               <button

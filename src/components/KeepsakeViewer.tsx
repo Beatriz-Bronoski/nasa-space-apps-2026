@@ -1,28 +1,36 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import * as T from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { SVGRenderer } from "three/examples/jsm/renderers/SVGRenderer.js";
+import { Rotate3d } from "lucide-react";
 import { buildKeepsake } from "@/lib/keepsake-meshes";
+import { groundKeepsake, hitSilhouette } from "@/lib/keepsake-projection";
 import { LABELS, type Keepsake } from "@/lib/keepsake";
 
-type Motion = "left" | "right" | "in" | "out" | "reset";
 export default function KeepsakeViewer({
   model,
   onDraw,
+  onReview,
+  resetVersion,
 }: {
   model: Keepsake;
   onDraw: () => void;
+  onReview: () => void;
+  resetVersion: number;
 }) {
   const ready = useRef(onDraw);
   ready.current = onDraw;
   const host = useRef<HTMLDivElement>(null);
-  const control = useRef<(action: Motion) => void>(() => {});
+  const target = useRef<SVGPathElement>(null);
+  const review = useRef(onReview);
+  review.current = onReview;
+  const reset = useRef<() => void>(() => {});
   const [failed, setFailed] = useState(false);
   const { kind, color, aspect, variant, style } = model;
   useEffect(() => {
     const parent = host.current;
-    if (!parent) return;
+    const hit = target.current;
+    if (!parent || !hit) return;
     setFailed(false);
     let renderer: T.WebGLRenderer | SVGRenderer;
     try {
@@ -48,7 +56,9 @@ export default function KeepsakeViewer({
       variant,
       style,
     });
-    scene.add(mesh);
+    const pivot = new T.Group();
+    pivot.add(mesh);
+    scene.add(pivot);
     scene.add(new T.HemisphereLight(0xfff7e8, 0xabb1a7, 1.45));
     const key = new T.DirectionalLight(0xfff4db, 2.4);
     key.position.set(3, 5, 4);
@@ -56,8 +66,9 @@ export default function KeepsakeViewer({
     const fill = new T.DirectionalLight(0xddeeff, 1);
     fill.position.set(-3, 2, -2);
     scene.add(fill);
-    const bounds = new T.Box3().setFromObject(mesh);
+    const bounds = new T.Box3().setFromObject(pivot, true);
     const size = bounds.getSize(new T.Vector3());
+    const paperHeight = bounds.min.y;
     const floor = new T.Group();
     // Soft concentric contact shadows also render in the SVG fallback.
     for (let step = 0; step < 7; step++) {
@@ -71,23 +82,39 @@ export default function KeepsakeViewer({
         }),
       );
       shadow.rotation.x = -Math.PI / 2;
-      const spread = 0.78 - step * 0.065;
-      shadow.scale.set(size.x * spread, size.z * spread, 1);
-      shadow.position.set(0.07, bounds.min.y - 0.018 + step * 0.0004, -0.055);
+      const spread = 0.63 - step * 0.05;
+      shadow.scale.set(spread, spread, 1);
+      shadow.position.y = step * 0.0004;
       floor.add(shadow);
     }
     scene.add(floor);
+    floor.position.set(0.07, paperHeight - 0.018, -0.055);
+    floor.scale.set(size.x, 1, size.z);
     const camera = new T.PerspectiveCamera(35, 1, 0.1, 60);
-    const initial = new T.Vector3(2.15, 5.6, 2.75).setLength(4.5);
-    camera.position.copy(initial);
-    const orbit = new OrbitControls(camera, element);
-    orbit.enablePan = false;
-    orbit.maxPolarAngle = Math.PI * 0.48;
-    orbit.minDistance = 2.2;
-    orbit.maxDistance = 8;
-    orbit.update();
-    orbit.saveState();
+    camera.position.set(-2.9, 5.6, 2.1).setLength(4.5);
+    camera.lookAt(0, 0, 0);
+    const paperNormal = new T.Vector3(0, 1, 0);
+    const screenRight = new T.Vector3(1, 0, 0).applyQuaternion(
+      camera.quaternion,
+    );
     const draw = () => renderer.render(scene, camera);
+    const updateHit = () => hit.setAttribute("d", hitSilhouette(pivot, camera));
+    const restOnPaper = () => {
+      groundKeepsake(pivot, paperHeight, bounds);
+      bounds.getSize(size);
+      floor.scale.set(size.x, 1, size.z);
+      draw();
+    };
+    const rotate = (yaw: number, tilt: number) => {
+      pivot.rotateOnWorldAxis(paperNormal, yaw);
+      pivot.rotateOnWorldAxis(screenRight, tilt);
+      restOnPaper();
+    };
+    reset.current = () => {
+      pivot.quaternion.identity();
+      restOnPaper();
+      updateHit();
+    };
     let firstFrame = true;
     const resize = () => {
       const w = parent.clientWidth,
@@ -97,41 +124,109 @@ export default function KeepsakeViewer({
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
         draw();
+        updateHit();
         if (firstFrame) {
           firstFrame = false;
           ready.current();
         }
       }
     };
-    const action = (move: Motion) => {
-      if (move === "reset") orbit.reset();
-      else {
-        const polar = new T.Spherical().setFromVector3(camera.position);
-        if (move === "left" || move === "right")
-          polar.theta += move === "right" ? Math.PI / 8 : -Math.PI / 8;
-        else
-          polar.radius = T.MathUtils.clamp(
-            polar.radius * (move === "in" ? 0.82 : 1.22),
-            2.2,
-            8,
-          );
-        camera.position.setFromSpherical(polar);
-        orbit.update();
-      }
-      draw();
+    // Only the visible mesh accepts a gesture. The transparent canvas and its
+    // contact shadow pass pointer, scroll and page-turn input through to the book.
+    const events = new AbortController();
+    const options = { signal: events.signal };
+    let drag: { id: number; x: number; y: number; moved: boolean } | undefined;
+    let suppressClick = false;
+    hit.addEventListener(
+      "pointerdown",
+      (e) => {
+        if (!e.isPrimary || e.button !== 0 || drag) return;
+        suppressClick = false;
+        drag = { id: e.pointerId, x: e.clientX, y: e.clientY, moved: false };
+        hit.focus({ preventScroll: true });
+        hit.setPointerCapture(e.pointerId);
+        hit.dataset.held = "";
+        e.stopPropagation();
+      },
+      options,
+    );
+    hit.addEventListener(
+      "pointermove",
+      (e) => {
+        if (!drag || drag.id !== e.pointerId) return;
+        const dx = e.clientX - drag.x;
+        const dy = e.clientY - drag.y;
+        if (!drag.moved && Math.hypot(dx, dy) < 4) return;
+        drag.moved = true;
+        drag.x = e.clientX;
+        drag.y = e.clientY;
+        const speed = Math.PI / Math.max(1, parent.clientHeight);
+        rotate(dx * speed, dy * speed);
+      },
+      options,
+    );
+    const finish = (e: PointerEvent) => {
+      if (!drag || drag.id !== e.pointerId) return;
+      suppressClick = drag.moved || e.type !== "pointerup";
+      if (drag.moved) updateHit();
+      drag = undefined;
+      delete hit.dataset.held;
+      if (hit.hasPointerCapture(e.pointerId))
+        hit.releasePointerCapture(e.pointerId);
     };
-    control.current = action;
-    orbit.addEventListener("change", draw);
+    hit.addEventListener("pointerup", finish, options);
+    hit.addEventListener("pointercancel", finish, options);
+    hit.addEventListener("lostpointercapture", finish, options);
+    hit.addEventListener(
+      "click",
+      (e) => {
+        if (!suppressClick || e.detail === 0) review.current();
+        suppressClick = false;
+      },
+      options,
+    );
+    hit.addEventListener(
+      "keydown",
+      (e) => {
+        const step = Math.PI / 12;
+        switch (e.key) {
+          case "ArrowLeft":
+            rotate(-step, 0);
+            break;
+          case "ArrowRight":
+            rotate(step, 0);
+            break;
+          case "ArrowUp":
+            rotate(0, -step);
+            break;
+          case "ArrowDown":
+            rotate(0, step);
+            break;
+          case "Home":
+            reset.current();
+            break;
+          case "Enter":
+          case " ":
+            review.current();
+            break;
+          default:
+            return;
+        }
+        if (e.key.startsWith("Arrow")) updateHit();
+        e.stopPropagation();
+        e.preventDefault();
+      },
+      options,
+    );
     const loss = () => setFailed(true);
     element.addEventListener("webglcontextlost", loss);
     const observer = new ResizeObserver(resize);
     observer.observe(parent);
     resize();
     return () => {
-      control.current = () => {};
+      reset.current = () => {};
+      events.abort();
       observer.disconnect();
-      orbit.removeEventListener("change", draw);
-      orbit.dispose();
       element.removeEventListener("webglcontextlost", loss);
       const materials = new Set<T.Material>();
       scene.traverse((part) => {
@@ -149,38 +244,39 @@ export default function KeepsakeViewer({
       element.remove();
     };
   }, [kind, color, aspect, variant, style]);
+  useEffect(() => {
+    if (resetVersion) reset.current();
+  }, [resetVersion]);
   return (
     <div className="object-viewer">
-      <div
-        ref={host}
-        className="object-stage"
-        role="img"
-        aria-label={"Miniatura facetada de " + LABELS[kind] + " sobre a página"}
-      />
+      <div className="object-stage">
+        <div ref={host} className="object-render" aria-hidden="true" />
+        <svg
+          className="object-picking"
+          viewBox="0 0 1000 1000"
+          preserveAspectRatio="none"
+        >
+          <path
+            ref={target}
+            className="object-hit"
+            fill="transparent"
+            tabIndex={0}
+            role="button"
+            data-opf-no-flip=""
+            aria-haspopup="dialog"
+            aria-label={
+              LABELS[kind] +
+              " em 3D. Use as setas para girar ou Enter para avaliar."
+            }
+          />
+        </svg>
+        <span className="object-rotate-hint" aria-hidden="true">
+          <Rotate3d size={18} />
+        </span>
+      </div>
       {failed && (
         <p role="alert">O visor perdeu a conexão gráfica. Reabra a prévia.</p>
       )}
-      <div className="object-tools" aria-label="Controles da miniatura">
-        {(
-          [
-            ["left", "Girar à esquerda", "↶"],
-            ["right", "Girar à direita", "↷"],
-            ["in", "Aproximar", "+"],
-            ["out", "Afastar", "−"],
-            ["reset", "Vista de cima", "⟲"],
-          ] as const
-        ).map(([key, label, icon]) => (
-          <button
-            type="button"
-            key={key}
-            title={label}
-            aria-label={label}
-            onClick={() => control.current(key)}
-          >
-            {icon}
-          </button>
-        ))}
-      </div>
     </div>
   );
 }

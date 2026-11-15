@@ -2,7 +2,6 @@
   margin: 1rem 0 2rem;
 }
 .object-entry,
-.object-tools,
 .shared-title,
 .shared-nav {
   display: flex;
@@ -11,8 +10,7 @@
   flex-wrap: wrap;
 }
 .object-link,
-.plain-object,
-.object-tools button {
+.plain-object {
   font: inherit;
   cursor: pointer;
 }
@@ -31,8 +29,7 @@
   font-size: 0.9rem;
   line-height: 1.35;
 }
-.object-link:hover,
-.object-tools button:hover {
+.object-link:hover {
   background: #e4eada;
 }
 .plain-object {
@@ -82,15 +79,57 @@
   width: 100%;
   aspect-ratio: 1.45;
   overflow: hidden;
-  touch-action: none;
   background: transparent;
 }
-.object-stage canvas,
-.object-stage svg {
+.object-render,
+.object-picking {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.object-render > canvas,
+.object-render > svg,
+.object-picking {
   display: block;
   width: 100%;
   height: 100%;
+}
+.object-picking {
   touch-action: none;
+}
+.object-hit {
+  pointer-events: fill;
+  touch-action: none;
+  cursor: grab;
+  -webkit-tap-highlight-color: transparent;
+}
+.object-hit[data-held] {
+  cursor: grabbing;
+}
+.object-hit:focus-visible {
+  outline: 2px dashed #537360;
+  outline-offset: 3px;
+}
+.object-rotate-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 3%;
+  transform: translateX(-50%);
+  color: #3f574b;
+  background: #fff8e5;
+  border-radius: 50%;
+  padding: 3px;
+  display: none;
+  pointer-events: none;
+}
+@media (hover: hover) {
+  .object-stage:has(.object-hit:hover:not([data-held])) .object-rotate-hint {
+    display: flex;
+  }
+}
+.object-stage:has(.object-hit:focus-visible:not([data-held]))
+  .object-rotate-hint {
+  display: flex;
 }
 .page-object {
   width: 100%;
@@ -143,7 +182,7 @@
   box-shadow: 1px 3px 8px #62564335;
   transform: rotate(-1.2deg);
 }
-.scrapbook-photo:has(.object-present) {
+.scrapbook-page .scrapbook-photo:has(.object-present) {
   background: transparent;
   border-color: transparent;
   box-shadow: none;
@@ -156,7 +195,7 @@
   position: relative;
   min-width: 0;
   isolation: isolate;
-  aspect-ratio: 1.24;
+  aspect-ratio: 1.45;
 }
 .object-caption {
   margin: 4px 0;
@@ -169,25 +208,14 @@
   justify-content: center;
   gap: 6px;
 }
-.object-review {
-  margin: 0.3rem 0 0.5rem;
-  text-align: center;
-  font:
-    normal 13px/1.4 var(--sans),
-    sans-serif;
-}
-.object-review summary {
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
-}
 .object-review label {
-  margin: 0.6rem auto;
-  max-width: 180px;
+  margin: 1rem 0;
 }
 .object-review .object-entry {
-  justify-content: center;
-  gap: 0.4rem;
+  margin-top: 0.8rem;
+}
+.page-object:has(.object-review[open]) > .object-error {
+  display: none;
 }
 .object-error {
   font-size: 0.88rem;
@@ -195,13 +223,6 @@
   color: #713e25;
   background: #fff0d9;
   padding: 0.5rem;
-}
-.object-tools {
-  gap: 0.35rem;
-}
-.object-tools button {
-  max-width: 15%;
-  min-width: 25px;
 }
 .photo-facets {
   position: absolute;
@@ -303,19 +324,6 @@
   .motion-waiting .object-viewer {
     opacity: 1;
   }
-}
-.object-tools {
-  justify-content: center;
-  padding: 0.5rem 0;
-}
-.object-tools button {
-  width: 40px;
-  height: 38px;
-  border: 1px solid #a7b09d;
-  border-radius: 8px;
-  background: #f8f8ef;
-  color: #34483d;
-  font-size: 1.1rem;
 }
 .shared-grid {
   display: grid;

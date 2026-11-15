@@ -4,7 +4,8 @@ import { addContribution, createInitialData } from "./model";
 import { parseStoredData } from "./storage";
 import { isKeepsake, KINDS, type Keepsake } from "./keepsake";
 import { buildKeepsake } from "./keepsake-meshes";
-import { Box3 } from "three";
+import { Box3, Group, Mesh, PerspectiveCamera, TorusGeometry } from "three";
+import { groundKeepsake, hitSilhouette } from "./keepsake-projection";
 
 const model: Keepsake = {
   version: 1,
@@ -59,4 +60,45 @@ test("the eight supported classes create bounded three-dimensional geometry", ()
   assert.equal(isKeepsake({ ...model, kind: "unknown" }), false);
   assert.equal(isKeepsake({ ...model, color: "invalid" }), false);
   assert.equal(isKeepsake({ ...model, aspect: Infinity }), false);
+});
+
+test("tilting a miniature keeps its lowest vertex on the paper at the same anchor", () => {
+  const bounds = new Box3();
+  for (const kind of KINDS) {
+    const pivot = new Group();
+    pivot.add(buildKeepsake({ ...model, kind }));
+    pivot.position.set(1.2, 0, -0.7);
+    const paperHeight = bounds.setFromObject(pivot, true).min.y;
+    for (const tilt of [0.3, Math.PI / 2, Math.PI, -0.8, 0]) {
+      pivot.rotation.set(tilt, tilt / 2, 0);
+      groundKeepsake(pivot, paperHeight, bounds);
+      assert.ok(
+        Math.abs(bounds.setFromObject(pivot, true).min.y - paperHeight) < 1e-6,
+      );
+      assert.equal(pivot.position.x, 1.2);
+      assert.equal(pivot.position.z, -0.7);
+    }
+  }
+});
+
+test("the pointer silhouette includes the rim and leaves its hole and the surrounding paper untouched", () => {
+  const ring = new Mesh(new TorusGeometry(1, 0.25, 12, 48));
+  const camera = new PerspectiveCamera(45, 1, 0.1, 10);
+  camera.position.z = 4;
+  const path = hitSilhouette(ring, camera);
+  const triangles = Array.from(
+    path.matchAll(/M(-?\d+) (-?\d+)L(-?\d+) (-?\d+) (-?\d+) (-?\d+)Z/g),
+    (match) => match.slice(1).map(Number),
+  );
+  function contains(x: number, y: number) {
+    return triangles.some(
+      ([ax, ay, bx, by, cx, cy]) =>
+        (bx - ax) * (y - ay) <= (by - ay) * (x - ax) &&
+        (cx - bx) * (y - by) <= (cy - by) * (x - bx) &&
+        (ax - cx) * (y - cy) <= (ay - cy) * (x - cx),
+    );
+  }
+  assert.equal(contains(800, 500), true);
+  assert.equal(contains(500, 500), false);
+  assert.equal(contains(50, 50), false);
 });
