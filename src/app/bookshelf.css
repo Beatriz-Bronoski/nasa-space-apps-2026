@@ -1,0 +1,347 @@
+/* Upright cloth albums resting on a continuous maple display ledge. */
+.album-grid {
+  --shelf-book-height: 248px;
+  --shelf-gap: 26px;
+  --shelf-top: #e0c7a3;
+  --shelf-face: #c8a77f;
+  --shelf-edge: #af8f69;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--shelf-gap);
+  row-gap: 38px;
+  padding: 10px 13px 0;
+  isolation: isolate;
+}
+.album-grid > .album-card {
+  position: relative;
+  min-width: 0;
+  display: grid;
+  grid-template-rows: var(--shelf-book-height) auto;
+  gap: 34px;
+  padding: 9px 0 0;
+  border-radius: 3px;
+  perspective: 1100px;
+  align-self: start;
+}
+.album-grid > .album-card::before,
+.album-grid > .album-card::after {
+  content: "";
+  position: absolute;
+  left: calc(var(--shelf-gap) / -2);
+  right: calc(var(--shelf-gap) / -2);
+  pointer-events: none;
+  z-index: -1;
+}
+.album-grid > .album-card::before {
+  top: calc(var(--shelf-book-height) + 4px);
+  height: 15px;
+  background: linear-gradient(180deg, #ecd8b7, var(--shelf-top) 80%, #ceb18a);
+  box-shadow: 0 -5px 11px #755c3120;
+  border-top: 1px solid #f4e3c766;
+}
+.album-grid > .album-card::after {
+  top: calc(var(--shelf-book-height) + 18px);
+  height: 16px;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 3px,
+      #8b68320b 4px,
+      transparent 5px 8px
+    ),
+    linear-gradient(180deg, #d0b18c, var(--shelf-face) 55%, var(--shelf-edge));
+  border-top: 1px solid #ae8d6438;
+  border-bottom: 1px solid #9d7d572e;
+  box-shadow:
+    0 9px 12px -5px #72573835,
+    inset 0 1px 0 #f4e3c74d;
+}
+.album-grid > .album-card:nth-child(4n + 1)::before {
+  border-radius: 5px 0 0 0;
+}
+.album-grid > .album-card:nth-child(4n)::before,
+.album-grid > .album-card:last-child::before {
+  border-radius: 0 5px 0 0;
+}
+.album-grid > .album-card:nth-child(4n + 1)::after {
+  border-radius: 0 0 0 4px;
+}
+.album-grid > .album-card:nth-child(4n)::after,
+.album-grid > .album-card:last-child::after {
+  border-radius: 0 0 4px 0;
+}
+.album-grid .album-book {
+  width: calc(100% - 13px);
+  max-width: 220px;
+  height: var(--shelf-book-height);
+  margin: 0 auto;
+  padding: 22px 20px 0 26px;
+  overflow: visible;
+  border-radius: 3px 7px 7px 3px;
+  transform: rotateY(-7deg);
+  transform-origin: center bottom;
+  box-shadow:
+    -3px 0 0 #bba781,
+    -6px 1px 0 #b29e7a,
+    8px 5px 10px #66543820,
+    inset -2px 0 0 #fff7,
+    inset 3px 0 5px #6b61461a;
+  transition:
+    transform 0.24s ease,
+    box-shadow 0.24s ease;
+}
+.album-grid .album-book::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  bottom: 2px;
+  right: -7px;
+  width: 7px;
+  border-radius: 0 4px 4px 0;
+  background: repeating-linear-gradient(90deg, #e3dcc9 0 1px, #f8efdc 1px 2px);
+  border-right: 1px solid #bfb195;
+  transform: skewY(-5deg);
+  transform-origin: left center;
+  z-index: -1;
+}
+.album-grid .album-book::after {
+  border-radius: inherit;
+}
+.album-grid .book-spine {
+  left: 9px;
+  width: 5px;
+  box-shadow: -3px 0 4px #66543812;
+}
+.album-grid .album-photo {
+  height: 157px;
+  transform: rotate(-2deg);
+  padding: 5px;
+}
+.album-grid .album-card:nth-child(even) .album-photo {
+  transform: rotate(1.5deg);
+}
+.album-grid .book-name {
+  font-size: 19px;
+  margin-top: 17px;
+}
+.album-grid .book-dots {
+  margin-top: 1px;
+}
+.album-grid .album-info {
+  position: relative;
+  padding: 0 1px;
+  text-align: center;
+}
+.album-grid .album-info h3 {
+  font-size: 12px;
+  line-height: 1.5;
+  min-height: 36px;
+  font-weight: 500;
+}
+.album-grid .album-meta {
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 5px;
+  font-size: 9px;
+}
+.album-grid .album-update {
+  justify-content: center;
+  font-size: 9px;
+  margin-top: 7px;
+}
+.album-grid .album-card:hover .album-book,
+.album-grid .album-card:focus-visible .album-book {
+  transform: translateY(-7px) rotateY(-3deg);
+  box-shadow:
+    -3px 0 0 #bba781,
+    -6px 1px 0 #b29e7a,
+    9px 10px 15px #66543825,
+    inset -2px 0 0 #fff7;
+}
+.album-grid .album-card:focus-visible {
+  outline-offset: 8px;
+}
+:root[data-theme="night"] .album-grid {
+  --shelf-top: #7a6b53;
+  --shelf-face: #65563f;
+  --shelf-edge: #4b4031;
+}
+:root[data-theme="night"] .album-grid > .album-card::before {
+  background: linear-gradient(180deg, #8a795b, var(--shelf-top) 80%, #66563f);
+  border-top-color: #b39a6d45;
+}
+:root[data-theme="night"] .album-grid > .album-card::after {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 3px,
+      #1c221b1a 4px,
+      transparent 5px 8px
+    ),
+    linear-gradient(180deg, #756249, var(--shelf-face) 55%, var(--shelf-edge));
+  box-shadow:
+    0 9px 12px -5px #0c191b66,
+    inset 0 1px 0 #b7a17b30;
+}
+@media (min-width: 1500px) {
+  .album-grid {
+    --shelf-book-height: 275px;
+    --shelf-gap: 32px;
+  }
+  .album-grid .album-photo {
+    height: 176px;
+  }
+  .album-grid .book-name {
+    font-size: 21px;
+    margin-top: 21px;
+  }
+  .album-grid .album-info h3 {
+    font-size: 14px;
+    min-height: 42px;
+  }
+  .album-grid .album-meta,
+  .album-grid .album-update {
+    font-size: 10px;
+  }
+}
+@media (max-width: 1200px) {
+  .album-grid {
+    --shelf-book-height: 226px;
+    --shelf-gap: 20px;
+    padding-inline: 10px;
+  }
+  .album-grid .album-book {
+    padding: 20px 15px 0 22px;
+  }
+  .album-grid .album-photo {
+    height: 139px;
+  }
+  .album-grid .book-name {
+    font-size: 18px;
+    margin-top: 15px;
+  }
+  .album-grid .album-info h3 {
+    font-size: 11px;
+    min-height: 33px;
+  }
+  .album-grid .album-meta,
+  .album-grid .album-update {
+    font-size: 8px;
+  }
+}
+@media (max-width: 760px) {
+  .album-grid {
+    --shelf-book-height: 262px;
+    --shelf-gap: 28px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-inline: 14px;
+    row-gap: 38px;
+  }
+  .album-grid > .album-card:nth-child(odd)::before {
+    border-radius: 5px 0 0 0;
+  }
+  .album-grid > .album-card:nth-child(even)::before {
+    border-radius: 0 5px 0 0;
+  }
+  .album-grid > .album-card:nth-child(odd)::after {
+    border-radius: 0 0 0 4px;
+  }
+  .album-grid > .album-card:nth-child(even)::after {
+    border-radius: 0 0 4px 0;
+  }
+  .album-grid .album-book {
+    padding: 22px 20px 0 25px;
+  }
+  .album-grid .album-photo {
+    height: 169px;
+  }
+  .album-grid .book-name {
+    font-size: 20px;
+    margin-top: 18px;
+  }
+  .album-grid .album-info h3 {
+    font-size: 12px;
+    min-height: 36px;
+  }
+  .album-grid .album-meta,
+  .album-grid .album-update {
+    font-size: 9px;
+  }
+}
+@media (max-width: 520px) {
+  .album-grid {
+    --shelf-book-height: 215px;
+    --shelf-gap: 21px;
+    padding: 9px 10.5px 0;
+    row-gap: 30px;
+  }
+  .album-grid > .album-card {
+    gap: 31px;
+  }
+  .album-grid .album-book {
+    width: calc(100% - 7px);
+    padding: 18px 12px 0 19px;
+  }
+  .album-grid .album-photo {
+    height: 131px;
+    padding: 4px;
+  }
+  .album-grid .book-name {
+    font-size: 17px;
+    margin-top: 15px;
+    gap: 5px;
+  }
+  .album-grid .book-name svg {
+    width: 10px;
+  }
+  .album-grid .book-dots {
+    font-size: 9px;
+  }
+  .album-grid .album-info h3 {
+    font-size: 10px;
+    min-height: 30px;
+  }
+  .album-grid .album-meta {
+    font-size: 7.5px;
+    gap: 4px;
+  }
+  .album-grid .album-update {
+    font-size: 7.5px;
+    margin-top: 6px;
+  }
+  .album-grid .album-update svg {
+    width: 10px;
+  }
+}
+@media (max-width: 360px) {
+  .album-grid {
+    --shelf-book-height: 194px;
+    --shelf-gap: 18px;
+    padding-inline: 9px;
+  }
+  .album-grid .album-book {
+    padding: 17px 10px 0 18px;
+  }
+  .album-grid .album-photo {
+    height: 114px;
+  }
+  .album-grid .book-name {
+    font-size: 16px;
+    margin-top: 13px;
+  }
+  .album-grid .album-info h3 {
+    font-size: 9px;
+  }
+  .album-grid .album-meta,
+  .album-grid .album-update {
+    font-size: 7px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .album-grid .album-book {
+    transition: none;
+  }
+  .album-grid .album-card:hover .album-book {
+    transform: rotateY(-7deg);
+  }
+}

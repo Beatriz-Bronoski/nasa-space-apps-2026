@@ -50,6 +50,7 @@ import {
 } from "@/lib/model";
 import { STORAGE_KEY, compressPhoto, parseStoredData } from "@/lib/storage";
 import AlbumBook from "@/components/AlbumBook";
+import "./bookshelf.css";
 
 type View = "albums" | "story" | "compose" | "checkin" | "replies";
 type Dialog = "connection" | "help" | "about" | "choose" | null;
@@ -626,11 +627,6 @@ export default function Home() {
                         </div>
                         <div className="album-info">
                           <h3>{a.title}</h3>
-                          <span>
-                            {profile === "alex"
-                              ? p.role
-                              : "With Alex · Astronaut"}
-                          </span>
                           <div className="album-meta">
                             {pages.length}{" "}
                             {pages.length === 1 ? "page" : "pages"}
@@ -1265,7 +1261,7 @@ export default function Home() {
           >
             {PEOPLE.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name} · {p.role}
+                {p.name}
               </option>
             ))}
           </select>

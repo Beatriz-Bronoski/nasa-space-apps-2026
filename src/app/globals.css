@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #f8f6f0;
-  --sidebar: #f0eee5;
-  --surface: #fffdf8;
-  --surface-2: #eeeee4;
+  --bg: #f2e7d4;
+  --sidebar: #eaddc5;
+  --surface: #f8eedc;
+  --surface-2: #eadcc2;
   --text: #354a53;
-  --muted: #596763;
+  --muted: #53615b;
   --sage: #52694e;
   --sage-hover: #435b40;
   --sage-light: #e7ecdf;
-  --line: #deded1;
-  --amber: #896138;
-  --amber-light: #f3e9d5;
+  --line: #d4c4a9;
+  --amber: #80572e;
+  --amber-light: #eee0c4;
   --terra: #93634c;
   --blue-light: #e2e9e9;
   --shadow: 0 8px 25px #555b4310;
@@ -458,7 +458,7 @@ h1 em {
   margin-right: 20px;
 }
 .polaroid {
-  background: #fffef8;
+  background: #fbf0d9;
   padding: 10px 10px 30px;
   box-shadow: 0 4px 14px #3b493717;
   width: 158px;
@@ -640,7 +640,7 @@ h1 em {
   background: #fff1;
 }
 .album-photo {
-  background: #fffcf2;
+  background: #fbf2df;
   padding: 5px;
   box-shadow: 0 1px 6px #5a553528;
   position: relative;
@@ -659,7 +659,7 @@ h1 em {
   position: absolute;
   width: 12px;
   height: 12px;
-  border: 3px solid #fffcf2;
+  border: 3px solid #fbf2df;
   box-shadow: 0 1px 2px #5552;
 }
 .photo-corner.tl {
