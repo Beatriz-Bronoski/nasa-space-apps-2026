@@ -8,7 +8,13 @@ import {
   type CSSProperties,
 } from "react";
 import { Heart } from "lucide-react";
-import type { Album } from "@/lib/model";
+import type { Album, Contribution } from "@/lib/model";
+import {
+  estimateOpeningTarget,
+  type OpeningTarget,
+} from "@/lib/opening-geometry";
+import AlbumLeaf from "./AlbumLeaf";
+import AlbumNameplate from "./AlbumNameplate";
 import "./album-opening.css";
 
 export type AlbumOpeningOrigin = {
@@ -22,28 +28,36 @@ type Props = {
   album: Album;
   personName: string;
   origin: AlbumOpeningOrigin;
+  pages: Contribution[];
+  totalPages: number;
+  profileId: string;
+  target: OpeningTarget | null;
+  onPrepare: () => void;
+  readerReady: boolean;
   onComplete: () => void;
 };
 
-function stageGeometry(origin: AlbumOpeningOrigin): CSSProperties {
-  const viewport =
-    typeof window === "undefined" ? 1280 : document.documentElement.clientWidth;
-  const portrait = viewport < 686;
-  const caseWidth = Math.min(940, viewport - (viewport <= 520 ? 36 : 96));
-  const pageWidth = Math.max(
-    220,
-    Math.min(440, portrait ? caseWidth - 20 : (caseWidth - 26) / 2),
-  );
-  const pageHeight = pageWidth * 1.35;
+function stageGeometry(
+  origin: AlbumOpeningOrigin,
+  target: OpeningTarget,
+): CSSProperties {
   return {
-    "--opening-width": `${pageWidth}px`,
-    "--opening-height": `${pageHeight}px`,
+    "--opening-width": `${target.width}px`,
+    "--opening-height": `${target.height}px`,
     "--opening-from-x": `${origin.left}px`,
     "--opening-from-y": `${origin.top}px`,
-    "--opening-scale-x": Math.max(1, origin.width) / pageWidth,
-    "--opening-scale-y": Math.max(1, origin.height) / pageHeight,
-    "--opening-to-x": `${portrait ? (viewport - pageWidth) / 2 : viewport / 2}px`,
-    "--opening-to-y": `${viewport <= 520 ? 56 : 76}px`,
+    "--opening-scale-x": Math.max(1, origin.width) / target.width,
+    "--opening-scale-y": Math.max(1, origin.height) / target.height,
+    "--opening-to-x": `${target.x}px`,
+    "--opening-to-y": `${target.y}px`,
+    "--opening-case-left": `${target.case.left - target.x}px`,
+    "--opening-case-top": `${target.case.top - target.y}px`,
+    "--opening-case-width": `${target.case.width}px`,
+    "--opening-case-height": `${target.case.height}px`,
+    "--opening-case-cut": `${target.portrait ? 0 : target.x - target.case.left}px`,
+    "--opening-spread-left": `${target.portrait ? 0 : -target.width}px`,
+    "--opening-spread-width": `${target.width * (target.portrait ? 1 : 2)}px`,
+    "--opening-right-left": `${target.portrait ? 0 : target.width}px`,
   } as CSSProperties;
 }
 
@@ -52,13 +66,48 @@ export default function AlbumOpening({
   album,
   personName,
   origin,
+  pages,
+  totalPages,
+  profileId,
+  target,
+  onPrepare,
+  readerReady,
   onComplete,
 }: Props) {
   const callback = useRef(onComplete);
   callback.current = onComplete;
+  const prepareCallback = useRef(onPrepare);
+  prepareCallback.current = onPrepare;
+  const prepared = useRef(false);
   const completed = useRef(false);
   const skipButton = useRef<HTMLButtonElement>(null);
-  const [geometry] = useState(() => stageGeometry(origin));
+  const [estimatedTarget] = useState(() =>
+    estimateOpeningTarget(
+      document.body.clientWidth || document.documentElement.clientWidth,
+      window.innerHeight,
+    ),
+  );
+  const destination = target ?? estimatedTarget;
+  const geometry = stageGeometry(origin, destination);
+  const rightIndex = destination.portrait ? 0 : 1;
+  const rightPage = pages[rightIndex];
+  const [animationDone, setAnimationDone] = useState(false);
+  const [bypassed, setBypassed] = useState(false);
+  const [revealing, setRevealing] = useState(false);
+
+  const prepare = useCallback(() => {
+    if (prepared.current) return;
+    prepared.current = true;
+    prepareCallback.current();
+  }, []);
+  const finishAnimation = useCallback(() => {
+    prepare();
+    setAnimationDone(true);
+  }, [prepare]);
+  const skip = useCallback(() => {
+    setBypassed(true);
+    finishAnimation();
+  }, [finishAnimation]);
 
   const complete = useCallback(() => {
     if (completed.current) return;
@@ -67,10 +116,17 @@ export default function AlbumOpening({
   }, []);
 
   useEffect(() => {
+    if (!animationDone || !readerReady) return;
+    setRevealing(true);
+    // The mounted book is already painted; only the lightweight overlay fades.
+    const fade = window.setTimeout(complete, 170);
+    return () => window.clearTimeout(fade);
+  }, [animationDone, readerReady, complete]);
+
+  useEffect(() => {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (preference.matches) {
-      complete();
-      return;
+      skip();
     }
     const previousOverflow = document.body.style.overflow;
     const previousGutter = document.documentElement.style.scrollbarGutter;
@@ -81,7 +137,7 @@ export default function AlbumOpening({
       if (event.key === "Escape") {
         event.preventDefault();
         event.stopPropagation();
-        complete();
+        skip();
       }
       if (event.key === "Tab") {
         event.preventDefault();
@@ -89,28 +145,37 @@ export default function AlbumOpening({
       }
     };
     const reducedMotion = () => {
-      if (preference.matches) complete();
+      if (preference.matches) skip();
     };
     // A changed viewport invalidates the captured shelf position: finish safely.
-    window.addEventListener("resize", complete);
+    window.addEventListener("resize", skip);
     window.addEventListener("keydown", key, true);
     preference.addEventListener("change", reducedMotion);
     // Covers CSS animation cancellation, background-tab throttling and slow frames.
-    const fallback = window.setTimeout(complete, 2100);
+    // The backdrop is opaque before the normal reader replaces the shelf.
+    // Build the real reader at its final size while the cover is still opening.
+    const warmup = window.setTimeout(prepare, 780);
+    const fallback = window.setTimeout(finishAnimation, 2250);
+    const safety = window.setTimeout(() => {
+      prepare();
+      complete();
+    }, 7000);
     return () => {
+      window.clearTimeout(warmup);
       window.clearTimeout(fallback);
+      window.clearTimeout(safety);
       document.body.style.overflow = previousOverflow;
       document.documentElement.style.scrollbarGutter = previousGutter;
-      window.removeEventListener("resize", complete);
+      window.removeEventListener("resize", skip);
       window.removeEventListener("keydown", key, true);
       preference.removeEventListener("change", reducedMotion);
     };
-  }, [complete]);
+  }, [complete, prepare, finishAnimation, skip]);
 
   const photo = album.cover.replace(/\.svg$/, ".jpg");
   return (
     <div
-      className={`album-opening opening-${album.accent}`}
+      className={`album-opening opening-${album.accent}${bypassed ? " opening-bypassed" : ""}${revealing ? " opening-revealing" : ""}`}
       style={geometry}
       role="dialog"
       aria-modal="true"
@@ -121,38 +186,38 @@ export default function AlbumOpening({
         Opening {personName}’s album.
       </span>
       <div
-        className="opening-flight"
+        className={`opening-flight album-reader ${destination.portrait ? "opening-portrait" : "opening-spread-mode"}`}
         aria-hidden="true"
         onAnimationEnd={(event) => {
           if (
             event.target === event.currentTarget &&
             event.animationName === "album-lift-and-open"
           )
-            complete();
+            finishAnimation();
         }}
       >
-        <div className="opening-page-block" />
-        <div className="opening-paper opening-right-paper">
-          <span className="opening-paper-caption">{album.title}</span>
-          <div className="opening-memory">
-            <img src={photo} alt="" draggable={false} />
+        <div
+          className={`book-case book-case-${album.accent} opening-reader-case`}
+        >
+          <div className="book-ground-shadow" />
+          <div className="book-page-edges" />
+          <div className="opening-spread">
+            {rightPage && (
+              <div className="album-leaf opf-page--right opening-stationary-leaf">
+                <AlbumLeaf
+                  page={rightPage}
+                  pageIndex={rightIndex}
+                  profileId={profileId}
+                  presentation
+                  navigation={{ showNext: rightIndex < totalPages - 1 }}
+                />
+              </div>
+            )}
           </div>
-          <div className="opening-paper-lines">
-            <i />
-            <i />
-            <i />
-          </div>
-          <span className="opening-paper-number">02</span>
+          {!destination.portrait && <div className="book-binding" />}
         </div>
-        <div className="opening-left-paper">
-          <span className="opening-paper-caption">{personName}</span>
-          <div className="opening-paper-lines">
-            <i />
-            <i />
-            <i />
-          </div>
-          <span className="opening-keepsake">♡</span>
-          <span className="opening-paper-number">01</span>
+        <div className="opening-nameplate-anchor">
+          <AlbumNameplate album={album} presentation />
         </div>
         <div className="opening-hardcover">
           <div className="opening-cover-face opening-cover-front">
@@ -167,16 +232,24 @@ export default function AlbumOpening({
             <span className="opening-cover-dots">· · ·</span>
           </div>
           <div className="opening-cover-face opening-cover-back">
-            <span className="opening-cover-inscription">{album.title}</span>
+            <div className="album-leaf opf-page--left opening-turning-leaf">
+              {!destination.portrait && pages[0] && (
+                <AlbumLeaf
+                  page={pages[0]}
+                  pageIndex={0}
+                  profileId={profileId}
+                  presentation
+                />
+              )}
+            </div>
           </div>
         </div>
-        <span className="opening-center-shadow" />
       </div>
       <button
         ref={skipButton}
         className="opening-skip"
         type="button"
-        onClick={complete}
+        onClick={skip}
       >
         Skip animation
       </button>

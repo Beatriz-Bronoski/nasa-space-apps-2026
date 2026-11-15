@@ -22,7 +22,7 @@ import "./scrapbook-editor.css";
 
 const freshDesign = (): PageDesign => ({
   layout: "classic",
-  tape: "midnight",
+  tape: "linen",
   photoTilt: -2,
   stickers: [],
 });
@@ -40,6 +40,7 @@ type Drag = {
 };
 type Props = {
   draft: Draft;
+  authorId?: string;
   onChange: (changes: Partial<Draft>) => void;
   onChoosePhoto: () => void;
   photoBusy: boolean;
@@ -48,6 +49,7 @@ type Props = {
 
 export default function ScrapbookEditor({
   draft,
+  authorId = "alex",
   onChange,
   onChoosePhoto,
   photoBusy,
@@ -475,6 +477,7 @@ export default function ScrapbookEditor({
         </div>
         <div className="scrapbook-preview" ref={paperRef}>
           <ScrapbookPage
+            voice={authorId === "alex" ? "space" : "earth"}
             title={draft.title || "A little moment"}
             text={draft.text || "Your words belong here."}
             photo={draft.photo}

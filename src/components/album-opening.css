@@ -1,13 +1,25 @@
 .album-opening {
   --opening-cloth: var(--cover-ochre);
-  --opening-paper: #f8eed9;
-  --opening-paper-shade: #ecdfc4;
   position: fixed;
   inset: 0;
   z-index: 120;
   overflow: hidden;
   perspective: 2200px;
   isolation: isolate;
+  opacity: 1;
+  transition: opacity 160ms ease-out;
+  will-change: opacity;
+}
+.album-opening.opening-revealing {
+  opacity: 0;
+  pointer-events: none;
+}
+.opening-bypassed .opening-flight {
+  visibility: hidden;
+}
+.opening-bypassed .opening-backdrop {
+  animation: none;
+  opacity: 1;
 }
 .opening-sage {
   --opening-cloth: var(--cover-olive);
@@ -21,124 +33,68 @@
 .opening-backdrop {
   position: absolute;
   inset: 0;
-  background: var(--bg);
   opacity: 0;
-  animation: album-shelf-recedes 1780ms linear both;
+  animation: album-shelf-recedes 1900ms linear both;
 }
-.opening-flight {
+.album-opening .opening-flight {
   position: fixed;
   top: 0;
   left: 0;
   width: var(--opening-width);
   height: var(--opening-height);
+  max-width: none;
+  margin: 0;
+  padding: 0;
   transform-origin: 0 0;
   transform-style: preserve-3d;
   will-change: transform;
-  animation: album-lift-and-open 1780ms cubic-bezier(0.22, 0.75, 0.24, 1) both;
+  pointer-events: none;
+  animation: album-lift-and-open 1900ms cubic-bezier(0.22, 0.72, 0.18, 1) both;
 }
-.opening-page-block {
+.opening-flight .opening-reader-case {
   position: absolute;
-  inset: 3px -7px -3px 3px;
-  background: repeating-linear-gradient(
-    90deg,
-    #e1d7bf 0 1px,
-    var(--opening-paper) 1px 3px
-  );
-  border: 3px solid var(--opening-cloth);
-  border-radius: 3px 8px 8px 3px;
-  box-shadow: 9px 18px 30px #35453430;
-  transform: translateZ(-8px);
+  z-index: 0;
+  left: var(--opening-case-left);
+  top: var(--opening-case-top);
+  width: var(--opening-case-width);
+  height: var(--opening-case-height);
+  animation: album-base-unfolds 1900ms ease both;
 }
-.opening-paper,
-.opening-left-paper {
+.opening-flight .opening-spread {
   position: absolute;
-  inset: 4px 2px 3px 3px;
-  padding: 9% 8% 7%;
-  background: linear-gradient(
-    90deg,
-    var(--opening-paper-shade),
-    var(--opening-paper) 14%
-  );
-  color: var(--text);
-  border: 1px solid #bdb19440;
-  border-radius: 2px 5px 5px 2px;
+  left: calc(var(--opening-spread-left) - var(--opening-case-left) - 1px);
+  top: calc(0px - var(--opening-case-top) - 1px);
+  width: var(--opening-spread-width);
+  height: var(--opening-height);
+  z-index: 2;
   overflow: hidden;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--paper-wash), var(--paper-wash)),
+    url("/textures/aged-paper.jpg");
+  background-size:
+    auto,
+    640px 640px;
+  border-radius: 2px 4px 6px 2px;
+  box-shadow:
+    3px 8px 8px -3px #4e382a73,
+    -1px -1px 1px #fff6;
 }
-.opening-right-paper {
-  transform: translateZ(-1px);
-}
-.opening-paper-caption {
-  display: block;
-  font-family: var(--serif);
-  font-size: clamp(18px, calc(var(--opening-width) * 0.055), 26px);
-  line-height: 1.5;
-  margin-bottom: 9%;
-}
-.opening-memory {
-  padding: 2%;
-  margin: 4% 0 9%;
-  height: 42%;
-  background: #fbf2df;
-  box-shadow: 0 2px 9px #66543820;
-  transform: rotate(1.5deg);
-}
-.opening-memory img,
-.opening-cover-photo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.opening-paper-lines {
-  display: grid;
-  gap: 11px;
-  margin-top: 8%;
-}
-.opening-paper-lines i {
-  display: block;
-  width: 100%;
-  height: 1px;
-  background: #b7aa8c45;
-}
-.opening-paper-lines i:last-child {
-  width: 62%;
-}
-.opening-paper-number {
+.opening-flight .opening-stationary-leaf {
   position: absolute;
-  bottom: 3%;
-  left: 50%;
-  font-family: var(--serif);
-  font-size: 10px;
-  color: var(--muted);
-}
-.opening-left-paper {
-  left: -100%;
-  right: 100%;
-  background: linear-gradient(
-    90deg,
-    var(--opening-paper) 85%,
-    var(--opening-paper-shade)
-  );
-  border: 4px solid var(--opening-cloth);
-  transform-origin: right center;
-  animation: album-left-leaf-unfolds 1780ms ease both;
-}
-.opening-left-paper .opening-paper-lines {
-  margin-top: 35%;
-}
-.opening-keepsake {
-  display: block;
-  margin-top: 35%;
-  text-align: center;
-  color: var(--terra);
-  font: 35px var(--serif);
+  top: 0;
+  left: var(--opening-right-left);
+  width: var(--opening-width);
+  height: var(--opening-height);
 }
 .opening-hardcover {
   position: absolute;
+  z-index: 5;
   inset: 0;
   transform-origin: left center;
   transform-style: preserve-3d;
   will-change: transform;
-  animation: album-hardcover-opens 1780ms cubic-bezier(0.3, 0.05, 0.22, 1) both;
+  animation: album-hardcover-opens 1900ms cubic-bezier(0.25, 0.1, 0.2, 1) both;
 }
 .opening-cover-face {
   position: absolute;
@@ -207,36 +163,28 @@
   letter-spacing: 0.3em;
   opacity: 0.8;
 }
-.opening-cover-back {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 18%;
-  border: 8px solid var(--opening-cloth);
-  background: linear-gradient(
-    90deg,
-    var(--opening-paper),
-    var(--opening-paper-shade)
-  );
-  color: var(--muted);
-  box-shadow: inset -8px 0 14px #5a483219;
-  transform: rotateY(180deg) translateZ(3px);
+
+.album-opening .opening-hardcover .opening-cover-back {
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: 1px 3px 4px 1px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--book-ink);
+  transform: rotateY(180deg);
 }
-.opening-cover-inscription {
-  font: italic 19px/1.8 var(--serif);
-  text-align: center;
-  opacity: 0.75;
+.opening-turning-leaf {
+  width: 100%;
+  height: 100%;
 }
-.opening-center-shadow {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -9px;
-  width: 18px;
-  background: linear-gradient(90deg, transparent, #66543838, transparent);
-  pointer-events: none;
-  opacity: 0;
-  animation: album-spine-shadows 1780ms ease both;
+.opening-portrait .opening-turning-leaf {
+  background-color: var(--paper);
+}
+.opening-cover-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .opening-skip {
   position: fixed;
@@ -254,7 +202,7 @@
     transform: translate3d(var(--opening-from-x), var(--opening-from-y), 0)
       scale(var(--opening-scale-x), var(--opening-scale-y)) rotateY(-7deg);
   }
-  15% {
+  16% {
     transform: translate3d(
         var(--opening-from-x),
         calc(var(--opening-from-y) - 29px),
@@ -266,15 +214,22 @@
       )
       rotateY(-15deg) rotateX(3deg);
   }
-  46% {
+  45% {
     transform: translate3d(
         var(--opening-to-x),
         calc(var(--opening-to-y) - 10px),
-        35px
+        28px
       )
       scale(1) rotateY(-3deg) rotateX(2deg);
   }
-  62%,
+  72% {
+    transform: translate3d(
+        var(--opening-to-x),
+        calc(var(--opening-to-y) - 2px),
+        0
+      )
+      scale(1) rotateY(0deg) rotateX(0.4deg);
+  }
   100% {
     transform: translate3d(var(--opening-to-x), var(--opening-to-y), 0) scale(1)
       rotateY(0deg) rotateX(0deg);
@@ -285,55 +240,46 @@
   18% {
     opacity: 0;
   }
-  43%,
+  38%,
   100% {
     opacity: 1;
   }
 }
 @keyframes album-hardcover-opens {
   0%,
-  46% {
+  42% {
     transform: rotateY(0deg);
   }
   54% {
-    transform: rotateY(-14deg);
+    transform: rotateY(-32deg);
   }
-  91%,
+  70% {
+    transform: rotateY(-118deg);
+  }
+  86% {
+    transform: rotateY(-169deg);
+  }
   100% {
-    transform: rotateY(-172deg);
+    transform: rotateY(-180deg);
   }
 }
-@keyframes album-left-leaf-unfolds {
+@keyframes album-base-unfolds {
   0%,
-  57% {
+  34% {
     opacity: 0;
-    transform: rotateY(88deg);
+    clip-path: inset(-60px -80px -80px var(--opening-case-cut));
   }
-  82%,
-  100% {
-    opacity: 1;
-    transform: rotateY(0deg);
-  }
-}
-@keyframes album-spine-shadows {
-  0%,
   48% {
-    opacity: 0;
+    opacity: 1;
+    clip-path: inset(-60px -80px -80px var(--opening-case-cut));
   }
-  72%,
+  86%,
   100% {
     opacity: 1;
+    clip-path: inset(-60px -80px -80px -80px);
   }
-}
-
-:root[data-theme="night"] .album-opening {
-  --opening-paper: #283c4e;
-  --opening-paper-shade: #203141;
 }
 @media (max-width: 685px) {
-  .opening-left-paper {
-    display: none;
-  }
   .opening-skip {
     right: 16px;
     bottom: 18px;
@@ -343,5 +289,28 @@
   .album-opening,
   .album-opening * {
     animation: none !important;
+    transition: none !important;
+  }
+}
+
+.opening-nameplate-anchor {
+  --book-cloth: var(--opening-cloth);
+  position: absolute;
+  left: calc(var(--opening-case-left) + 1px);
+  top: calc(var(--opening-case-top) + 1px);
+  width: calc(var(--opening-case-width) - 2px);
+  height: calc(var(--opening-case-height) - 2px);
+  pointer-events: none;
+  z-index: 8;
+  animation: album-label-reveals 1900ms ease both;
+}
+@keyframes album-label-reveals {
+  0%,
+  68% {
+    opacity: 0;
+  }
+  90%,
+  100% {
+    opacity: 1;
   }
 }

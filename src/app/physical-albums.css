@@ -1,0 +1,377 @@
+/* Shared materials keep the shelf, flying cover, and open book in the same world. */
+:root {
+  --typewriter: "Courier New", Courier, monospace;
+  --cover-ochre: #64663c;
+  --cloth-texture: url("/textures/cloth-weave.svg");
+  --desk-image:
+    linear-gradient(125deg, #d7b79be0, #d6bda5de 76%),
+    url("/textures/aged-paper.jpg");
+}
+:root[data-theme="night"] {
+  --desk-image:
+    linear-gradient(125deg, #23384be8, #192d40ed),
+    url("/textures/aged-paper.jpg");
+}
+.app-shell.immersive-reader {
+  position: relative;
+  isolation: isolate;
+  background: none;
+  min-height: 100dvh;
+}
+.app-shell.immersive-reader::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--desk-image) center top / cover #d7bba1;
+}
+.album-opening .opening-backdrop {
+  background: var(--desk-image) center top / cover #d7bba1;
+}
+.album-opening .opening-cover-front {
+  background-image:
+    linear-gradient(130deg, #f7e6be2b, transparent 50%, #23332335),
+    var(--cloth-texture);
+  background-size:
+    auto,
+    24px 24px;
+  box-shadow:
+    inset -3px 0 0 #fff3,
+    inset 4px 0 7px #26354445,
+    6px 12px 20px #36250f38;
+}
+.album-opening .opening-cover-front::after {
+  inset: 8px;
+  background: none;
+  border: 1px dashed #ead5ab99;
+  border-left: 0;
+  opacity: 0.85;
+}
+.album-opening .opening-cover-spine {
+  width: 3%;
+  border-left: 1px dashed #edd6aab0;
+  border-right: 1px solid #25312860;
+  background: linear-gradient(90deg, #21302835, #f4e0b024, #26362b38);
+}
+.album-opening .opening-cover-name {
+  font-family: var(--hand-title);
+  font-weight: 600;
+  font-style: normal;
+}
+.album-opening .opening-cover-name {
+  font-size: clamp(29px, calc(var(--opening-width) * 0.105), 46px);
+}
+.album-opening .opening-cover-photo {
+  position: relative;
+  background: #fbf5e8;
+  box-shadow: 4px 7px 10px #30261740;
+}
+.album-opening .opening-skip {
+  box-shadow: 3px 5px 10px #35200d33;
+}
+.immersive-reader .workspace {
+  background: transparent;
+}
+.immersive-reader .main-content {
+  width: 100%;
+  max-width: none;
+  padding: 0 40px 12px;
+}
+.reader-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 46px;
+  gap: 16px;
+  color: #454b2e;
+  font-family: var(--typewriter);
+}
+.immersive-reader .reader-topbar .back-button {
+  margin: 0;
+  padding: 4px 5px;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  border-radius: 3px;
+  color: inherit;
+  font-family: var(--typewriter);
+  font-weight: 700;
+  font-size: 17px;
+  gap: 9px;
+}
+.reader-signature {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
+  padding-right: 5px;
+}
+.immersive-reader .book-journey {
+  border-top: 0;
+  color: var(--text);
+}
+.immersive-reader .book-journey summary {
+  padding: 7px 11px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  box-shadow: 2px 4px 8px #35200d22;
+}
+.immersive-reader .book-journey[open] {
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.immersive-reader .book-journey[open] summary {
+  box-shadow: none;
+}
+.immersive-reader .book-reply-button {
+  box-shadow: 2px 4px 8px #35200d20;
+}
+.immersive-reader .book-end-action .primary-button {
+  box-shadow: 4px 6px 12px #2e230d42;
+}
+.book-case .album-flipbook,
+.book-case .opening-spread {
+  clip-path: polygon(
+    0.15% 0.2%,
+    7% 0,
+    15% 0.17%,
+    24% 0.05%,
+    34% 0.2%,
+    43% 0,
+    54% 0.15%,
+    66% 0,
+    75% 0.2%,
+    85% 0.04%,
+    94% 0.16%,
+    99.8% 0.1%,
+    100% 12%,
+    99.8% 24%,
+    100% 38%,
+    99.8% 51%,
+    100% 67%,
+    99.85% 81%,
+    99.95% 92%,
+    99.7% 99.8%,
+    90% 100%,
+    80% 99.8%,
+    68% 100%,
+    58% 99.85%,
+    46% 100%,
+    35% 99.8%,
+    24% 100%,
+    14% 99.8%,
+    5% 100%,
+    0.15% 99.8%,
+    0 88%,
+    0.2% 76%,
+    0 63%,
+    0.18% 49%,
+    0 35%,
+    0.2% 21%,
+    0 9%
+  );
+}
+
+.album-grid .album-card .album-book {
+  background-image:
+    linear-gradient(130deg, #f9e8c222, transparent 52%, #27302028),
+    var(--cloth-texture);
+  background-size:
+    auto,
+    24px 24px;
+  border-color: color-mix(in srgb, var(--album-cover) 70%, #3d3024);
+  border-radius: 4px 8px 9px 4px;
+  overflow: visible;
+  box-shadow:
+    -3px 0 0 var(--album-spine),
+    -6px 1px 0 var(--album-spine),
+    0 2px 4px #3a302334,
+    4px 7px 0 -2px color-mix(in srgb, var(--album-cover) 75%, #34352b),
+    5px 11px 11px -5px #3a30234d,
+    0 0 15px #5a453318,
+    inset 3px 0 5px #f6e6b91c,
+    inset -2px 0 2px #2b332b40;
+}
+.album-grid .album-card .album-book::before,
+.album-opening .opening-cover-front::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0 -6px -7px 0;
+  width: auto;
+  border: 0;
+  transform: none;
+  pointer-events: none;
+  border-radius: 4px 9px 9px 4px;
+  background:
+    repeating-linear-gradient(
+        90deg,
+        #e8dab9 0 1px,
+        #b19a70 1px 2px,
+        #f5e8c9 2px 3px
+      )
+      right top / 7px 100% no-repeat,
+    repeating-linear-gradient(
+        0deg,
+        #e8dab9 0 1px,
+        #b19a70 1px 2px,
+        #f5e8c9 2px 3px
+      )
+      left bottom / 100% 8px no-repeat,
+    #b6a17e;
+  clip-path: polygon(
+    calc(100% - 8px) 5px,
+    100% 8px,
+    100% 100%,
+    6px 100%,
+    3px calc(100% - 9px),
+    calc(100% - 8px) calc(100% - 9px)
+  );
+}
+.album-grid .album-card:hover .album-book,
+.album-grid .album-card:focus-visible .album-book {
+  box-shadow:
+    -3px 0 0 var(--album-spine),
+    -6px 1px 0 var(--album-spine),
+    0 3px 5px #3a302334,
+    4px 7px 0 -2px color-mix(in srgb, var(--album-cover) 75%, #34352b),
+    7px 17px 18px -7px #3a302357,
+    0 0 16px #5a45331c,
+    inset 3px 0 5px #f6e6b91c,
+    inset -2px 0 2px #2b332b40;
+}
+.album-grid .album-card .album-book::after {
+  inset: 6px;
+  opacity: 0.7;
+  background: none;
+  border: 1px dashed #e8d4a776;
+  border-left: 0;
+  border-radius: 2px 5px 6px 2px;
+}
+.album-grid .album-card .book-spine {
+  left: 8px;
+  width: 8px;
+  border-left: 1px dashed #eed6aeb0;
+  border-right: 1px solid #1f2b3140;
+  background: linear-gradient(90deg, #1d292a38, #f4dfa31c, #26342c30);
+  box-shadow:
+    3px 0 5px #25312845,
+    -1px 0 1px #f1dfb64d;
+}
+.album-grid .album-card .book-name {
+  font-family: var(--hand-title);
+  font-weight: 600;
+  font-size: 27px;
+  letter-spacing: 0.2px;
+  text-shadow: 0 1px 1px #29382830;
+  line-height: 1;
+}
+.album-grid .album-card .album-photo {
+  background: #fbf5e8;
+  border: 1px solid #dfd5bf;
+  box-shadow:
+    3px 5px 6px #2d30283d,
+    inset 0 0 2px #d3c9ae70;
+}
+.album-grid .album-card .album-photo::before,
+.album-opening .opening-cover-photo::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: -7px;
+  left: 34%;
+  width: 38%;
+  height: 16px;
+  transform: rotate(6deg);
+  background:
+    repeating-linear-gradient(45deg, #f2d89c99 0 5px, #bc9f6c66 5px 6px),
+    #d7bc8499;
+  clip-path: polygon(
+    3% 0,
+    98% 3%,
+    96% 24%,
+    100% 42%,
+    97% 71%,
+    99% 98%,
+    0 95%,
+    3% 64%,
+    0 32%
+  );
+  box-shadow: 1px 1px 2px #5e472522;
+}
+.scrapbook-preview-wrap .scrapbook-preview {
+  position: relative;
+  background-image:
+    linear-gradient(130deg, #f7e6be30, #23332322), var(--cloth-texture);
+  background-size:
+    auto,
+    24px 24px;
+  padding: 11px 12px 20px 10px;
+  box-shadow:
+    7px 12px 18px #3d322b35,
+    2px 4px 0 #8a754d,
+    3px 7px 0 #d6c49b,
+    4px 10px 0 #685d43;
+}
+.scrapbook-preview-wrap .scrapbook-preview::after {
+  content: "";
+  position: absolute;
+  inset: 5px 5px 10px;
+  border: 1px dashed #ead8af88;
+  border-radius: 3px 7px 7px 3px;
+  pointer-events: none;
+}
+:root[data-theme="night"] .reader-topbar {
+  color: #eee6d1;
+}
+:root[data-theme="night"] .album-grid .album-card .album-book {
+  box-shadow:
+    -3px 0 0 var(--album-spine),
+    -6px 1px 0 var(--album-spine),
+    0 2px 4px #09151b66,
+    4px 7px 0 -2px color-mix(in srgb, var(--album-cover) 65%, #162a36),
+    5px 11px 12px -4px #09151b88,
+    0 0 16px #09151b40,
+    inset 3px 0 5px #d7e1d514,
+    inset -2px 0 2px #162a3659;
+}
+:root[data-theme="night"] .album-grid .album-card .album-book::before,
+:root[data-theme="night"] .album-opening .opening-cover-front::before {
+  background:
+    repeating-linear-gradient(
+        90deg,
+        #8e9a96 0 1px,
+        #53686d 1px 2px,
+        #a4aaa0 2px 3px
+      )
+      right top / 7px 100% no-repeat,
+    repeating-linear-gradient(
+        0deg,
+        #8e9a96 0 1px,
+        #53686d 1px 2px,
+        #a4aaa0 2px 3px
+      )
+      left bottom / 100% 8px no-repeat,
+    #53686d;
+}
+@media (max-width: 520px) {
+  .immersive-reader .main-content {
+    padding-inline: 20px;
+  }
+  .album-grid .album-card .book-name {
+    font-size: 25px;
+    margin-top: 14px;
+  }
+}
+
+@media (max-width: 520px) {
+  .reader-signature {
+    font-size: 17px;
+  }
+  .immersive-reader .reader-topbar .back-button {
+    font-size: 15px;
+  }
+}

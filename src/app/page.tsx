@@ -53,8 +53,13 @@ import { STORAGE_KEY, compressPhoto, parseStoredData } from "@/lib/storage";
 import AlbumBook from "@/components/AlbumBook";
 import Link from "next/link";
 import AlbumOpening from "@/components/AlbumOpening";
+import {
+  measureOpeningTarget,
+  type OpeningTarget,
+} from "@/lib/opening-geometry";
 import ScrapbookEditor from "@/components/ScrapbookEditor";
 import "./bookshelf.css";
+import "./physical-albums.css";
 
 type View = "albums" | "story" | "compose" | "checkin" | "replies";
 type Dialog = "connection" | "help" | "about" | "choose" | null;
@@ -231,6 +236,10 @@ export default function Home() {
     albumId: string;
     origin: { left: number; top: number; width: number; height: number };
   } | null>(null);
+  const [readerReady, setReaderReady] = useState(false);
+  const [openingTarget, setOpeningTarget] = useState<OpeningTarget | null>(
+    null,
+  );
   const openingLock = useRef(false);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -245,15 +254,17 @@ export default function Home() {
   const latestReply = notifications[notifications.length - 1];
   const draftKey = `${profile}:${selected}`;
   const draft = data.drafts[draftKey] ?? emptyDraft;
-  const visiblePages = data.pages
-    .filter(
-      (p) =>
-        p.albumId === selected &&
-        (p.authorId === profile ||
-          p.status === "delivered" ||
-          p.status === "answered"),
-    )
-    .sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt));
+  const pagesForAlbum = (albumId: string) =>
+    data.pages
+      .filter(
+        (page) =>
+          page.albumId === albumId &&
+          (page.authorId === profile ||
+            page.status === "delivered" ||
+            page.status === "answered"),
+      )
+      .sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt));
+  const visiblePages = pagesForAlbum(selected);
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [note, setNote] = useState("");
   const weekly = data.checkIns.find(
@@ -341,8 +352,8 @@ export default function Home() {
     return () => clearTimeout(t);
   }, [toast]);
   useEffect(() => {
-    if (ready) titleRef.current?.focus();
-  }, [view, selected]);
+    if (ready && !opening) titleRef.current?.focus({ preventScroll: true });
+  }, [view, selected, ready, opening]);
   useEffect(() => {
     if (view === "checkin") {
       setRatings(
@@ -375,6 +386,7 @@ export default function Home() {
     const source = trigger?.querySelector<HTMLElement>(".album-book");
     const bounds = source?.getBoundingClientRect();
     if (
+      !pagesForAlbum(id).length ||
       !bounds?.width ||
       !bounds.height ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -384,6 +396,8 @@ export default function Home() {
       return;
     }
     openingLock.current = true;
+    setReaderReady(false);
+    setOpeningTarget(null);
     setOpening({
       albumId: id,
       origin: {
@@ -394,6 +408,22 @@ export default function Home() {
       },
     });
   };
+  const prepareOpening = useCallback(() => {
+    if (!opening || !openingLock.current) return;
+    setSelected(opening.albumId);
+    setHighlight("");
+    setView("story");
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [opening]);
+  const markReaderReady = useCallback(() => {
+    if (openingLock.current) {
+      const reader = document.querySelector<HTMLElement>(
+        ".app-shell .album-reader",
+      );
+      if (reader) setOpeningTarget(measureOpeningTarget(reader));
+    }
+    setReaderReady(true);
+  }, []);
   const finishOpening = useCallback(() => {
     if (!opening || !openingLock.current) return;
     openingLock.current = false;
@@ -788,13 +818,17 @@ export default function Home() {
 
           {view === "story" && (
             <>
-              <button
-                className="back-button"
-                onClick={() => navigate("albums")}
-              >
-                <ArrowLeft size={16} />
-                All albums
-              </button>
+              <div className="reader-topbar">
+                <button
+                  className="back-button"
+                  aria-label="Back to shelf"
+                  onClick={() => navigate("albums")}
+                >
+                  <ArrowLeft size={20} />
+                  Shelf
+                </button>
+                <span className="reader-signature">Still Here</span>
+              </div>
               <h1 className="sr-only" ref={titleRef} tabIndex={-1}>
                 {album.title}
               </h1>
@@ -804,20 +838,13 @@ export default function Home() {
                 album={album}
                 profileId={profile}
                 initialPageId={highlight || undefined}
+                onReady={markReaderReady}
                 onCompose={(replyTo) => compose(selected, replyTo)}
                 onObjectChange={(id, object3d) => setData(current => ({
                   ...current,
                   pages: current.pages.map(p => p.id === id ? { ...p, object3d } : p),
                 }))}
               />
-              {visiblePages.length > 0 && (
-                <div className="page-end-action book-end-action">
-                  <button className="primary-button" onClick={() => compose()}>
-                    <Plus size={16} />
-                    Add a page
-                  </button>
-                </div>
-              )}
             </>
           )}
 
@@ -867,6 +894,7 @@ export default function Home() {
                 <ScrapbookEditor
                   key={draftKey}
                   draft={draft}
+                  authorId={profile}
                   onChange={updateDraft}
                   onChoosePhoto={() => fileRef.current?.click()}
                   photoBusy={photoBusy}
@@ -1386,6 +1414,12 @@ export default function Home() {
               profile === "alex" ? person(opening.albumId).name : "Alex & you"
             }
             origin={opening.origin}
+            target={openingTarget}
+            profileId={profile}
+            pages={pagesForAlbum(opening.albumId).slice(0, 2)}
+            totalPages={pagesForAlbum(opening.albumId).length}
+            onPrepare={prepareOpening}
+            readerReady={readerReady}
             onComplete={finishOpening}
           />,
           document.body,

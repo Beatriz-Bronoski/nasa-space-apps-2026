@@ -1,10 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+} from "react";
 import { type Book, FlipBook, Page } from "@openpageflip/react";
 import {
-  ArrowLeft,
-  ArrowRight,
   CheckCheck,
   ChevronDown,
   Cloud,
@@ -13,17 +17,14 @@ import {
   Plus,
   Send,
 } from "lucide-react";
-import {
-  PEOPLE,
-  formatDate,
-  getStatusLabel,
-  type Album,
-  type Contribution,
-} from "@/lib/model";
+import { PEOPLE, formatDate, type Album, type Contribution } from "@/lib/model";
 import "@openpageflip/core/styles.css";
 import type { Keepsake } from "@/lib/keepsake";
 import "./album-book.css";
-import ScrapbookPage from "./ScrapbookPage";
+import AlbumLeaf from "./AlbumLeaf";
+import AlbumNameplate from "./AlbumNameplate";
+import { getReaderLayout } from "@/lib/opening-geometry";
+import { afterReaderImagesPaint } from "@/lib/reader-ready";
 
 type Props = {
   pages: Contribution[];
@@ -36,14 +37,6 @@ type Props = {
 
 const authorName = (id: string) =>
   PEOPLE.find((person) => person.id === id)?.name ?? "Someone close";
-const statusIcon = (page: Contribution) =>
-  page.status === "recorded"
-    ? Cloud
-    : page.status === "sent"
-      ? Send
-      : page.status === "answered"
-        ? Heart
-        : CheckCheck;
 
 /** Every contribution is a physical leaf; the fold engine controls only its presentation. */
 export default function AlbumBook({
@@ -55,6 +48,15 @@ export default function AlbumBook({
   onObjectChange,
 }: Props) {
   const book = useRef<Book>(null);
+  const reader = useRef<HTMLElement>(null);
+  const focusAfterTurn = useRef(false);
+  const readyCallback = useRef(onReady);
+  readyCallback.current = onReady;
+  const [readerReady, setReaderReady] = useState(false);
+  const [initialLayout, setInitialLayout] = useState<{
+    page: number;
+    portrait: boolean;
+  } | null>(null);
   const lastJump = useRef("");
   const target = Math.max(
     0,
@@ -63,7 +65,70 @@ export default function AlbumBook({
   const [index, setIndex] = useState(target);
   const [portrait, setPortrait] = useState(false);
   const [turning, setTurning] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+  const [layout, setLayout] = useState(() =>
+    getReaderLayout(
+      typeof document === "undefined"
+        ? 1280
+        : document.body.clientWidth || document.documentElement.clientWidth,
+      typeof window === "undefined" ? 900 : window.innerHeight,
+    ),
+  );
+  const hasPages = pages.length > 0;
+
+  useEffect(() => {
+    let frame = 0;
+    const resize = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        const next = getReaderLayout(
+          document.body.clientWidth || document.documentElement.clientWidth,
+          window.innerHeight,
+        );
+        setLayout((previous) =>
+          previous.caseWidth === next.caseWidth &&
+          previous.maxPageWidth === next.maxPageWidth &&
+          previous.minPageWidth === next.minPageWidth
+            ? previous
+            : next,
+        );
+      });
+    };
+    window.addEventListener("resize", resize);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (readerReady || (hasPages && !initialLayout) || !reader.current) return;
+    const spread = initialLayout
+      ? [
+          initialLayout.page,
+          ...(initialLayout.portrait ? [] : [initialLayout.page + 1]),
+        ]
+      : [];
+    const images = spread.flatMap((page) =>
+      Array.from(
+        reader.current!.querySelectorAll<HTMLImageElement>(
+          `[data-reader-page-index="${page}"] img`,
+        ),
+      ),
+    );
+    return afterReaderImagesPaint(
+      images,
+      () => {
+        setReaderReady(true);
+        readyCallback.current?.();
+      },
+      document.fonts?.ready,
+    );
+  }, [initialLayout, hasPages, readerReady]);
 
   useEffect(() => {
     const preference = matchMedia("(prefers-reduced-motion: reduce)");
@@ -89,15 +154,38 @@ export default function AlbumBook({
   const last = Math.min(first + (portrait ? 0 : 1), pages.length - 1);
   const visible = pages.slice(first, last + 1);
 
+  useEffect(() => {
+    if (!focusAfterTurn.current || turning) return;
+    const surface = reader.current?.querySelector<HTMLElement>(
+      `[data-reader-page-index="${first}"] .leaf-content`,
+    );
+    if (surface) {
+      focusAfterTurn.current = false;
+      surface.focus({ preventScroll: true });
+    }
+  }, [first, last, turning]);
+
   const turn = (direction: "next" | "previous") => {
     const api = book.current;
-    if (!api || turning) return;
+    if (
+      !api ||
+      turning ||
+      api.state === "flipping" ||
+      api.state === "user_fold"
+    )
+      return;
     if (direction === "next") {
       if (last >= pages.length - 1) return;
+      focusAfterTurn.current = !!reader.current?.contains(
+        document.activeElement,
+      );
       if (reducedMotion) api.turnNext();
       else void api.flipNext("bottom");
     } else {
       if (first <= 0) return;
+      focusAfterTurn.current = !!reader.current?.contains(
+        document.activeElement,
+      );
       if (reducedMotion) api.turnPrev();
       else void api.flipPrev("bottom");
     }
@@ -120,7 +208,11 @@ export default function AlbumBook({
 
   if (!pages.length)
     return (
-      <section className="album-reader book-empty">
+      <section
+        ref={reader}
+        className="album-reader book-empty"
+        data-reader-ready={readerReady ? "true" : "false"}
+      >
         <Feather size={28} />
         <h2>A new chapter.</h2>
         <button className="primary-button" onClick={() => onCompose()}>
@@ -132,21 +224,29 @@ export default function AlbumBook({
 
   return (
     <section
+      ref={reader}
+      style={
+        { "--reader-case-width": `${layout.caseWidth}px` } as CSSProperties
+      }
+      data-reader-ready={readerReady ? "true" : "false"}
+      data-book-turning={turning ? "true" : "false"}
       className={`album-reader ${portrait ? "book-portrait" : "book-spread"}`}
       aria-label={`${album.title}, chronological book`}
       onKeyDown={onKey}
     >
       <div className={`book-case book-case-${album.accent}`}>
+        <div className="book-ground-shadow" aria-hidden="true" />
+        <AlbumNameplate album={album} />
         <div className="book-page-edges" aria-hidden="true" />
         <FlipBook
           key={`${album.id}:${profileId}`}
           ref={book}
           className="album-flipbook"
-          width={400}
-          height={540}
+          width={560}
+          height={660}
           size="stretch"
-          minWidth={280}
-          maxWidth={440}
+          minWidth={layout.minPageWidth}
+          maxWidth={layout.maxPageWidth}
           layout="auto"
           startPage={first}
           cover={false}
@@ -156,17 +256,22 @@ export default function AlbumBook({
           click={reducedMotion ? "off" : "edges"}
           drag={!reducedMotion}
           swipe={!reducedMotion}
-          hover={!reducedMotion}
+          hover={false}
           swipeDistance={35}
           ignoreDragOn="a, button, input, textarea, select, [data-opf-no-flip]"
           onInit={({ page, orientation }) => {
             setTurning(false);
             setIndex(page);
             setPortrait(orientation === "portrait");
+            setInitialLayout(
+              (layout) =>
+                layout ?? { page, portrait: orientation === "portrait" },
+            );
           }}
           onFlip={({ page }) => setIndex(page)}
           onUpdate={({ page, orientation }) => {
-            setTurning(false);
+            const state = book.current?.state;
+            setTurning(state === "flipping" || state === "user_fold");
             setIndex(page);
             setPortrait(orientation === "portrait");
           }}
@@ -180,10 +285,10 @@ export default function AlbumBook({
           }
         >
           {pages.map((page, pageIndex) => {
-            const Icon = statusIcon(page);
-            const own = page.authorId === profileId;
             return (
               <Page
+                density="soft"
+                data-reader-page-index={pageIndex}
                 className={`album-leaf ${page.photo ? "leaf-with-photo" : "leaf-words"}`}
                 key={page.id}
               >
@@ -235,96 +340,68 @@ export default function AlbumBook({
         </FlipBook>
         {!portrait && <div className="book-binding" aria-hidden="true" />}
       </div>
-      <div className="book-navigation">
+      <p
+        className="book-pagination sr-only"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {first === last
+          ? `Page ${first + 1}`
+          : `Pages ${first + 1}–${last + 1}`}{" "}
+        of {pages.length}
+      </p>
+      <div className="book-footer-actions">
         <button
-          type="button"
-          className="book-turn-button"
-          aria-label="Previous page"
-          title="Previous page · Left arrow"
-          disabled={first <= 0 || turning}
-          onClick={() => turn("previous")}
+          className="primary-button book-add-page"
+          onClick={() => onCompose()}
         >
-          <ArrowLeft size={18} />
+          <Plus size={17} />
+          Add a page
         </button>
-        <span className="book-pagination" aria-live="polite" aria-atomic="true">
-          {first === last
-            ? `Page ${first + 1}`
-            : `Pages ${first + 1}–${last + 1}`}
-          <span>of {pages.length}</span>
-        </span>
-        <button
-          type="button"
-          className="book-turn-button"
-          aria-label="Next page"
-          title="Next page · Right arrow"
-          disabled={last >= pages.length - 1 || turning}
-          onClick={() => turn("next")}
-        >
-          <ArrowRight size={18} />
-        </button>
+        <details className="book-journey">
+          <summary>
+            Page details
+            <ChevronDown size={12} />
+          </summary>
+          <div className="book-journey-pages">
+            {visible.map((page, offset) => (
+              <div key={page.id}>
+                <strong>
+                  Page {first + offset + 1} · {authorName(page.authorId)}
+                </strong>
+                <ol>
+                  <li>
+                    <Cloud size={12} />
+                    <span>Recorded</span>
+                    <time>{formatDate(page.createdAt)}</time>
+                  </li>
+                  {page.sentAt && (
+                    <li>
+                      <Send size={12} />
+                      <span>Sent</span>
+                      <time>{formatDate(page.sentAt)}</time>
+                    </li>
+                  )}
+                  {page.deliveredAt && (
+                    <li>
+                      <CheckCheck size={12} />
+                      <span>Delivered</span>
+                      <time>{formatDate(page.deliveredAt)}</time>
+                    </li>
+                  )}
+                  {page.answeredAt && (
+                    <li>
+                      <Heart size={12} />
+                      <span>Answered</span>
+                      <time>{formatDate(page.answeredAt)}</time>
+                    </li>
+                  )}
+                </ol>
+              </div>
+            ))}
+          </div>
+        </details>
       </div>
-      <div className="book-actions">
-        {visible
-          .filter(
-            (page) =>
-              page.authorId !== profileId &&
-              (page.status === "delivered" || page.status === "answered"),
-          )
-          .map((page) => (
-            <button
-              className="book-reply-button"
-              key={page.id}
-              aria-label={`Reply to ${authorName(page.authorId)}, page ${pages.findIndex((item) => item.id === page.id) + 1}`}
-              onClick={() => onCompose(page.id)}
-            >
-              Reply to {authorName(page.authorId)}
-              <ArrowRight size={14} />
-            </button>
-          ))}
-      </div>
-      <details className="book-journey">
-        <summary>
-          Page details
-          <ChevronDown size={12} />
-        </summary>
-        <div className="book-journey-pages">
-          {visible.map((page, offset) => (
-            <div key={page.id}>
-              <strong>
-                Page {first + offset + 1} · {authorName(page.authorId)}
-              </strong>
-              <ol>
-                <li>
-                  <Cloud size={12} />
-                  <span>Recorded</span>
-                  <time>{formatDate(page.createdAt)}</time>
-                </li>
-                {page.sentAt && (
-                  <li>
-                    <Send size={12} />
-                    <span>Sent</span>
-                    <time>{formatDate(page.sentAt)}</time>
-                  </li>
-                )}
-                {page.deliveredAt && (
-                  <li>
-                    <CheckCheck size={12} />
-                    <span>Delivered</span>
-                    <time>{formatDate(page.deliveredAt)}</time>
-                  </li>
-                )}
-                {page.answeredAt && (
-                  <li>
-                    <Heart size={12} />
-                    <span>Answered</span>
-                    <time>{formatDate(page.answeredAt)}</time>
-                  </li>
-                )}
-              </ol>
-            </div>
-          ))}
-        </div>
-      </details>
     </section>
   );
 }

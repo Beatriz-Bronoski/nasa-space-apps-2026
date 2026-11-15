@@ -22,6 +22,7 @@ type Props = {
   onObjectChange: (next?: Keepsake) => void;
   design?: PageDesign;
   children?: ReactNode;
+  voice?: "earth" | "space";
 };
 
 /** The editor and physical album use exactly the same page composition. */
@@ -34,16 +35,19 @@ export default function ScrapbookPage({
   onObjectChange,
   design,
   children,
+  voice = "space",
 }: Props) {
   const layout = design?.layout ?? "classic";
   return (
-    <div className={`scrapbook-page scrapbook-layout-${layout}`}>
+    <div
+      className={`scrapbook-page scrapbook-layout-${layout} scrapbook-voice-${voice}${text.length > 110 ? " scrapbook-dense" : ""}`}
+    >
       <div className="scrapbook-content">
         <h2 className="scrapbook-title">{title}</h2>
         <div className="scrapbook-arrangement">
           {photo && (
             <figure
-              className={`scrapbook-photo scrapbook-tape-${design?.tape ?? "midnight"}`}
+              className={`scrapbook-photo scrapbook-tape-${design?.tape ?? "linen"}`}
               style={
                 {
                   "--photo-tilt": `${design?.photoTilt ?? -2}deg`,
@@ -62,6 +66,14 @@ export default function ScrapbookPage({
                 visibleInBook={visibleInBook}
                 onChange={onObjectChange}
               />
+              {voice === "earth" &&
+                ["tl", "tr", "bl", "br"].map((corner) => (
+                  <span
+                    key={corner}
+                    className={`scrapbook-photo-corner scrapbook-photo-corner-${corner}`}
+                    aria-hidden="true"
+                  />
+                ))}
               <span
                 className="scrapbook-tape scrapbook-tape-bottom"
                 aria-hidden="true"
@@ -69,7 +81,13 @@ export default function ScrapbookPage({
             </figure>
           )}
           {text && (
-            <div className="scrapbook-note">
+            <div
+              className={`scrapbook-note scrapbook-tape-${design?.tape ?? "linen"}`}
+            >
+              <span
+                className="scrapbook-tape scrapbook-note-tape"
+                aria-hidden="true"
+              />
               <p>{text}</p>
             </div>
           )}

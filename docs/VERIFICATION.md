@@ -65,3 +65,59 @@ All delivery tests use the clearly labeled simulator. They do not verify communi
 - A 390 × 844 viewport had no horizontal page overflow. The mobile tray remained available above the preview; dragging from it onto the paper added a sticker. The paper expanded to preserve the complete note. This is viewport/pointer verification, not a physical touchscreen test.
 - A crisis cue displayed support next to the text field while Publish remained enabled. Removing the cue removed the panel. No browser warnings/errors were observed in these flows.
 - Physical-device touch, runtime OS reduced-motion changes, a full assistive-technology audit, and clinical review remain unverified.
+
+## Opening handoff performance revision
+
+- TypeScript and all 25 tests passed. Four new isolated readiness tests cover loading/decoding (including rejection), the image deadline, cancellation and late callbacks, and empty spreads waiting for two paint frames.
+- In a desktop browser sample approximately 1.1 seconds after activating a shelf book, the opening overlay was still present with an opaque backdrop, while the real reader already reported ready at its final 880 px width. Focus remained on Skip animation and the application stayed inert. After handoff, the ready reader remained available, focus moved to its heading, inert was removed, and body scrolling was restored.
+- Page navigation advanced to the next spread. Repeated opening of different albums, keyboard activation, Escape, and the Skip animation button completed without a stuck overlay. A 390 × 844 viewport also had the reader ready while the opening was still present, with no horizontal overflow. Resizing to 414 px during opening safely revealed the correct ready reader and restored scrolling. No browser warnings/errors were observed.
+- These are functional timing samples and source-level checks of the mount handoff, not an FPS benchmark or a promise for every device. CPU throttling, physical touch devices, and runtime OS reduced-motion changes were not exercised.
+
+## Physical scrapbook revision
+
+- TypeScript and all 27 semantic tests passed, including two new readiness tests for fonts loading together with photos, failure, timeout, late resolution, and cancellation.
+- In the browser, the new self-hosted wood/paper textures, cloth cover stitching, visible leaf stacks, Polaroid photo frames, washi-taped notes, handwritten text, and fabric sticker weave/stitched hems rendered on existing saved pages. Different layouts and saved tape colors retained their data. Page turning still advanced through the book.
+- At about 1.1 seconds during opening, the actual reader reported ready while the opening overlay was still visible and the handwriting fonts reported loaded. The handoff completed without a stuck overlay.
+- At 390 × 844, the book switched to one portrait page, with document scrollWidth 375 and innerWidth 390 (the scrollbar gutter accounts for the difference). Both light and night materials were reviewed. Focusing the paper text and pressing Ctrl+End reached scrollTop 136, matching scrollHeight−clientHeight 136, and the complete end of the note was visible.
+- The editor retained its draft and both new fabric stickers, and arrow-key positioning changed the selected sticker’s saved coordinates. No browser warnings/errors were observed during these flows.
+- Representative flat color pairs were calculated: ink on paper 7.84:1, metadata on paper 4.98:1, ink on note 9.32:1, night ink on note 7.07:1, and wood-scene controls 7.28:1. Photographic texture variation and a full independent accessibility audit remain separate from these token checks. Physical touch, CPU-throttled FPS, and runtime OS reduced-motion testing were not performed.
+
+The pickup geometry was aligned to the deeper cover: a desktop opening targeted y = 107 px while the mounted engine paper began at about 108 px. At 686 px viewport width, both the reader and the flying book used portrait mode, and the decorative left paper stayed hidden. Resizing during that opening completed into the correct album.
+
+## Real-page opening continuity revision
+
+- TypeScript and all 33 tests passed. Six new geometry tests cover exact measured spread/portrait targets, missing/invalid/zero DOM boxes, physical cover padding, responsive fallback centering, and the available-width orientation boundary.
+- During desktop opening, the stationary page’s title and story matched the actual second reader page. The turning backface carried the actual first page. After accounting for the case border, a late-animation night-mode sample measured zero horizontal difference and about 0.08 px vertical difference between the stationary and real page; both used the same ink. The reader was already ready.
+- The opening backdrop and reader’s fixed wood plane had identical image definitions and 720 px heights in the sampled desktop viewport. This removes the previous different crop caused by sizing the reader texture against the full scrollable document.
+- At 390 × 844, the opening displayed the first real page in portrait mode, matching its eventual title; scrollWidth 375 remained below innerWidth 390. Escape and Skip animation completed into the correct album, restored body overflow, removed inert, and focused its heading. Resizing to 414 px during a night-mode opening also completed correctly.
+- In an isolated fresh browser origin, the seeded one-page Maya album showed that exact page on the turning backface, kept the stationary right side blank, and finished at Page 1 of 1 with Next disabled. Reader page navigation still worked after the shared-leaf refactor. No browser warnings/errors were observed.
+- Empty-album and reduced-motion bypasses were reviewed in source. Physical-device touch, CPU-throttled FPS measurements, and changing OS reduced-motion at runtime were not exercised.
+
+## Reference-style open-album revision
+
+- TypeScript strict checking and all 35 tests passed against the final reader layout, focus handling, turn-state guards, and scrollbar-gutter sizing changes. The geometry suite now covers the larger page proportion, viewport-height budget, and narrow-screen minimum width.
+- At 1536 × 1024, the open case measured approximately 1489 × 897 px at x = 16, y = 46; the bottom actions ended at y = 995. The book and creation action fit the viewport. Document scrollWidth was 1521 px, below innerWidth 1536 px.
+- At 1280 × 720, the existing longer pancake contribution displayed its complete note after the denser arrangement adjustment. The sewn pair label, uppercase author/location labels, thin handwriting and underlines, Earth photo corners, ruled space notes, in-page Reply, page numbers, and corner navigation rendered over the parchment scene.
+- Keyboard navigation advanced through spreads 1–2, 3–4, and 5–6 and returned to 3–4. Focus moved to the newly visible paper after each completed turn. Turn controls remained guarded while the page engine was moving. Reply on Lily's fourth page opened the correct continuation in the composer and preserved the existing draft.
+- The Page details disclosure expanded to show Recorded, Sent, Delivered, and Answered dates for the current pages, then collapsed. One Add a page action remained below the book. The composer retained its text and existing two stickers; adding, moving with an arrow key, and deleting a temporary sticker returned focus to the tray.
+- Portrait layouts at 390 × 844 and 320 × 844 had no horizontal overflow. At 320 px, the page measured 259 px wide and stayed inside its 281 px case after using the body's available width to account for the scrollbar gutter. The bottom Add a page action and Page details did not overlap. At 390 px, portrait navigation advanced to page 2 and focused its paper.
+- Light and night materials were reviewed. During opening samples at 390 px and 1536 px, the real reader reported ready while the presentation was still visible, and both scenes used the same pair label. No application warnings or errors were observed in the local browser console.
+- These are local functional and viewport checks, not a full contrast or assistive-technology audit. Physical-device touch, CPU-throttled animation measurements, and runtime OS reduced-motion changes remain untested. Production-build and deployment validation are separate release steps.
+
+## Soft final leaves and book depth
+
+- A fresh `npm ci` applied the bounded dependency correction. Running the test hook again reported it already applied. TypeScript and all 39 tests passed. Four added regressions exercise actual installed pagination for one through seven pages in both orientations, preserve cover behavior and page counts, and check repeatability and rejection of unexpected patch targets.
+- Before the correction, the three-page Sam album's last page rendered with `opf-page--hard`. Afterward, the same final page rendered with `opf-page--soft`. A timed forward-turn sample showed a polygon-clipped, rotated paper fold and zero hard page elements. The reverse turn also used soft polygon folds and returned focus to the first paper.
+- At 390 × 844, navigation reached the final third page and returned to the second page. The sampled last-page turn used soft folds, and the final page received focus. Document scrollWidth was 375 px, below innerWidth 390 px.
+- At 320 × 844, shelf books and the open album had document scrollWidth 305 px. The 259 px paper remained inside the 281 px cover. Layered edges, lower cloth cover, all-around shadows, and bottom controls remained contained. Night mode retained the depth layers and readable paper controls.
+- During a night-mode opening, the real reader was ready while the presentation remained visible. Both cases had identical computed ambient, contact, and cast-shadow layers. No local browser warnings or errors were observed.
+- These are functional and visual browser checks, not an FPS benchmark, a physical-touch test, or a full accessibility audit. Runtime OS reduced-motion testing remains separate; its existing instant-navigation path is unchanged.
+
+## Stronger volume on the open album
+
+- TypeScript checking and all 39 tests passed, with the eight geometry tests updated for the deeper cover, surrounding shadow space, and height budget.
+- At 1280 × 720, the case began at y = 64 and ended near y = 628, with its bottom action ending near y = 708. The live paper began at y = 81; its lower edge sat 45 px above the case's lower edge, exposing the layered paper block. Forward and reverse page navigation retained soft leaves and moved focus correctly.
+- At 1536 × 1024, the case measured about 1406 × 868 px with approximately 58 px of side space. The bottom action ended near y = 1012; document scrollWidth 1521 remained below innerWidth 1536. The surrounding shadow and lower cloth lip were visually reviewed.
+- At 320 × 844, the 243 px paper remained within a 265 px case at x = 20, y = 62. The bottom action and Page details remained separate, and document scrollWidth was 305 px. Both day and night depth layers were reviewed.
+- A timed night-mode opening showed the real reader ready while the presentation remained visible. Both ground-shadow elements had identical computed shadow layers, and the moving case was already within about one pixel of the real case. No local browser warnings or errors were observed.
+- These checks do not measure frame rate or replace physical-device and full accessibility testing.
