@@ -26,13 +26,13 @@ npm run preview
 
 ## Explore the demo
 
-1. Open an album, add a written moment or a photo, and leave the editor to check that its draft is saved.
-2. Use connection settings to pause simulated delivery or simulate being offline. A recorded page stays in this browser until the simulator can advance it.
-3. Resume the connection to see **Recorded → Sent → Delivered**. Delivery uses a 12-second simulated deadline; an offline or paused simulator makes no transitions. If the deadline passes during a pause, pending delivery can complete on reconnection. This is not a real network guarantee or a promised arrival time.
-4. In connection settings, switch from Alex to Lily, Sam, Maya, or June. Open the relevant album and manually reply to a delivered page. Switch back after that reply is delivered to see its notification and the original page marked **Answered**. A timer never writes a human reply.
+1. Open a person's album as a book. Each contribution occupies a page in chronological order. Turn pages forward or backward with the navigation controls, arrow keys, or a corner drag; narrow screens show one page at a time. Reduced-motion mode is implemented to navigate without the page-turn animation. Longer contributions remain inside a focusable region with native scrolling on the paper page; there is no separate full-text modal.
+2. Add a written moment or a photo, then leave the editor to check that its draft is saved.
+3. Use connection settings to pause simulated delivery. A recorded page stays in this browser until the simulator can advance it. Resume to see **Recorded → Sent → Delivered**. Delivery uses a 12-second simulated deadline; an offline or paused simulator makes no transitions. If the deadline passes during a pause, pending delivery can complete on reconnection. This is not a real network guarantee or a promised arrival time.
+4. In connection settings, switch from Alex to Lily, Sam, Maya, or June. Open the relevant book and manually reply to a delivered page. Switch back after that reply is delivered to see its notification and the original page marked **Answered**. Opening a reply takes you to that contribution in the book. A timer never writes a human reply.
 5. Open the weekly check-in. Connection, loneliness, and support are separate labeled 1–5 responses. The current week's check-in can be edited; there is no composite health score, diagnosis, or automatic third-party alert.
 
-There are no typing indicators, recipient read receipts, streaks, rankings, or measures that treat message quantity as relationship health. The local notification state only tracks which reply notifications have been opened in this demo.
+The interface keeps explanatory copy brief. Response-time reassurance lives in **How it works**, reached from a discreet footer link. Delivery states, demo limitations, privacy information, and immediate support remain available. There are no typing indicators, recipient read receipts, streaks, rankings, or measures that treat message quantity as relationship health. The local notification state only tracks which reply notifications have been opened in this demo.
 
 ## Local data and photos
 
@@ -48,19 +48,21 @@ Help is always available. Limited English and Portuguese phrase matching also su
 
 `npm test` runs semantic model and transport tests with `node:test` through `tsx`. It checks interruption and reconnection, the delivery deadline, manual-reply requirements, reply notifications, author/album validation, UTC dates and week boundaries, and support-language cues. Run the commands above to validate your checkout; this guide is not a record of checks performed.
 
-For a manual review, follow the album/reply flow above, reload with a saved draft and a check-in, remove an attached photo, and exercise the paused/offline controls. Repeat with keyboard only: check visible focus, dialog dismissal and return focus, form labels, and access to help. Check a narrow mobile viewport for navigation, editor controls, long messages, and dialogs without horizontal overflow. Verify that help appears while entering a cue and that the editor remains usable.
+For a manual review, follow the album/reply flow above, reload with a saved draft and a check-in, remove an attached photo, and exercise the paused/offline controls. For the book, check first/last boundaries, odd and even page counts, forward/backward turns, a newly added contribution, and opening a reply directly. Check corner dragging, arrow-key navigation, the focusable text region's native scroll, and the **Page details** disclosure. Repeat with keyboard only: verify visible focus, dialog dismissal and return focus, form labels, and access to help. Check a narrow mobile viewport for portrait book pages, editor controls, long messages, and dialogs without horizontal overflow. Verify that support appears while entering a cue and that the editor remains usable. Real-device touch and runtime OS reduced-motion preference testing remain separate checks. See [VERIFICATION.md](docs/VERIFICATION.md) for completed results and remaining limits.
 
 ## Files and deployment
 
 - `src/app/page.tsx`: interactive application and local browser state.
 - `src/app/globals.css`: responsive visual styles and focus states.
 - `src/app/layout.tsx`: metadata, document language, and self-hosted fonts.
+- `src/components/AlbumBook.tsx`: chronological book reader, page-turn interaction, and accessible navigation.
+- `src/components/album-book.css`: paper, binding, page shadows, and responsive reader styles.
 - `src/lib/model.ts`: domain types, sample data, delivery reducer, notifications, and check-in/date helpers.
 - `src/lib/model.test.ts` and `src/lib/storage.test.ts`: model, transport, and persistence behavior tests.
 - `next.config.ts`: static export configuration.
 - `.openai/hosting.json`: Sites project binding and the `out` static directory.
 - [Research sources](docs/SOURCES.md), [product and technical decisions](docs/DECISIONS.md), and [image credits](docs/ASSETS.md).
 
-Build before deploying through Sites. The review deployment is intended to remain private; access is controlled by the Sites deployment settings. `.openai/hosting.json` binds this checkout to a hosting project and identifies `out/` as the static directory. A Sites deployment does not commit or push source to the original GitHub repository automatically.
+Build before deploying through Sites. The review deployment remains private; access is controlled by Sites settings. `.openai/hosting.json` binds this checkout to the hosting project and identifies `out/` as the static directory. GitHub holds the application source on `main`; Sites serves the built application. Source pushes and private deployment are separate release steps.
 
 A production service needs authenticated backend storage, authorization/RBAC, encryption, a delay-tolerant transport with idempotency and acknowledgments, and review of consent, accessibility, clinical behavior, and localized support resources. See [DECISIONS.md](docs/DECISIONS.md) for the boundary between the demonstration and that work.

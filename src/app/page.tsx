@@ -8,7 +8,6 @@ import {
   type ReactNode,
 } from "react";
 import {
-  ArrowDown,
   ArrowLeft,
   ArrowRight,
   Bell,
@@ -45,7 +44,6 @@ import {
   createInitialData,
   formatDate,
   getReplyNotifications,
-  getStatusLabel,
   hasCrisisLanguage,
   weekKey,
   type Album,
@@ -54,6 +52,7 @@ import {
   type Draft,
 } from "@/lib/model";
 import { STORAGE_KEY, compressPhoto, parseStoredData } from "@/lib/storage";
+import AlbumBook from "@/components/AlbumBook";
 
 type View = "albums" | "story" | "compose" | "checkin" | "replies";
 type Dialog = "connection" | "help" | "about" | "choose" | null;
@@ -87,23 +86,6 @@ function Avatar({
   return (
     <span className={`avatar ${p.color} ${size}`} aria-hidden="true">
       {p.initials}
-    </span>
-  );
-}
-
-function Status({ page }: { page: Contribution }) {
-  const Icon =
-    page.status === "recorded"
-      ? Cloud
-      : page.status === "sent"
-        ? Send
-        : page.status === "answered"
-          ? Heart
-          : CheckCheck;
-  return (
-    <span className={`status status-${page.status}`}>
-      <Icon size={13} />
-      {getStatusLabel(page.status)}
     </span>
   );
 }
@@ -252,6 +234,7 @@ export default function Home() {
   const albums =
     profile === "alex" ? ALBUMS : ALBUMS.filter((a) => a.personId === profile);
   const notifications = getReplyNotifications(data, profile);
+  const latestReply = notifications[notifications.length - 1];
   const draftKey = `${profile}:${selected}`;
   const draft = data.drafts[draftKey] ?? emptyDraft;
   const visiblePages = data.pages
@@ -366,25 +349,6 @@ export default function Home() {
       setNote(weekly?.note ?? "");
     }
   }, [view, profile, weekly?.id]);
-  useEffect(() => {
-    if (view === "story" && highlight) {
-      const timer = setTimeout(
-        () =>
-          document
-            .getElementById(`page-${highlight}`)
-            ?.scrollIntoView({
-              behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
-                .matches
-                ? "instant"
-                : "smooth",
-              block: "center",
-            }),
-        120,
-      );
-      return () => clearTimeout(timer);
-    }
-  }, [view, highlight]);
-
   const navigate = (next: View) => {
     setHighlight("");
     setView(next);
@@ -438,11 +402,14 @@ export default function Home() {
       const drafts = { ...next.drafts };
       delete drafts[draftKey];
       setData({ ...next, drafts });
-      navigate("story");
+      const createdPage = next.pages.find(
+        (page) => !data.pages.some((existing) => existing.id === page.id),
+      );
+      setHighlight(createdPage?.id ?? "");
+      setView("story");
+      window.scrollTo({ top: 0, behavior: "instant" });
       setToast(
-        online
-          ? "Page recorded. It will travel when the connection is ready."
-          : "Page recorded on this device. It will send when you reconnect.",
+        online ? "Page recorded." : "Page recorded. Queued until reconnection.",
       );
     } catch (e) {
       setPhotoError(
@@ -510,8 +477,7 @@ export default function Home() {
         >
           <Brand />
         </button>
-        <p className="sidebar-tagline">A place for your people.</p>
-        <span className="nav-label">YOUR LITTLE CORNER</span>
+        <span className="nav-label">YOUR SPACE</span>
         <nav aria-label="Main navigation">
           <button
             className={
@@ -543,17 +509,6 @@ export default function Home() {
             <LockKeyhole className="nav-lock" size={13} />
           </button>
         </nav>
-        <div className="sidebar-note">
-          <span className="little-orbit" aria-hidden="true">
-            ✧
-          </span>
-          <p>
-            Different skies.
-            <br />
-            The same little things.
-          </p>
-          <span>Every page brings you closer.</span>
-        </div>
         <div className="sidebar-bottom">
           <button
             className="connection-card"
@@ -564,21 +519,14 @@ export default function Home() {
               <strong>
                 {online ? "Connection is open" : "Connection is paused"}
               </strong>
-              <small>
-                {online
-                  ? "Stories travel at their own pace"
-                  : "Your pages are safe in the queue"}
-              </small>
             </span>
             <Settings2 size={14} />
           </button>
           <button className="help-button" onClick={() => setDialog("help")}>
-            <CircleHelp size={16} />A little support
+            <CircleHelp size={16} />
+            Support
             <ArrowRight size={14} />
           </button>
-          <span className="sidebar-footer">
-            Made for the distance. And the love.
-          </span>
         </div>
       </aside>
       <div className="workspace">
@@ -649,20 +597,12 @@ export default function Home() {
             <>
               <section className="welcome">
                 <div className="welcome-copy">
-                  <div className="eyebrow">
-                    <span />
-                    LIFE HAPPENS IN THE LITTLE MOMENTS
-                  </div>
                   <h1 ref={titleRef} tabIndex={-1}>
                     A little closer,
                     <br />
                     <em>from anywhere.</em>
                   </h1>
-                  <p>
-                    For the everyday stories you don’t want to miss.
-                    <br className="desktop-break" /> One page from you. One page
-                    from them. All in your own time.
-                  </p>
+                  <p>Shared moments with your favorite people.</p>
                   <button
                     className="primary-button"
                     onClick={() => setDialog("choose")}
@@ -686,42 +626,19 @@ export default function Home() {
                     <img src="/images/lily.jpg" alt="" />
                     <span>the little things, kept close ♡</span>
                   </div>
-                  <span className="art-caption">A small piece of home.</span>
                   <svg className="caption-arrow" viewBox="0 0 80 50">
                     <path d="M3 3Q72 0 58 39m0 0-6-11m6 11 10-7" />
                   </svg>
                 </div>
               </section>
-              <div className="gentle-banner">
-                <span className="banner-icon">
-                  <Radio size={19} />
-                </span>
-                <p>
-                  <strong>No rush. No missed moments.</strong>
-                  <span>
-                    Pages may take a while to arrive. The connection is still
-                    there.
-                  </span>
-                </p>
-                <button onClick={() => setDialog("about")}>
-                  How it works
-                  <ArrowRight size={15} />
-                </button>
-              </div>
               <section
                 className="albums-section"
                 aria-labelledby="albums-title"
               >
                 <div className="section-heading">
                   <div>
-                    <span className="eyebrow small">
-                      A LITTLE PIECE OF EACH OTHER
-                    </span>
                     <h2 id="albums-title">Your people. Your stories.</h2>
                   </div>
-                  <span className="section-caption">
-                    A growing collection of together.
-                  </span>
                 </div>
                 <div className="album-grid">
                   {albums.map((a) => {
@@ -817,40 +734,37 @@ export default function Home() {
                 <div className="latest-card">
                   <div className="mini-heading">
                     <span>
-                      <Sparkles size={15} />A LITTLE SOMETHING CAME HOME
+                      <Sparkles size={15} />
+                      LATEST REPLY
                     </span>
                     <button onClick={() => navigate("replies")}>
                       View replies
                       <ArrowRight size={14} />
                     </button>
                   </div>
-                  {notifications[0] ? (
+                  {latestReply ? (
                     <button
                       className="reply-preview"
-                      onClick={() => openReply(notifications[0])}
+                      onClick={() => openReply(latestReply)}
                     >
-                      <Avatar id={notifications[0].authorId} />
+                      <Avatar id={latestReply.authorId} />
                       <div>
                         <h3>
-                          {person(notifications[0].authorId).name} added to your
+                          {person(latestReply.authorId).name} added to your
                           story
                         </h3>
                         <p>
-                          “{notifications[0].text.slice(0, 104)}
-                          {notifications[0].text.length > 104 ? "…" : ""}”
+                          “{latestReply.text.slice(0, 104)}
+                          {latestReply.text.length > 104 ? "…" : ""}”
                         </p>
-                        <span>{formatDate(notifications[0].createdAt)}</span>
+                        <span>{formatDate(latestReply.createdAt)}</span>
                       </div>
                       <ArrowRight size={18} />
                     </button>
                   ) : (
                     <div className="quiet-empty">
                       <Feather size={23} />
-                      <p>
-                        Your next little moment will find its way here.
-                        <br />
-                        <span>There’s nothing you need to wait for.</span>
-                      </p>
+                      <p>No new replies.</p>
                     </div>
                   )}
                 </div>
@@ -861,27 +775,18 @@ export default function Home() {
                   <div>
                     <div className="mini-heading">
                       <span>
-                        JUST FOR YOU
+                        PRIVATE
                         <LockKeyhole size={11} />
                       </span>
                     </div>
-                    <h3>A moment to check in.</h3>
-                    <p>How are you feeling in the space between?</p>
+                    <h3>Your weekly check-in.</h3>
                     <button onClick={() => navigate("checkin")}>
-                      {weekly
-                        ? "Revisit your check-in"
-                        : "Take your weekly check-in"}
+                      {weekly ? "Revisit your check-in" : "Check in"}
                       <ArrowRight size={15} />
                     </button>
                   </div>
                 </div>
               </section>
-              <div className="page-signoff">
-                <span />
-                Far apart. Still part of each other’s days.
-                <Heart size={12} />
-                <span />
-              </div>
             </>
           )}
 
@@ -894,10 +799,7 @@ export default function Home() {
                 <ArrowLeft size={16} />
                 All albums
               </button>
-              <section className="story-heading">
-                <div className="story-cover">
-                  <img src={photoUrl(album)} alt="Album cover" />
-                </div>
+              <section className="story-heading reader-heading">
                 <div>
                   <span className="eyebrow small">
                     {profile === "alex"
@@ -907,136 +809,20 @@ export default function Home() {
                   <h1 ref={titleRef} tabIndex={-1}>
                     {album.title}
                   </h1>
-                  <p>A shared story, one little moment at a time.</p>
                 </div>
                 <button className="primary-button" onClick={() => compose()}>
                   <Plus size={16} />
                   Add a page
                 </button>
               </section>
-              <div className="story-note">
-                <Feather size={17} />
-                <p>
-                  Keep the story going whenever you feel like it. There is no
-                  turn timer and no reply deadline.
-                </p>
-              </div>
-              <div className="timeline" aria-label="Album pages, oldest first">
-                {visiblePages.map((page, index) => {
-                  const author = person(page.authorId);
-                  const parent = page.replyTo
-                    ? data.pages.find((p) => p.id === page.replyTo)
-                    : undefined;
-                  const canReply =
-                    page.authorId !== profile &&
-                    ["delivered", "answered"].includes(page.status);
-                  return (
-                    <article
-                      id={`page-${page.id}`}
-                      key={page.id}
-                      className={`story-page ${page.authorId === profile ? "own-page" : ""} ${highlight === page.id ? "highlighted" : ""}`}
-                    >
-                      <div className="timeline-node">
-                        <Avatar id={page.authorId} size="small" />
-                      </div>
-                      <div className="page-top">
-                        <span>
-                          <strong>
-                            {page.authorId === profile ? "You" : author.name}
-                          </strong>
-                          <span className="page-index">
-                            PAGE {String(index + 1).padStart(2, "0")}
-                          </span>
-                        </span>
-                        <time dateTime={page.createdAt}>
-                          {formatDate(page.createdAt)} · UTC
-                        </time>
-                      </div>
-                      {parent && (
-                        <div className="reply-context">
-                          <ArrowDown size={12} />A page in response to “
-                          {parent.title}”
-                        </div>
-                      )}
-                      <h2>{page.title}</h2>
-                      <p className="page-text">{page.text}</p>
-                      {page.photo && (
-                        <img
-                          className="page-photo"
-                          src={page.photo}
-                          alt={`Photo accompanying ${page.title}`}
-                        />
-                      )}
-                      <div className="page-bottom">
-                        <Status page={page} />
-                        {canReply && (
-                          <button
-                            className="text-button"
-                            onClick={() => compose(page.albumId, page.id)}
-                          >
-                            Write the next page
-                            <ArrowRight size={14} />
-                          </button>
-                        )}
-                        {page.authorId === profile &&
-                          page.status === "delivered" && (
-                            <span className="no-rush">
-                              A reply can come in its own time.
-                            </span>
-                          )}
-                      </div>
-                      <details className="delivery-details">
-                        <summary>
-                          Page journey <ChevronDown size={12} />
-                        </summary>
-                        <ol>
-                          <li>
-                            <Cloud size={13} />
-                            <span>Recorded on this device</span>
-                            <time>{formatDate(page.createdAt)}</time>
-                          </li>
-                          {page.sentAt && (
-                            <li>
-                              <Send size={13} />
-                              <span>Sent through the demo link</span>
-                              <time>{formatDate(page.sentAt)}</time>
-                            </li>
-                          )}
-                          {page.deliveredAt && (
-                            <li>
-                              <CheckCheck size={13} />
-                              <span>Delivered to this album</span>
-                              <time>{formatDate(page.deliveredAt)}</time>
-                            </li>
-                          )}
-                          {page.answeredAt && (
-                            <li>
-                              <Heart size={13} />
-                              <span>A response was delivered</span>
-                              <time>{formatDate(page.answeredAt)}</time>
-                            </li>
-                          )}
-                        </ol>
-                        <small>
-                          Times recorded in UTC. Delivery does not mean a person
-                          has read the page.
-                        </small>
-                      </details>
-                    </article>
-                  );
-                })}
-                <div className="timeline-end">
-                  <BookHeart size={22} />
-                  <p>There’s always room for another little moment.</p>
-                  <button
-                    className="secondary-button"
-                    onClick={() => compose()}
-                  >
-                    <Plus size={15} />
-                    Add your page
-                  </button>
-                </div>
-              </div>
+              <AlbumBook
+                key={selected + ":" + profile}
+                pages={visiblePages}
+                album={album}
+                profileId={profile}
+                initialPageId={highlight || undefined}
+                onCompose={(replyTo) => compose(selected, replyTo)}
+              />
             </>
           )}
 
@@ -1054,11 +840,8 @@ export default function Home() {
                     : "ALEX"}
                 </span>
                 <h1 ref={titleRef} tabIndex={-1}>
-                  What would you like to keep?
+                  A new page.
                 </h1>
-                <p>
-                  A small thing from your day can mean the world to someone.
-                </p>
               </div>
               <form
                 className="editor-paper"
@@ -1087,7 +870,7 @@ export default function Home() {
                   </div>
                 )}
                 <label className="field-label" htmlFor="page-title">
-                  Give this moment a name <span>(optional)</span>
+                  Title <span>(optional)</span>
                 </label>
                 <input
                   id="page-title"
@@ -1135,14 +918,9 @@ export default function Home() {
                     <ImagePlus size={22} />
                     <span>
                       <strong>
-                        {photoBusy
-                          ? "Preparing your photo…"
-                          : "Add a little window into your day"}
+                        {photoBusy ? "Preparing your photo…" : "Add a photo"}
                       </strong>
-                      <small>
-                        One photo · JPEG, PNG, or WebP · up to 10 MB, made
-                        lighter here
-                      </small>
+                      <small>JPEG, PNG, or WebP · up to 10 MB</small>
                     </span>
                     <Plus size={17} />
                   </button>
@@ -1177,8 +955,6 @@ export default function Home() {
                   <p>
                     <LockKeyhole size={13} />
                     Only for this shared album.
-                    <br />
-                    <span>You don’t need to wait for a reply.</span>
                   </p>
                   <button
                     className="primary-button"
@@ -1194,26 +970,21 @@ export default function Home() {
                   </button>
                 </div>
               </form>
-              <p className="editor-footnote">
-                <Cloud size={15} />
-                {online
-                  ? "Your page is recorded first, then sent through the demo link."
-                  : "Connection paused. Your page will stay recorded until the link returns."}
-              </p>
+              {!online && (
+                <p className="editor-footnote">
+                  <Cloud size={15} />
+                  Connection paused · Your page will stay queued.
+                </p>
+              )}
             </div>
           )}
 
           {view === "replies" && (
             <div className="narrow-content">
-              <span className="eyebrow small">
-                LITTLE MOMENTS, FINDING THEIR WAY BACK
-              </span>
               <h1 ref={titleRef} tabIndex={-1}>
-                Something came home.
+                Replies.
               </h1>
-              <p className="page-intro">
-                When someone continues your story, you’ll find their page here.
-              </p>
+
               {data.pages
                 .filter(
                   (p) =>
@@ -1263,10 +1034,7 @@ export default function Home() {
                 <div className="empty-state">
                   <BookHeart size={40} />
                   <h2>A quiet space for now.</h2>
-                  <p>
-                    Replies will appear when they arrive. You can leave this
-                    page and go on with your day.
-                  </p>
+
                   <button
                     className="secondary-button"
                     onClick={() => navigate("albums")}
@@ -1276,13 +1044,6 @@ export default function Home() {
                   </button>
                 </div>
               )}
-              <div className="privacy-note">
-                <Radio size={17} />
-                <p>
-                  Replies appear after delivery. There are no typing indicators,
-                  read receipts, or expectations of being online together.
-                </p>
-              </div>
             </div>
           )}
 
@@ -1297,19 +1058,11 @@ export default function Home() {
                 <br />
                 <em>this week?</em>
               </h1>
-              <p className="page-intro">
-                A small pause to notice how you feel.
-                <br />
-                No right answers. Nothing you have to earn.
-              </p>
+
               <div className="checkin-week">
                 <Leaf size={16} />
                 Week of {formatDate(weekKey(new Date()) + "T00:00:00Z")}
-                <span>
-                  {weekly
-                    ? "Saved · You can change your answers"
-                    : "About a minute, at your own pace"}
-                </span>
+                {weekly && <span>Saved · Editable</span>}
               </div>
               <form
                 className="checkin-form"
@@ -1375,7 +1128,7 @@ export default function Home() {
                   </fieldset>
                 ))}
                 <label className="field-label" htmlFor="checkin-note">
-                  Anything you’d like to make space for? <span>(optional)</span>
+                  A note for yourself <span>(optional)</span>
                 </label>
                 <textarea
                   className="note-input"
@@ -1411,22 +1164,22 @@ export default function Home() {
                 {weekly && (
                   <p className="saved-checkin">
                     <CheckCheck size={15} />
-                    Saved {formatDate(weekly.createdAt)}. Your answers are never
-                    added to an album.
+                    Saved {formatDate(weekly.createdAt)}.
                   </p>
                 )}
               </form>
               <div className="privacy-note">
                 <LockKeyhole size={18} />
                 <p>
-                  This check-in stays in this browser. It isn’t shared,
-                  monitored, or used to diagnose you. Demo profiles share this
-                  device’s storage; use your own trusted device.
-                  <br />
-                  <strong>
-                    The number of pages you write says nothing about your
-                    well-being.
-                  </strong>
+                  Saved in this browser, separate from your albums. Demo
+                  profiles share this device.{" "}
+                  <button
+                    className="inline-info"
+                    type="button"
+                    onClick={() => setDialog("about")}
+                  >
+                    About privacy
+                  </button>
                 </p>
               </div>
               {data.checkIns.filter(
@@ -1461,14 +1214,14 @@ export default function Home() {
         </main>
         <footer className="workspace-footer">
           <Brand small />
-          <span>
-            A local-first preview · Delivery is simulated · Saved in this
-            browser
-          </span>
-          <button onClick={() => setDialog("help")}>
-            Here when you need a little support
-            <Heart size={12} />
-          </button>
+          <span>Demo · Simulated delivery · Browser storage</span>
+          <div className="footer-links">
+            <button onClick={() => setDialog("about")}>How it works</button>
+            <button onClick={() => setDialog("help")}>
+              Support
+              <Heart size={12} />
+            </button>
+          </div>
         </footer>
       </div>
       {toast && (
@@ -1486,10 +1239,7 @@ export default function Home() {
         </div>
       )}
       {dialog === "choose" && (
-        <Modal title="Who is this little moment for?" onClose={closeDialog}>
-          <p className="modal-intro">
-            Pick an album. You can take your time with the words.
-          </p>
+        <Modal title="Choose an album" onClose={closeDialog}>
           <div className="album-choices">
             {albums.map((a) => (
               <button key={a.id} onClick={() => compose(a.id)}>
@@ -1579,8 +1329,9 @@ export default function Home() {
       {dialog === "about" && (
         <Modal title="Good stories take their time." onClose={closeDialog}>
           <p className="modal-intro">
-            A shared album you can add to from different places, at different
-            times. There is no right pace to stay close.
+            No rush. No missed moments. Add pages whenever you like;
+            communication delays and interruptions can hold delivery. Nobody
+            needs to be online together.
           </p>
           <ol className="how-it-works">
             <li>
@@ -1625,7 +1376,10 @@ export default function Home() {
           </ol>
           <p className="fine-print">
             This preview uses a simulated link. It never invents a human reply.
-            In a real mission, delay and interruptions may be much longer.
+            In a real mission, delays may be much longer. Check-ins stay
+            separate from albums and are not monitored or used for diagnosis.
+            Page counts never measure well-being. Demo profiles share this
+            browser’s unencrypted storage.
           </p>
         </Modal>
       )}

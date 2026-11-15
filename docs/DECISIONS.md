@@ -12,6 +12,20 @@ The application is a local-first **DEMO**, with that status visible in its inter
 
 Connection settings expose Alex, Lily, Sam, Maya, and June as demo perspectives. This allows a reviewer to create both sides of a conversation deliberately. It is not a sign-in system. UI filtering and author validation help demonstrate the intended interaction but do not create a security boundary: anyone with access to the browser can inspect or change its local data.
 
+## A book for each shared story
+
+Opening an album shows a physical-book reader rather than a timeline. Each contribution is a page, ordered by its creation time from oldest to newest. The paper, binding, page stack, folding leaf, and moving shadows support the album metaphor. Forward and backward turns, including corner dragging, preserve the sense of turning a sheet rather than sliding cards.
+
+The reader uses `src/components/AlbumBook.tsx` and `src/components/album-book.css`, with the page-fold engine supplied by `@openpageflip/react` and `@openpageflip/core`. The lockfile records the installed versions. Author, full UTC date, page position, and delivery status remain visible without a repeated explanatory paragraph on every page. A reply opens its corresponding contribution in the reader.
+
+Previous/next controls and arrow-key navigation complement pointer interaction. Narrow screens use a portrait, single-page layout. The reduced-motion media query and effect are implemented to use the engine's instant navigation instead of animated turns; runtime testing of the OS preference remains pending. Long contributions stay inside a focusable region with native scrolling within the paper page, without a separate full-text modal. The **Page details** disclosure provides additional delivery information. Book navigation does not change delivery state, mark a page read for another participant, or generate a response.
+
+## Less copy, information when needed
+
+The home and editor focus on choosing a person, reading, and adding a page. Repeated slogans and prominent response-time reassurance are removed. The “no rush” explanation is available in the existing **How it works** modal through a discreet footer link. Operational status is still conveyed where it matters: a paused connection, an unsaved draft, or an unavailable browser store must remain clear.
+
+Copy reduction does not remove the local-demo boundary, private check-in/storage information, or immediate support and emergency guidance. Those explain material limits or help the person make a decision, rather than repeating the product's mood.
+
 ## Pages and simulated transport
 
 The delivery state describes what the prototype knows:
@@ -59,13 +73,13 @@ The implementation uses Next.js 16.4.6, TypeScript, React 19, and Tailwind CSS 4
 
 Use `npm ci` to install the lockfile, `npm run dev` for local development, `npm run typecheck` for TypeScript checking, `npm test` for model tests, and `npm run build` followed by `npm run preview` to inspect the export. `next start` does not serve this static-export workflow.
 
-`.openai/hosting.json` records the Sites project binding and `out/` directory. The review deployment should remain private through Sites access settings; that file is not itself an authentication mechanism. Publishing static files through Sites does not push commits to the original GitHub repository. Source control and deployment are separate actions.
+`.openai/hosting.json` records the Sites project binding and `out/` directory. The review deployment remains private through Sites access settings; that file is not itself an authentication mechanism. The application source is maintained on the original GitHub repository's `main` branch. A release has two distinct steps: push the validated source to GitHub and deploy its matching build through Sites.
 
 ## Verification approach
 
 The `node:test` suite, executed through `tsx`, focuses on domain behavior: delivery interruption/reconnection, deadline handling, valid reply relationships, notifications, UTC dates/week boundaries, and a bounded set of support cues. Passing those tests cannot establish clinical safety, accessibility, or actual network delivery.
 
-Manual acceptance should follow complete flows: create and reload a draft; attach and remove a photo; record while offline; resume simulated delivery; switch perspective; author and deliver a reply; return to see the result; and create, reload, and edit a weekly check-in. Keyboard and mobile review should cover focus visibility, dialog close/return behavior, labels, help access, long content, and overflow. These are verification instructions, not a claim that a particular check has been executed.
+Manual acceptance should follow complete flows: open a book; navigate to its first and last pages; turn forward and backward; add a contribution; create and reload a draft; attach and remove a photo; record while offline; resume simulated delivery; switch perspective; author and deliver a reply; open the result on its book page; and create, reload, and edit a weekly check-in. Reader review should include odd/even page counts, a one-page album, corner dragging, portrait mode, keyboard controls, reduced motion, the focusable text region's native scrolling, and the **Page details** disclosure. Keyboard and mobile review should also cover focus visibility, dialog close/return behavior, labels, help access, and overflow. [VERIFICATION.md](VERIFICATION.md) records completed browser checks and distinguishes viewport testing from remaining real-device touch and runtime OS reduced-motion checks.
 
 ## Required before production
 
