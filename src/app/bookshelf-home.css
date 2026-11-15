@@ -1,0 +1,157 @@
+/* The shelf's paper navigation belongs to the home scene only. */
+.bookshelf-home .sidebar {
+  --text: #394333;
+  --muted: #60654f;
+  --line: #c2b498;
+  --surface-2: #e2d8c3;
+  --sage: #414e35;
+  --sage-light: #ddd5be;
+  --amber: #6c4d28;
+  --amber-light: #e7d6b9;
+  background:
+    linear-gradient(105deg, #f8f1e3db, #ede3d0e8),
+    url("/textures/aged-paper.jpg");
+  background-size:
+    auto,
+    560px 560px;
+  border-right: 1px solid #bda98b;
+  box-shadow:
+    5px 0 13px #503a231c,
+    inset -3px 0 0 #f7eedc;
+}
+.bookshelf-home .sidebar .nav-item.active {
+  box-shadow: inset 3px 0 0 #727956;
+}
+.bookshelf-home .sidebar button:focus-visible {
+  outline-color: #596844;
+}
+.bookshelf-home .astronaut-name {
+  font-size: 40px;
+  padding: 0 10px;
+}
+.bookshelf-home .nav-label {
+  display: none;
+}
+.bookshelf-home .sidebar nav {
+  margin-top: 44px;
+}
+.bookshelf-home .workspace {
+  background:
+    linear-gradient(110deg, #dbc8aae0, #e6d4bce3),
+    url("/textures/aged-paper.jpg");
+  background-size:
+    auto,
+    720px 720px;
+}
+.bookshelf-home .main-content {
+  width: 100%;
+  max-width: 1380px;
+  padding: 34px 30px 24px;
+  min-height: calc(100dvh - 66px);
+}
+.bookshelf-home .workspace-footer {
+  min-height: 66px;
+  height: auto;
+  padding: 14px 30px;
+  gap: 18px;
+  background: transparent;
+  border-color: #a18e6e4d;
+}
+.bookshelf-home .workspace-footer > span {
+  color: #5d604d;
+  font-size: 10px;
+  line-height: 1.5;
+}
+.bookshelf-home .footer-links button {
+  color: #4e5941;
+  font-size: 11px;
+}
+.album-create-form {
+  display: grid;
+  gap: 12px;
+}
+.album-create-form .field-label {
+  margin: 8px 0 0;
+}
+.album-create-form .story-input {
+  min-height: 46px;
+  height: 46px;
+  padding: 10px 12px;
+  font: 400 15px / 1.4 var(--sans);
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.album-create-form .primary-button {
+  margin-top: 14px;
+  justify-self: end;
+}
+:root[data-theme="night"] .bookshelf-home .sidebar {
+  --text: #e9e3d4;
+  --muted: #bac5bd;
+  --line: #64716b;
+  --surface-2: #344a54;
+  --sage: #ede6d3;
+  --sage-light: #40595b;
+  --amber: #e8ce9a;
+  --amber-light: #344b58;
+  background:
+    linear-gradient(105deg, #263e4cf5, #203544f5),
+    url("/textures/aged-paper.jpg");
+  box-shadow:
+    5px 0 13px #091a2733,
+    inset -2px 0 #6b7f7926;
+  border-color: #61716c;
+}
+:root[data-theme="night"] .bookshelf-home .sidebar button:focus-visible {
+  outline-color: #d5d9bd;
+}
+:root[data-theme="night"] .bookshelf-home .workspace {
+  background:
+    linear-gradient(110deg, #1e3449f2, #213849f5),
+    url("/textures/aged-paper.jpg");
+}
+:root[data-theme="night"] .bookshelf-home .workspace-footer > span,
+:root[data-theme="night"] .bookshelf-home .footer-links button {
+  color: #c6cec1;
+}
+@media (max-width: 980px) {
+  .bookshelf-home .astronaut-name {
+    font-size: 18px;
+    padding: 0;
+  }
+  .bookshelf-home .sidebar nav {
+    margin-top: 24px;
+  }
+  .bookshelf-home .main-content {
+    padding: 24px 20px;
+  }
+}
+@media (max-width: 520px) {
+  .bookshelf-home .sidebar nav {
+    margin-top: 0;
+  }
+  .bookshelf-home .sidebar {
+    box-shadow: 0 -3px 12px #3b312328;
+  }
+  .bookshelf-home .main-content {
+    padding: 14px 10px 22px;
+    min-height: 0;
+  }
+  .bookshelf-home .mobile-astronaut {
+    padding: 20px 20px 2px;
+  }
+  .bookshelf-home .workspace-footer {
+    padding: 14px 12px 18px;
+    gap: 10px;
+  }
+  .bookshelf-home .workspace-footer > span {
+    width: 100%;
+    text-align: center;
+    font-size: 10px;
+  }
+  .bookshelf-home .footer-links button {
+    font-size: 11px;
+  }
+}

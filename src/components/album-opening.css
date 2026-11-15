@@ -104,7 +104,7 @@
   -webkit-backface-visibility: hidden;
 }
 .opening-cover-front {
-  padding: 9% 9% 0 12%;
+  padding: 0;
   background-color: var(--opening-cloth);
   color: var(--cover-ink);
   border: 1px solid color-mix(in srgb, var(--opening-cloth) 80%, #263544);

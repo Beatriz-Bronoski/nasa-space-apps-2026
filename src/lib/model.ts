@@ -56,6 +56,7 @@ export type CheckIn = {
 };
 export type AppData = {
   version: 1;
+  customAlbums?: Album[];
   pages: Contribution[];
   drafts: Record<string, Draft>;
   checkIns: CheckIn[];
@@ -139,6 +140,61 @@ export const ALBUMS: Album[] = [
     accent: "blue",
   },
 ];
+
+export const MAX_CUSTOM_ALBUMS = 48;
+export const MAX_ALBUM_TITLE_LENGTH = 70;
+
+const customAlbumId = (value: unknown): value is string =>
+  typeof value === "string" &&
+  /^album-[A-Za-z0-9][A-Za-z0-9-]{0,85}$/.test(value);
+const albumTitle = (value: unknown): value is string =>
+  typeof value === "string" &&
+  value === value.trim() &&
+  value.length > 0 &&
+  value.length <= MAX_ALBUM_TITLE_LENGTH &&
+  !/[\u0000-\u001f\u007f]/.test(value);
+
+/** Custom books reuse an existing companion's locally bundled cover materials. */
+export function isCustomAlbum(value: unknown): value is Album {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const record = value as Record<string, unknown>;
+  const template = ALBUMS.find((item) => item.personId === record.personId);
+  return (
+    !!template &&
+    customAlbumId(record.id) &&
+    albumTitle(record.title) &&
+    record.cover === template.cover &&
+    record.accent === template.accent &&
+    record.subtitle === template.subtitle
+  );
+}
+
+export function getAlbums(data: Pick<AppData, "customAlbums">): Album[] {
+  return [...ALBUMS, ...(data.customAlbums ?? [])];
+}
+
+/** Add an empty shared album without creating a page, reply, or new participant. */
+export function createAlbum(
+  data: AppData,
+  input: Pick<Album, "personId" | "title">,
+  id = `album-${globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`}`,
+): AppData {
+  const template = ALBUMS.find((item) => item.personId === input.personId);
+  if (!template) throw new Error("Choose someone from your existing circle.");
+  const title = typeof input.title === "string" ? input.title.trim() : "";
+  if (!albumTitle(title))
+    throw new Error(
+      `Give this album a name between 1 and ${MAX_ALBUM_TITLE_LENGTH} characters.`,
+    );
+  if (!customAlbumId(id) || getAlbums(data).some((item) => item.id === id))
+    throw new Error("This album could not be added. Please try again.");
+  if ((data.customAlbums?.length ?? 0) >= MAX_CUSTOM_ALBUMS)
+    throw new Error(
+      `Your bookshelf can hold up to ${MAX_CUSTOM_ALBUMS} added albums.`,
+    );
+  const album: Album = { ...template, id, title };
+  return { ...data, customAlbums: [...(data.customAlbums ?? []), album] };
+}
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -249,7 +305,7 @@ export function addContribution(
   input: NewContribution,
   now = new Date(),
 ): AppData {
-  const album = ALBUMS.find((item) => item.id === input.albumId);
+  const album = getAlbums(data).find((item) => item.id === input.albumId);
   if (
     !album ||
     (input.authorId !== "alex" && input.authorId !== album.personId)

@@ -1,6 +1,9 @@
 import {
-  ALBUMS,
+  MAX_CUSTOM_ALBUMS,
   PEOPLE,
+  getAlbums,
+  isCustomAlbum,
+  type Album,
   type AppData,
   type Contribution,
   type CheckIn,
@@ -16,7 +19,6 @@ const text = (x: unknown, max = 12000) =>
 const date = (x: unknown) =>
   typeof x === "string" && Number.isFinite(Date.parse(x));
 const person = (x: unknown) => PEOPLE.some((p) => p.id === x);
-const album = (x: unknown) => ALBUMS.some((a) => a.id === x);
 const photo = (x: unknown) =>
   x === undefined ||
   (typeof x === "string" &&
@@ -32,22 +34,32 @@ function invalid(): never {
   );
 }
 
-const validPage = (p: unknown): p is Contribution =>
-  isObject(p) &&
-  identifier(p.id) &&
-  album(p.albumId) &&
-  person(p.authorId) &&
-  (p.authorId === "alex" || p.authorId === p.albumId) &&
-  text(p.title, 120) &&
-  text(p.text, 10000) &&
-  photo(p.photo) &&
-  (p.design === undefined || isPageDesign(p.design)) &&
-  date(p.createdAt) &&
-  ["recorded", "sent", "delivered", "answered"].includes(p.status as string) &&
-  [p.sentAt, p.deliveredAt, p.answeredAt].every(
-    (t) => t === undefined || date(t),
-  ) &&
-  (p.replyTo === undefined || identifier(p.replyTo));
+const validPage = (
+  p: unknown,
+  albums: Map<string, Album>,
+): p is Contribution => {
+  if (!isObject(p)) return false;
+  const album =
+    typeof p.albumId === "string" ? albums.get(p.albumId) : undefined;
+  return (
+    identifier(p.id) &&
+    !!album &&
+    person(p.authorId) &&
+    (p.authorId === "alex" || p.authorId === album.personId) &&
+    text(p.title, 120) &&
+    text(p.text, 10000) &&
+    photo(p.photo) &&
+    (p.design === undefined || isPageDesign(p.design)) &&
+    date(p.createdAt) &&
+    ["recorded", "sent", "delivered", "answered"].includes(
+      p.status as string,
+    ) &&
+    [p.sentAt, p.deliveredAt, p.answeredAt].every(
+      (t) => t === undefined || date(t),
+    ) &&
+    (p.replyTo === undefined || identifier(p.replyTo))
+  );
+};
 const validCheckIn = (c: unknown): c is CheckIn =>
   isObject(c) &&
   identifier(c.id) &&
@@ -86,8 +98,18 @@ export function parseStoredData(raw: string): AppData {
     !Array.isArray(v.readReplyIds)
   )
     throw new Error("Unrecognized saved data");
+  const customAlbums = v.customAlbums === undefined ? [] : v.customAlbums;
   if (
-    !v.pages.every(validPage) ||
+    !Array.isArray(customAlbums) ||
+    customAlbums.length > MAX_CUSTOM_ALBUMS ||
+    !customAlbums.every(isCustomAlbum)
+  )
+    invalid();
+  const albums = getAlbums({ customAlbums });
+  if (!unique(albums.map((item) => item.id))) invalid();
+  const albumById = new Map(albums.map((item) => [item.id, item]));
+  if (
+    !v.pages.every((page) => validPage(page, albumById)) ||
     !v.checkIns.every(validCheckIn) ||
     !v.readReplyIds.every(identifier)
   )
@@ -117,17 +139,23 @@ export function parseStoredData(raw: string): AppData {
       invalid();
   const drafts: Record<string, Draft> = {};
   for (const [key, d] of Object.entries(v.drafts)) {
-    if (
-      !/^(alex|lily|sam|maya|june):(lily|sam|maya|june)$/.test(key) ||
-      !validDraft(d)
-    )
+    const parts = key.split(":");
+    const [authorId, albumId] = parts;
+    const album = albumById.get(albumId);
+    if (parts.length !== 2 || !person(authorId) || !album || !validDraft(d))
       invalid();
-    const [authorId, albumId] = key.split(":");
-    if (authorId !== "alex" && authorId !== albumId) invalid();
+    if (authorId !== "alex" && authorId !== album.personId) invalid();
     if (d.replyTo && !validReply(d.replyTo, albumId, authorId)) invalid();
     drafts[key] = d;
   }
-  return { version: 1, pages, drafts, checkIns, readReplyIds };
+  return {
+    version: 1,
+    ...(v.customAlbums === undefined ? {} : { customAlbums }),
+    pages,
+    drafts,
+    checkIns,
+    readReplyIds,
+  };
 }
 
 /** Canvas re-encoding strips source metadata and keeps the queued payload small. */

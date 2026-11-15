@@ -1,0 +1,609 @@
+.rustic-bookshelf {
+  --shelf-spine-width: clamp(62px, 7.8cqi, 88px);
+  --shelf-cover-width: clamp(226px, 26cqi, 280px);
+  --shelf-book-height: clamp(336px, 42cqi, 430px);
+  --shelf-max-row: 6;
+  --shelf-wood: url("/textures/rustic-wood.jpg");
+  --shelf-paper: #edddbc;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  container-type: inline-size;
+}
+.shelf-cabinet {
+  padding: 18px;
+  border: 1px solid #774720;
+  border-radius: 4px;
+  background-color: #9a5d2e;
+  background-image:
+    linear-gradient(105deg, #c58b4021, #5730112b), var(--shelf-wood);
+  background-size:
+    auto,
+    100% auto;
+  box-shadow:
+    0 12px 22px #51351c38,
+    0 2px 3px #49311b66,
+    inset 2px 2px 2px #ecc98c80,
+    inset -2px -2px 3px #4c2e1a99;
+}
+.rustic-bookshelf .shelf-heading {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 19px;
+  min-height: 80px;
+  padding: 17px 25px;
+  margin-bottom: 19px;
+  color: #42462a;
+  background:
+    linear-gradient(115deg, #f8ebd2bd, #e6cea36b),
+    url("/textures/aged-paper.jpg") center / 500px;
+  border: 1px solid #9e6d3b;
+  box-shadow:
+    inset 0 2px 6px #6e4b2340,
+    0 2px 2px #f1cd8a66;
+}
+.rustic-bookshelf .shelf-heading h1 {
+  margin: 0;
+  color: inherit;
+  font: 500 clamp(27px, 3.4cqi, 39px) / 1.2 var(--serif, Georgia, serif);
+  letter-spacing: -0.04em;
+  outline-offset: 6px;
+}
+.rustic-bookshelf .shelf-add-album {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 6px 8px;
+  color: inherit;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font: 500 15px / 1.4 var(--serif, Georgia, serif);
+}
+.rustic-bookshelf .shelf-add-album:hover {
+  background: #6a70301a;
+  border-color: #77784d55;
+}
+.shelf-heading-brand {
+  padding-left: 20px;
+  border-left: 1px solid #7d744a80;
+  white-space: nowrap;
+  font: 500 19px / 1.3 var(--serif, Georgia, serif);
+}
+.shelf-compartment {
+  position: relative;
+  padding: 20px 20px 22px;
+  margin-bottom: 21px;
+  background-color: #bca278;
+  background-image:
+    radial-gradient(ellipse at 13% 55%, #eed3a22e, transparent 55%),
+    linear-gradient(#ad8a6066, #d3bd9759), url("/textures/aged-paper.jpg");
+  background-size: auto, auto, 620px;
+  border-left: 2px solid #6b421f;
+  border-right: 2px solid #bd8546;
+  box-shadow:
+    inset 0 27px 28px -14px #4b2e17ba,
+    inset 12px 0 16px -8px #4f301b88,
+    inset -8px 0 12px -7px #59402366;
+}
+.shelf-compartment:last-child {
+  margin-bottom: 0;
+}
+.shelf-compartment::before {
+  content: "";
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  bottom: 0;
+  height: 22px;
+  background:
+    linear-gradient(#d7a96430, #6b3f2026),
+    var(--shelf-wood) center 70% / 100% auto;
+  border-top: 1px solid #e6bf7e99;
+  box-shadow:
+    0 -5px 12px #55351a45,
+    inset 0 3px 2px #e1ae6566;
+  pointer-events: none;
+  z-index: 0;
+}
+.shelf-compartment::after {
+  content: "";
+  position: absolute;
+  left: -5px;
+  right: -5px;
+  bottom: -18px;
+  height: 18px;
+  background:
+    linear-gradient(#a2673155, #4e30194d),
+    var(--shelf-wood) center 90% / 100% auto;
+  border: 1px solid #70451f;
+  box-shadow:
+    inset 0 1px #e6ba7566,
+    0 8px 10px -5px #50301e66;
+  pointer-events: none;
+  z-index: 1;
+}
+.shelf-book-row {
+  display: flex;
+  align-items: end;
+  gap: 7px;
+  min-height: var(--shelf-book-height);
+  padding-right: calc(
+    var(--shelf-cover-width) - var(--shelf-spine-width) * 0.55
+  );
+  transition: padding-right 650ms cubic-bezier(0.2, 0.72, 0.22, 1);
+}
+.shelf-measuring .shelf-book-row {
+  overflow: hidden;
+}
+.shelf-book-slot {
+  flex: 0 0 var(--shelf-spine-width);
+  position: relative;
+  transition: flex-basis 650ms cubic-bezier(0.2, 0.72, 0.22, 1);
+}
+.shelf-book-row:has(.shelf-active) {
+  padding-right: 0;
+}
+.shelf-book-slot:has(.shelf-active) {
+  flex-basis: calc(var(--shelf-cover-width) + var(--shelf-spine-width) * 0.45);
+}
+.rustic-bookshelf .shelf-book-trigger {
+  --shelf-cloth: var(--cover-ochre, #64663c);
+  position: relative;
+  display: block;
+  width: var(--shelf-spine-width);
+  height: var(--shelf-book-height);
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  color: #f4e0b4;
+  background: none;
+  perspective: 1600px;
+  perspective-origin: 50% 50%;
+  text-align: left;
+  outline-offset: 7px;
+  z-index: 2;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.rustic-bookshelf .shelf-accent-sage {
+  --shelf-cloth: var(--cover-olive, #667451);
+}
+.rustic-bookshelf .shelf-accent-terracotta {
+  --shelf-cloth: var(--cover-clay, #985b43);
+}
+.rustic-bookshelf .shelf-accent-blue {
+  --shelf-cloth: var(--cover-slate, #455e6b);
+}
+.shelf-volume {
+  position: absolute;
+  left: calc(var(--shelf-spine-width) * 0.5);
+  top: 0;
+  width: var(--shelf-cover-width);
+  height: 100%;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  transform: rotateY(88deg);
+  transition: transform 650ms cubic-bezier(0.2, 0.72, 0.22, 1);
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.shelf-spine,
+.shelf-back-board,
+.rustic-bookshelf .shelf-front-cover.album-book {
+  position: absolute;
+  height: 100%;
+  background-color: var(--shelf-cloth);
+  background-image:
+    linear-gradient(
+      100deg,
+      #15251f59,
+      #f4deb726 24%,
+      transparent 50%,
+      #22291747 98%
+    ),
+    url("/textures/cloth-weave.svg");
+  background-size:
+    auto,
+    20px 20px;
+  border: 1px solid color-mix(in srgb, var(--shelf-cloth) 65%, #302c1b);
+  backface-visibility: hidden;
+}
+.shelf-spine {
+  top: 0;
+  left: calc(var(--shelf-spine-width) * -0.5);
+  width: var(--shelf-spine-width);
+  border-radius: 11px 11px 9px 9px;
+  transform: rotateY(-90deg);
+  box-shadow:
+    inset 3px 0 4px #f3ddb333,
+    inset -4px 0 5px #1f241e66,
+    1px 4px 6px #2f251e66;
+}
+.shelf-spine::after {
+  content: "";
+  position: absolute;
+  inset: 6px 5px;
+  border: 1px dashed #e8d8ad40;
+  border-radius: 8px;
+}
+.shelf-spine-band {
+  position: absolute;
+  left: 1px;
+  right: 1px;
+  height: 12px;
+  border-radius: 45%;
+  background: linear-gradient(
+    #19291d45,
+    #ead2a657 24%,
+    #3f412144 48%,
+    #e6d3a038 65%,
+    #29352250
+  );
+  box-shadow:
+    0 2px 2px #17251d40,
+    0 -1px 0 #e6d2a140;
+}
+.shelf-band-top {
+  top: 13%;
+}
+.shelf-band-bottom {
+  bottom: 13%;
+}
+.shelf-spine-pair {
+  position: absolute;
+  top: 24%;
+  left: 52%;
+  height: 53%;
+  writing-mode: vertical-rl;
+  transform: translateX(-50%) rotate(180deg);
+  white-space: nowrap;
+  text-align: center;
+  color: var(--cover-ink, #f8eedc);
+  font: 500 clamp(22px, calc(var(--shelf-spine-width) * 0.42), 37px) / 1.2
+    var(--serif, Georgia, serif);
+  text-shadow: 0 1px 1px #3b311b99;
+}
+.shelf-spine-title {
+  position: absolute;
+  left: 7px;
+  top: 25%;
+  height: 50%;
+  overflow: hidden;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--cover-ink, #f8eedc);
+  font: 400 10px / 1.2 var(--sans, sans-serif);
+  opacity: 1;
+}
+.shelf-reply-marker {
+  position: absolute;
+  top: 7%;
+  left: calc(50% - 3px);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #eed09b;
+  box-shadow: 0 0 0 3px #e2c58326;
+}
+.shelf-back-board {
+  inset: 0;
+  width: 100%;
+  border-radius: 5px 12px 12px 5px;
+  transform: translateZ(calc(var(--shelf-spine-width) * -0.5));
+}
+.shelf-page-block {
+  position: absolute;
+  inset: 6px 6px 5px 3px;
+  background: linear-gradient(90deg, #c4b58f, #f1e4c8 8%, #e0d0aa 97%);
+  border: 1px solid #b2a17d;
+  border-radius: 2px 8px 8px 2px;
+  transform: translateZ(calc(var(--shelf-spine-width) * 0.5 - 6px));
+  box-shadow:
+    2px 0 #a89570,
+    4px 0 #eadbb9;
+}
+.shelf-page-edge {
+  position: absolute;
+  left: 100%;
+  top: 7px;
+  bottom: 6px;
+  width: var(--shelf-spine-width);
+  transform-origin: left center;
+  transform: translateZ(calc(var(--shelf-spine-width) * 0.5)) rotateY(90deg);
+  background: repeating-linear-gradient(
+    90deg,
+    #d8c79f 0 1px,
+    #f2e5c8 1px 3px,
+    #bda882 3px 3.5px
+  );
+  border-radius: 0 6px 6px 0;
+  backface-visibility: hidden;
+}
+.rustic-bookshelf .shelf-front-cover.album-book {
+  inset: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  border-radius: 3px 13px 13px 3px;
+  transform-origin: left center;
+  transform: translateZ(calc(var(--shelf-spine-width) * 0.5));
+  box-shadow:
+    inset 2px 0 4px #172c2140,
+    inset -2px -1px 1px #f7dfac50,
+    3px 6px 9px #2f251c55;
+  transition: transform 650ms cubic-bezier(0.2, 0.72, 0.22, 1);
+}
+.rustic-bookshelf .shelf-front-cover.album-book::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  opacity: 1;
+  border: 1px dashed #ebd7a77d;
+  border-radius: 2px 8px 8px 2px;
+  background: none;
+  box-shadow: 0 0 0 1px #29332126;
+  z-index: 2;
+  pointer-events: none;
+}
+.shelf-cover-content {
+  position: absolute;
+  inset: 0;
+  container-type: inline-size;
+  color: #46492a;
+}
+.shelf-cover-label {
+  position: absolute;
+  top: 8%;
+  left: 9%;
+  width: 82%;
+  padding: 7px 8px 6px;
+  background:
+    linear-gradient(120deg, #fbf2dca6, #dfca9c66),
+    url("/textures/aged-paper.jpg") center / 300px;
+  border: 1px solid #a78c56;
+  border-radius: 2px 3px 3px 2px;
+  box-shadow:
+    1px 3px 3px #2d30213d,
+    inset 0 0 0 2px #f5e5c2;
+  transform: rotate(1.1deg);
+  text-align: center;
+}
+.shelf-cover-label::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1px dashed #9a8755b3;
+  border-radius: 1px;
+  pointer-events: none;
+}
+.shelf-cover-names {
+  position: relative;
+  display: block;
+  font: 500 clamp(13px, 9.4cqw, 32px) / 1.2 var(--serif, Georgia, serif);
+  white-space: nowrap;
+}
+.shelf-cover-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: 4px;
+  padding: 0 3px;
+  font: 400 clamp(8px, 3.9cqw, 13px) / 1.25 var(--serif, Georgia, serif);
+}
+.shelf-cover-photo {
+  position: absolute;
+  top: 31%;
+  left: 11%;
+  width: 78%;
+  height: 44%;
+  padding: 5px;
+  background: #f8f0dc;
+  border: 1px solid #d7c9aa;
+  box-shadow: 3px 5px 5px #25301b40;
+  transform: rotate(-1.2deg);
+}
+.shelf-cover-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+}
+.shelf-photo-corner {
+  position: absolute;
+  width: 15%;
+  aspect-ratio: 1;
+  z-index: 2;
+  background: linear-gradient(
+    135deg,
+    #edcf8d,
+    #c6a266 54%,
+    #a58044 57%,
+    #ddbc80 64%
+  );
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+  filter: drop-shadow(1px 1px 1px #5b4c2b66);
+}
+.shelf-corner-tl {
+  top: 0;
+  left: 0;
+}
+.shelf-corner-tr {
+  top: 0;
+  right: 0;
+  transform: rotate(90deg);
+}
+.shelf-corner-bl {
+  bottom: 0;
+  left: 0;
+  transform: rotate(-90deg);
+}
+.shelf-corner-br {
+  bottom: 0;
+  right: 0;
+  transform: rotate(180deg);
+}
+.shelf-cover-sprout {
+  position: absolute;
+  width: 19%;
+  height: auto;
+  bottom: 7%;
+  left: 41%;
+  color: #dfc989;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  filter: drop-shadow(0 1px 1px #29321eaa);
+}
+.shelf-cover-sprout path:first-child {
+  fill: #b9ae5d55;
+}
+.shelf-book-trigger.shelf-active {
+  z-index: 20;
+}
+.shelf-book-trigger.shelf-active::before {
+  content: "";
+  position: absolute;
+  top: -18px;
+  bottom: -5px;
+  left: -8px;
+  width: calc(var(--shelf-cover-width) + var(--shelf-spine-width) * 0.45);
+  border-radius: 8px;
+  pointer-events: auto;
+  z-index: -1;
+}
+.shelf-book-trigger.shelf-active .shelf-volume {
+  transform: translate3d(calc(var(--shelf-spine-width) * -0.32), -10px, 52px)
+    rotateY(12deg);
+}
+.rustic-bookshelf .shelf-active .shelf-front-cover {
+  transform: translateZ(calc(var(--shelf-spine-width) * 0.5)) rotateY(-6deg);
+}
+.shelf-book-trigger.opening-source .shelf-volume {
+  visibility: hidden;
+}
+.shelf-touch-instruction {
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted, #626953);
+}
+.shelf-empty {
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  background: #d9c49e;
+}
+.shelf-empty button {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 18px;
+  color: #424a30;
+  border: 1px solid #818356;
+  border-radius: 6px;
+  background: #f4e7cc;
+}
+:root[data-theme="night"] .shelf-heading {
+  color: #ede5cc;
+  background:
+    linear-gradient(115deg, #314653ec, #253d4aed),
+    url("/textures/aged-paper.jpg");
+  border-color: #5c624c;
+}
+:root[data-theme="night"] .shelf-compartment {
+  background-image:
+    linear-gradient(#243b41c9, #354946d1), url("/textures/aged-paper.jpg");
+  box-shadow:
+    inset 0 27px 28px -14px #091b25dd,
+    inset 12px 0 16px -8px #091b25aa;
+}
+:root[data-theme="night"] .shelf-cabinet {
+  background-image: linear-gradient(#182a3859, #182a3859), var(--shelf-wood);
+  box-shadow:
+    0 12px 22px #091b2566,
+    0 2px 3px #091b25aa,
+    inset 2px 2px 2px #dbba734d,
+    inset -2px -2px 3px #19291b99;
+}
+@container (max-width: 600px) {
+  .shelf-cabinet {
+    padding: 11px;
+  }
+  .rustic-bookshelf .shelf-heading {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px 8px;
+    padding: 15px 13px;
+    margin-bottom: 14px;
+  }
+  .rustic-bookshelf .shelf-heading h1 {
+    font-size: clamp(23px, 6.7cqi, 30px);
+  }
+  .shelf-heading-brand {
+    padding-left: 0;
+    border: 0;
+    font-size: 14px;
+  }
+  .rustic-bookshelf .shelf-add-album {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: start;
+    min-height: 35px;
+    padding-left: 0;
+    font-size: 13px;
+  }
+  .shelf-rows {
+    --shelf-spine-width: clamp(44px, 12cqi, 54px);
+    --shelf-cover-width: clamp(146px, 44cqi, 176px);
+    --shelf-book-height: clamp(260px, 74cqi, 344px);
+    --shelf-max-row: 2;
+  }
+  .shelf-compartment {
+    padding: 15px 10px 18px;
+    margin-bottom: 18px;
+  }
+  .shelf-compartment::before {
+    height: 18px;
+  }
+  .shelf-compartment::after {
+    height: 15px;
+    bottom: -15px;
+  }
+  .shelf-book-row {
+    gap: 5px;
+  }
+  .shelf-spine-pair {
+    font-size: calc(var(--shelf-spine-width) * 0.43);
+    left: 58%;
+  }
+  .shelf-spine-title {
+    font-size: 8px;
+    left: 4px;
+  }
+  .shelf-spine-band {
+    height: 8px;
+  }
+  .shelf-book-trigger.shelf-active .shelf-volume {
+    transform: translate3d(calc(var(--shelf-spine-width) * -0.32), -7px, 26px)
+      rotateY(12deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shelf-volume,
+  .rustic-bookshelf .shelf-front-cover.album-book,
+  .shelf-book-row,
+  .shelf-book-slot {
+    transition: none;
+  }
+}

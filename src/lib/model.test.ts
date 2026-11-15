@@ -3,12 +3,15 @@ import assert from "node:assert/strict";
 import {
   addContribution,
   advanceDelivery,
+  createAlbum,
   createInitialData,
   formatDate,
   getReplyNotifications,
+  getAlbums,
   getStatusLabel,
   hasCrisisLanguage,
   weekKey,
+  MAX_CUSTOM_ALBUMS,
   type AppData,
   type Contribution,
   type PageDesign,
@@ -21,6 +24,124 @@ const empty = (): AppData => ({
   drafts: {},
   checkIns: [],
   readReplyIds: [],
+});
+
+test("adding an album creates an empty persistent book with bounded title and existing companion materials", () => {
+  const original = empty();
+  const data = createAlbum(
+    original,
+    { personId: "lily", title: "  Growing together  " },
+    "album-garden",
+  );
+  const book = getAlbums(data).find((item) => item.id === "album-garden")!;
+  assert.equal(book.title, "Growing together");
+  assert.equal(book.personId, "lily");
+  assert.equal(book.cover, "/images/lily.jpg");
+  assert.equal(book.accent, "amber");
+  assert.equal(getAlbums(data).length, 5);
+  assert.deepEqual(data.pages, []);
+  assert.equal(Object.hasOwn(original, "customAlbums"), false);
+  assert.throws(
+    () =>
+      createAlbum(data, { personId: "lily", title: "Same ID" }, "album-garden"),
+    /try again/,
+  );
+  for (const title of ["", "   ", "x".repeat(71), "Two\nlines"])
+    assert.throws(
+      () => createAlbum(original, { personId: "lily", title }),
+      /name between/,
+    );
+  for (const personId of ["alex", "unknown"])
+    assert.throws(
+      () => createAlbum(original, { personId, title: "A book" }),
+      /existing circle/,
+    );
+  assert.throws(
+    () =>
+      createAlbum(original, { personId: "lily", title: "A book" }, "alex:lily"),
+    /try again/,
+  );
+  let full = original;
+  for (let i = 0; i < MAX_CUSTOM_ALBUMS; i++)
+    full = createAlbum(
+      full,
+      { personId: "lily", title: `Book ${i + 1}` },
+      `album-${i}`,
+    );
+  assert.throws(
+    () => createAlbum(full, { personId: "lily", title: "One more" }),
+    /48 added albums/,
+  );
+});
+
+test("custom albums preserve participant and reply boundaries throughout simulated delivery", () => {
+  let data = createAlbum(
+    empty(),
+    { personId: "lily", title: "Our garden" },
+    "album-garden",
+  );
+  data = createAlbum(
+    data,
+    { personId: "lily", title: "Our sketches" },
+    "album-sketches",
+  );
+  const input = {
+    albumId: "album-garden",
+    authorId: "alex",
+    title: "A new leaf",
+    text: "We can keep watching it grow.",
+  };
+  data = addContribution(data, input, now);
+  data = {
+    ...data,
+    pages: advanceDelivery(
+      advanceDelivery(data.pages, true, now),
+      true,
+      new Date(now.getTime() + 12_000),
+    ),
+  };
+  const parent = data.pages[0];
+  assert.equal(parent.status, "delivered");
+  assert.throws(
+    () => addContribution(data, { ...input, authorId: "maya" }),
+    /participant/,
+  );
+  assert.throws(
+    () =>
+      addContribution(data, {
+        ...input,
+        albumId: "album-sketches",
+        authorId: "lily",
+        replyTo: parent.id,
+      }),
+    /other participant/,
+  );
+  const replied = addContribution(
+    data,
+    {
+      ...input,
+      authorId: "lily",
+      text: "It has two leaves now!",
+      replyTo: parent.id,
+    },
+    new Date(now.getTime() + 20_000),
+  );
+  const sent = advanceDelivery(
+    replied.pages,
+    true,
+    new Date(now.getTime() + 20_000),
+  );
+  const delivered = advanceDelivery(
+    sent,
+    true,
+    new Date(now.getTime() + 32_000),
+  );
+  assert.equal(delivered[0].status, "answered");
+  assert.equal(
+    getReplyNotifications({ ...replied, pages: delivered }, "alex")[0].authorId,
+    "lily",
+  );
+  assert.equal(data.customAlbums?.length, 2);
 });
 const page = (extra: Partial<Contribution> = {}): Contribution => ({
   id: "original",

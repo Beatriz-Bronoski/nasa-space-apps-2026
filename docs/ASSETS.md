@@ -13,6 +13,10 @@ Each original page states that its photograph is free to use under the [Unsplash
 
 Images were resized and cropped through Unsplash's image service (`fit=crop&w=720&h=720&q=78`). The people pictured are unrelated to the fictional album names. Covers are decorative examples and should be replaced by participant-chosen memories in a deployed multiuser service.
 
+## Rustic bookshelf
+
+The cabinet reuses the existing self-hosted wood and aged-paper materials below. Cloth-bound spines, raised bands, sewn labels, corner mounts, and the small sprout emblem in `Bookshelf.tsx` are original CSS/SVG construction. The shelf and flying cover share the same content renderer. No new raster images or external asset requests were introduced for this revision.
+
 ## Generated physical materials
 
 The following original material textures were generated with the built-in OpenAI image-generation tool on 15 November 2026 for this application. They contain no photographs of people, text, logos, or third-party artwork. The generated PNG originals were retained outside the repository; project copies were resized and JPEG-compressed with the existing Sharp dependency, without content editing.

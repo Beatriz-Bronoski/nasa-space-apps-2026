@@ -1,6 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createInitialData, type AppData, type PageDesign } from "./model";
+import {
+  addContribution,
+  advanceDelivery,
+  createAlbum,
+  createInitialData,
+  MAX_CUSTOM_ALBUMS,
+  type AppData,
+  type PageDesign,
+} from "./model";
 import { parseStoredData } from "./storage";
 
 const now = new Date("2026-11-14T15:00:00Z");
@@ -69,6 +77,130 @@ test("legacy version-one snapshots without design metadata still load unchanged"
   assert.deepEqual(restored, data);
   assert.equal(Object.hasOwn(restored.pages[0], "design"), false);
   assert.equal(Object.hasOwn(restored.drafts["alex:lily"], "design"), false);
+  assert.equal(Object.hasOwn(restored, "customAlbums"), false);
+});
+
+const customSaved = () => {
+  let data = createAlbum(
+    saved(),
+    { personId: "lily", title: "Our garden" },
+    "album-garden",
+  );
+  data = addContribution(
+    data,
+    {
+      albumId: "album-garden",
+      authorId: "alex",
+      title: "From here",
+      text: "A leaf unfolded.",
+    },
+    now,
+  );
+  data = {
+    ...data,
+    pages: advanceDelivery(
+      advanceDelivery(data.pages, true, now),
+      true,
+      new Date(now.getTime() + 12_000),
+    ),
+  };
+  const parent = data.pages.find((item) => item.albumId === "album-garden")!;
+  data.drafts["lily:album-garden"] = {
+    title: "From Earth",
+    text: "Two leaves now.",
+    replyTo: parent.id,
+    design: design(),
+  };
+  data.drafts["alex:album-garden"] = {
+    title: "Another moment",
+    text: "A draft for this book.",
+  };
+  return addContribution(
+    data,
+    {
+      albumId: "album-garden",
+      authorId: "lily",
+      title: "Your plant says hello",
+      text: "Mine has grown too.",
+      replyTo: parent.id,
+    },
+    new Date(now.getTime() + 20_000),
+  );
+};
+
+test("added albums, their contributions and both participant drafts round-trip with legacy records", () => {
+  const data = customSaved();
+  const restored = parse(data);
+  assert.deepEqual(restored, data);
+  assert.equal(restored.customAlbums?.[0].title, "Our garden");
+  assert.equal(
+    restored.pages.filter((item) => item.albumId === "album-garden").length,
+    2,
+  );
+  assert.equal(restored.drafts["lily:album-garden"].design?.layout, "postcard");
+  assert.equal(restored.checkIns[0].note, data.checkIns[0].note);
+});
+
+test("invalid added-album metadata rejects the complete snapshot without introducing external covers or participants", () => {
+  const invalidPatches = [
+    { id: "lily" },
+    { id: "album-bad:id" },
+    { id: "album-" },
+    { personId: "alex" },
+    { personId: "unknown" },
+    { title: "" },
+    { title: " padded " },
+    { title: "x".repeat(71) },
+    { title: "New\nline" },
+    { cover: "https://tracker.example/book.jpg" },
+    { cover: "javascript:alert(1)" },
+    { cover: "data:image/jpeg;base64,/9j/2Q==" },
+    { cover: "/images/sam.jpg" },
+    { accent: "script" },
+    { subtitle: "Unvalidated metadata" },
+  ];
+  for (const patch of invalidPatches) {
+    const data = customSaved();
+    Object.assign(data.customAlbums![0], patch);
+    const raw = JSON.stringify(data);
+    assert.throws(() => parseStoredData(raw), /invalid or duplicate/);
+    assert.equal(JSON.stringify(data), raw);
+  }
+  assert.throws(
+    () => parse({ ...saved(), customAlbums: null }),
+    /invalid or duplicate/,
+  );
+  const duplicate = customSaved();
+  duplicate.customAlbums!.push({ ...duplicate.customAlbums![0] });
+  assert.throws(() => parse(duplicate), /invalid or duplicate/);
+  const tooMany = customSaved();
+  tooMany.customAlbums = Array.from(
+    { length: MAX_CUSTOM_ALBUMS + 1 },
+    (_, index) => ({ ...tooMany.customAlbums![0], id: `album-${index}` }),
+  );
+  assert.throws(() => parse(tooMany), /invalid or duplicate/);
+});
+
+test("added-album pages and drafts retain participant and exact-album reply validation", () => {
+  const wrongPageAuthor = customSaved();
+  wrongPageAuthor.pages.find(
+    (item) => item.albumId === "album-garden",
+  )!.authorId = "maya";
+  assert.throws(() => parse(wrongPageAuthor), /invalid or duplicate/);
+  const wrongDraftAuthor = customSaved();
+  wrongDraftAuthor.drafts["maya:album-garden"] = {
+    title: "",
+    text: "Not a participant",
+  };
+  assert.throws(() => parse(wrongDraftAuthor), /invalid or duplicate/);
+  const foreignDraft = customSaved();
+  foreignDraft.drafts["lily:album-garden"].replyTo = "lily-2";
+  assert.throws(() => parse(foreignDraft), /invalid or duplicate/);
+  const foreignPage = customSaved();
+  foreignPage.pages.find(
+    (item) => item.albumId === "album-garden" && item.authorId === "lily",
+  )!.replyTo = "lily-2";
+  assert.throws(() => parse(foreignPage), /invalid or duplicate/);
 });
 
 test("invalid scrapbook metadata rejects the whole snapshot for pages and drafts", () => {

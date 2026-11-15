@@ -132,3 +132,13 @@ The pickup geometry was aligned to the deeper cover: a desktop opening targeted 
 - During a timed night opening, the real reader was ready while the presentation remained visible. Both volume components used the same initial depth values; their rectangles differed by less than 0.1 px vertically in the sampled late animation.
 - At 1536 × 1024, the case fit within its 40 px side gutters, the volume matched the live paper, and the bottom action ended near y = 1009. Document scrollWidth was 1521 px. The wider projection retained a visible fine outer face. No local browser warnings or errors were observed.
 - These are functional and visual viewport checks, not a frame-rate benchmark, a physical-touch test, or a full accessibility audit. Runtime OS reduced-motion testing remains separate; the new decorative transitions respect its media query.
+
+## Rustic bookshelf home
+
+- TypeScript and all 44 tests passed. Five new model/storage regressions cover album creation bounds, participant/reply rules, full custom-album/page/draft roundtrips, legacy snapshots, and rejection of malformed cover metadata.
+- At 1280 × 720, the cabinet displayed the English header and upright spines. Hovering the first book revealed its textured front cover while pushing neighboring spines aside. Its revealed cover ended near x = 583 and the next spine began near x = 594. Document scrollWidth 1265 stayed below innerWidth 1280, and physical-book dragging did not select text.
+- Clicking the revealed cover photo opened the correct album. During the opening, the shared label read Sam & Alex, all four photo corners were present, and the real reader was already ready while the presentation remained visible.
+- With the pointer still over Sam, keyboard navigation focused Maya and produced exactly one active preview. Enter opened Maya's album. The previous reader's soft-page behavior and bottom creation action remained available.
+- A new Little traditions album was created locally with Maya, survived a reload, accepted its first contribution, and reopened after another reload. The contribution retained its text and simulated transport state. Switching to Maya showed only her seeded and added albums; no unrelated books appeared.
+- At 320 × 844, five albums formed three compartments. A focused front cover stayed inside the 285 px cabinet, and document scrollWidth 305 stayed below innerWidth 320. Day and night materials were reviewed. No local browser warnings or errors were observed.
+- Physical touchscreen activation, runtime OS reduced-motion changes, a full accessibility audit, and frame-rate measurement remain untested. The touch preview branch and reduced-motion styles were reviewed in source.

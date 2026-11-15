@@ -28,15 +28,15 @@ import {
   Send,
   Settings2,
   ShieldCheck,
-  Sparkles,
   Trash2,
   Wifi,
   WifiOff,
   X,
 } from "lucide-react";
 import {
-  ALBUMS,
   PEOPLE,
+  createAlbum,
+  getAlbums,
   addContribution,
   advanceDelivery,
   createInitialData,
@@ -44,7 +44,6 @@ import {
   getReplyNotifications,
   hasCrisisLanguage,
   weekKey,
-  type Album,
   type AppData,
   type Contribution,
   type Draft,
@@ -57,14 +56,18 @@ import {
   type OpeningTarget,
 } from "@/lib/opening-geometry";
 import ScrapbookEditor from "@/components/ScrapbookEditor";
+import Bookshelf from "@/components/Bookshelf";
 import "./bookshelf.css";
 import "./physical-albums.css";
+import "./bookshelf-home.css";
 
 type View = "albums" | "story" | "compose" | "checkin" | "replies";
-type Dialog = "connection" | "help" | "about" | "choose" | null;
+type Dialog = "connection" | "help" | "about" | "new-album" | null;
 const emptyDraft: Draft = { title: "", text: "" };
+const shelfOrder = new Map(
+  ["sam", "maya", "june", "lily"].map((id, index) => [id, index]),
+);
 const person = (id: string) => PEOPLE.find((p) => p.id === id)!;
-const photoUrl = (album: Album) => album.cover.replace(".svg", ".jpg");
 
 function Brand({ small = false }: { small?: boolean }) {
   return (
@@ -226,6 +229,9 @@ export default function Home() {
   const [deviceOnline, setDeviceOnline] = useState(true);
   const [dark, setDark] = useState(false);
   const [dialog, setDialog] = useState<Dialog>(null);
+  const [newAlbumTitle, setNewAlbumTitle] = useState("");
+  const [newAlbumPerson, setNewAlbumPerson] = useState("lily");
+  const [newAlbumError, setNewAlbumError] = useState("");
   const [toast, setToast] = useState("");
   const [storageError, setStorageError] = useState("");
   const [photoError, setPhotoError] = useState("");
@@ -243,14 +249,19 @@ export default function Home() {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const lastStored = useRef<string | null>(null);
-  const album = ALBUMS.find((a) => a.id === selected)!;
+  const allAlbums = getAlbums(data);
+  const album = allAlbums.find((a) => a.id === selected) ?? allAlbums[0];
+  const openingAlbum = opening
+    ? allAlbums.find((a) => a.id === opening.albumId)
+    : undefined;
   const current = person(profile);
   const astronaut = PEOPLE.find((person) => person.role === "Astronaut")!;
   const online = deviceOnline && !paused;
   const albums =
-    profile === "alex" ? ALBUMS : ALBUMS.filter((a) => a.personId === profile);
+    profile === "alex"
+      ? allAlbums
+      : allAlbums.filter((a) => a.personId === profile);
   const notifications = getReplyNotifications(data, profile);
-  const latestReply = notifications[notifications.length - 1];
   const draftKey = `${profile}:${selected}`;
   const draft = data.drafts[draftKey] ?? emptyDraft;
   const pagesForAlbum = (albumId: string) =>
@@ -529,10 +540,40 @@ export default function Home() {
     setToast("Your check-in is saved privately on this device.");
   };
   const closeDialog = useCallback(() => setDialog(null), []);
+  const handleCreateAlbum = () => {
+    try {
+      const id = `album-${crypto.randomUUID()}`;
+      const next = createAlbum(
+        data,
+        {
+          personId: profile === "alex" ? newAlbumPerson : profile,
+          title: newAlbumTitle,
+        },
+        id,
+      );
+      setData(next);
+      setSelected(id);
+      setDialog(null);
+      navigate("albums");
+      setToast("Album added to your bookshelf.");
+    } catch (error) {
+      setNewAlbumError(
+        error instanceof Error
+          ? error.message
+          : "This album could not be created.",
+      );
+    }
+  };
 
   return (
     <div
-      className={view === "story" ? "app-shell immersive-reader" : "app-shell"}
+      className={
+        view === "story"
+          ? "app-shell immersive-reader"
+          : view === "albums"
+            ? "app-shell bookshelf-home"
+            : "app-shell"
+      }
       inert={opening ? true : undefined}
     >
       <a className="skip-link" href="#main-content">
@@ -618,198 +659,36 @@ export default function Home() {
             </div>
           )}
           {view === "albums" && (
-            <>
-              <section className="welcome">
-                <div className="welcome-copy">
-                  <h1 ref={titleRef} tabIndex={-1}>
-                    A little closer,
-                    <br />
-                    <em>from anywhere.</em>
-                  </h1>
-                  <p>Shared moments with your favorite people.</p>
-                </div>
-                <div className="welcome-art" aria-hidden="true">
-                  <span className="orbit orbit-one" />
-                  <span className="orbit orbit-two" />
-                  <span className="art-spark spark-one">✦</span>
-                  <span className="art-spark spark-two">✧</span>
-                  <div className="polaroid back-polaroid">
-                    <img src="/images/sam.jpg" alt="" />
-                    <span>our favorite kind of quiet</span>
-                  </div>
-                  <div className="polaroid front-polaroid">
-                    <span className="tape" />
-                    <img src="/images/lily.jpg" alt="" />
-                    <span>the little things, kept close ♡</span>
-                  </div>
-                  <svg className="caption-arrow" viewBox="0 0 80 50">
-                    <path d="M3 3Q72 0 58 39m0 0-6-11m6 11 10-7" />
-                  </svg>
-                </div>
-              </section>
-              <section
-                className="albums-section"
-                aria-labelledby="albums-title"
-              >
-                <div className="section-heading">
-                  <div>
-                    <h2 id="albums-title">Your people. Your stories.</h2>
-                  </div>
-                </div>
-                <div className="album-grid">
-                  {albums.map((a) => {
-                    const p = person(a.personId);
-                    const pages = data.pages.filter(
-                      (p) =>
-                        p.albumId === a.id &&
-                        (p.authorId === profile ||
-                          ["delivered", "answered"].includes(p.status)),
-                    );
-                    const last = pages[pages.length - 1];
-                    const unread = notifications.find(
-                      (n) => n.albumId === a.id,
-                    );
-                    const ownDraft = data.drafts[`${profile}:${a.id}`];
-                    return (
-                      <button
-                        className={`album-card ${a.accent}${opening?.albumId === a.id ? " opening-source" : ""}`}
-                        key={a.id}
-                        onClick={(event) =>
-                          openAlbum(a.id, event.currentTarget)
-                        }
-                        aria-label={`Open ${p.name}'s album, ${a.title}`}
-                      >
-                        <div className="album-book">
-                          <div className="book-spine" />
-                          <div className="album-photo">
-                            <img
-                              src={photoUrl(a)}
-                              alt={
-                                a.id === "lily"
-                                  ? "A child playing at the beach"
-                                  : a.id === "sam"
-                                    ? "A quiet lake between mountains"
-                                    : a.id === "maya"
-                                      ? "Friends walking a mountain trail"
-                                      : "Flowers growing in a garden"
-                              }
-                            />
-                            <span className="photo-corner tl" />
-                            <span className="photo-corner br" />
-                          </div>
-                          <span className="book-name">
-                            {profile === "alex" ? p.name : "Alex & you"}
-                            <Heart size={12} />
-                          </span>
-                          <span className="book-dots">· · ·</span>
-                        </div>
-                        <div className="album-info">
-                          <h3>{a.title}</h3>
-                          <div className="album-meta">
-                            {pages.length}{" "}
-                            {pages.length === 1 ? "page" : "pages"}
-                            <span>·</span>
-                            {last
-                              ? new Intl.DateTimeFormat("en-GB", {
-                                  day: "numeric",
-                                  month: "short",
-                                  year: "numeric",
-                                  timeZone: "UTC",
-                                }).format(new Date(last.createdAt))
-                              : "A fresh beginning"}
-                          </div>
-                          <div
-                            className={`album-update ${unread ? "has-update" : ""}`}
-                          >
-                            {unread ? (
-                              <>
-                                <span className="tiny-dot" />A new page from{" "}
-                                {person(unread.authorId).name}
-                              </>
-                            ) : ownDraft?.text || ownDraft?.photo ? (
-                              <>
-                                <Feather size={12} />A page in the making
-                              </>
-                            ) : (
-                              <>
-                                <BookHeart size={13} />
-                                Open your album
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </section>
-              <section className="home-bottom">
-                <div className="latest-card">
-                  <div className="mini-heading">
-                    <span>
-                      <Sparkles size={15} />
-                      LATEST REPLY
-                    </span>
-                    <button onClick={() => navigate("replies")}>
-                      View replies
-                      <ArrowRight size={14} />
-                    </button>
-                  </div>
-                  {latestReply ? (
-                    <button
-                      className="reply-preview"
-                      onClick={() => openReply(latestReply)}
-                    >
-                      <Avatar id={latestReply.authorId} />
-                      <div>
-                        <h3>
-                          {person(latestReply.authorId).name} added to your
-                          story
-                        </h3>
-                        <p>
-                          “{latestReply.text.slice(0, 104)}
-                          {latestReply.text.length > 104 ? "…" : ""}”
-                        </p>
-                        <span>{formatDate(latestReply.createdAt)}</span>
-                      </div>
-                      <ArrowRight size={18} />
-                    </button>
-                  ) : (
-                    <div className="quiet-empty">
-                      <Feather size={23} />
-                      <p>No new replies.</p>
-                    </div>
-                  )}
-                </div>
-                <div className="checkin-teaser">
-                  <span className="teaser-leaf">
-                    <Leaf size={25} />
-                  </span>
-                  <div>
-                    <div className="mini-heading">
-                      <span>
-                        PRIVATE
-                        <LockKeyhole size={11} />
-                      </span>
-                    </div>
-                    <h3>Your weekly check-in.</h3>
-                    <button onClick={() => navigate("checkin")}>
-                      {weekly ? "Revisit your check-in" : "Check in"}
-                      <ArrowRight size={15} />
-                    </button>
-                  </div>
-                </div>
-              </section>
-              <div className="page-end-action">
-                <button
-                  className="primary-button"
-                  onClick={() => setDialog("choose")}
-                >
-                  <Plus size={16} />
-                  Add a page
-                </button>
-              </div>
-            </>
+            <Bookshelf
+              albums={[...albums]
+                .sort(
+                  (left, right) =>
+                    (shelfOrder.get(left.id) ?? 4) -
+                    (shelfOrder.get(right.id) ?? 4),
+                )
+                .map((item) => ({
+                  album: item,
+                  companionName: person(item.personId).name,
+                  astronautName: astronaut.name,
+                  pageCount: pagesForAlbum(item.id).length,
+                  hasReply: notifications.some(
+                    (reply) => reply.albumId === item.id,
+                  ),
+                  hasDraft: !!(
+                    data.drafts[`${profile}:${item.id}`]?.text ||
+                    data.drafts[`${profile}:${item.id}`]?.photo
+                  ),
+                }))}
+              onOpen={openAlbum}
+              onAddAlbum={() => {
+                setNewAlbumTitle("");
+                setNewAlbumPerson(profile === "alex" ? "lily" : profile);
+                setNewAlbumError("");
+                setDialog("new-album");
+              }}
+              headingRef={titleRef}
+              openingAlbumId={opening?.albumId}
+            />
           )}
 
           {view === "story" && (
@@ -1192,7 +1071,7 @@ export default function Home() {
         </main>
         {view !== "story" && (
           <footer className="workspace-footer">
-            <Brand small />
+            {view !== "albums" && <Brand small />}
             <span>Demo · Simulated delivery · Browser storage</span>
             <div className="footer-links">
               <button onClick={() => setDialog("connection")}>Settings</button>
@@ -1219,22 +1098,56 @@ export default function Home() {
           </button>
         </div>
       )}
-      {dialog === "choose" && (
-        <Modal title="Choose an album" onClose={closeDialog}>
-          <div className="album-choices">
-            {albums.map((a) => (
-              <button key={a.id} onClick={() => compose(a.id)}>
-                <img src={photoUrl(a)} alt="" />
-                <span>
-                  <strong>
-                    {profile === "alex" ? person(a.personId).name : "Alex"}
-                  </strong>
-                  <small>{a.title}</small>
-                </span>
-                <ArrowRight size={17} />
-              </button>
-            ))}
-          </div>
+      {dialog === "new-album" && (
+        <Modal title="Add an album" onClose={closeDialog}>
+          <form
+            className="album-create-form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              handleCreateAlbum();
+            }}
+          >
+            <label className="field-label" htmlFor="new-album-title">
+              Album title
+            </label>
+            <input
+              id="new-album-title"
+              className="story-input"
+              value={newAlbumTitle}
+              onChange={(event) => setNewAlbumTitle(event.target.value)}
+              placeholder="A place for little memories"
+              maxLength={70}
+              required
+            />
+            <label className="field-label" htmlFor="new-album-person">
+              Share with
+            </label>
+            <select
+              id="new-album-person"
+              className="profile-select"
+              value={newAlbumPerson}
+              onChange={(event) => setNewAlbumPerson(event.target.value)}
+            >
+              {PEOPLE.filter(
+                (item) =>
+                  item.id !== "alex" &&
+                  (profile === "alex" || item.id === profile),
+              ).map((item) => (
+                <option value={item.id} key={item.id}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+            {newAlbumError && (
+              <p className="field-error" role="alert">
+                {newAlbumError}
+              </p>
+            )}
+            <button className="primary-button" type="submit">
+              <Plus size={17} />
+              Add album
+            </button>
+          </form>
         </Modal>
       )}
       {dialog === "connection" && (
@@ -1401,10 +1314,8 @@ export default function Home() {
       {opening &&
         createPortal(
           <AlbumOpening
-            album={ALBUMS.find((item) => item.id === opening.albumId)!}
-            personName={
-              profile === "alex" ? person(opening.albumId).name : "Alex & you"
-            }
+            album={openingAlbum!}
+            personName={person(openingAlbum!.personId).name}
             origin={opening.origin}
             target={openingTarget}
             profileId={profile}
