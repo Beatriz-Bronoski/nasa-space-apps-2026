@@ -1,0 +1,99 @@
+.album-person-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.album-create-form .album-person-heading .field-label {
+  margin: 0;
+}
+.album-person-toggle,
+.album-remove-cover {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 0;
+  color: var(--sage);
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.album-cover-picker {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 12px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+.album-cover-sample {
+  flex: 0 0 116px;
+  width: 116px;
+  min-width: 0;
+  background: #fbf6e9;
+  padding: 7px 7px 10px;
+  transform: rotate(-3deg);
+  box-shadow: 1px 4px 8px #4a39252b;
+}
+.album-cover-sample img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+.album-cover-sample span {
+  display: block;
+  margin-top: 6px;
+  font: 500 16px / 1.1 var(--hand);
+  color: #394333;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+.album-cover-controls {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.album-create-form .album-cover-controls .field-label {
+  margin: 0;
+}
+.album-optional {
+  font-weight: 400;
+  color: var(--muted);
+}
+.album-cover-controls .secondary-button {
+  padding: 9px 12px;
+  font-size: 12px;
+}
+.album-cover-controls small,
+.album-local-note {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.album-local-note {
+  margin-top: 4px;
+}
+.album-create-form .primary-button {
+  margin-top: 0;
+}
+@media (max-width: 420px) {
+  .album-cover-picker {
+    padding: 12px;
+    gap: 14px;
+  }
+  .album-cover-sample {
+    flex-basis: 86px;
+    width: 86px;
+  }
+  .album-cover-controls .secondary-button {
+    padding: 8px;
+  }
+}

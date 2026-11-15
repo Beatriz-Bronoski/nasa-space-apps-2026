@@ -121,3 +121,55 @@ The pickup geometry was aligned to the deeper cover: a desktop opening targeted 
 - At 320 × 844, the 243 px paper remained within a 265 px case at x = 20, y = 62. The bottom action and Page details remained separate, and document scrollWidth was 305 px. Both day and night depth layers were reviewed.
 - A timed night-mode opening showed the real reader ready while the presentation remained visible. Both ground-shadow elements had identical computed shadow layers, and the moving case was already within about one pixel of the real case. No local browser warnings or errors were observed.
 - These checks do not measure frame rate or replace physical-device and full accessibility testing.
+
+## CSS 3D book construction
+
+- TypeScript and all 39 tests passed. Geometry tests cover the slimmer 30/24 px bottom cover padding and 194 px desktop height budget.
+- The live reader contains twelve stable decorative sheet planes, six per half, with computed `preserve-3d`, a 1600 px perspective, and rotated side/bottom faces. At 1280 × 720, the volume box matched the live paper exactly. The right fore-edge projected about 6.2 px outward, and its deepest sheet extended about 16.1 px below the reading surface. The previous continuous striped layer is absent.
+- Advancing from spread 1–2 to 3–4 preserved the twelve planes and changed the left/right depth from 11/17 px to 13/15 px. Keyboard navigation focused the new paper. Dragging the upper-right paper corner across the spine also reached spread 3–4; reverse navigation returned to the first spread. No hard contribution leaves were observed.
+- Reply on Lily's fourth page opened the correct continuation and preserved the existing draft text and two decorations. No new page was published during this check.
+- At 390 × 844, the single visible volume group matched the 313 px paper. Portrait navigation reached page 2 and focused its text region. At 320 × 844, the final page of the three-page Sam book remained soft, and document scrollWidth was 305 px. Night materials and the raised nameplate were visually reviewed.
+- During a timed night opening, the real reader was ready while the presentation remained visible. Both volume components used the same initial depth values; their rectangles differed by less than 0.1 px vertically in the sampled late animation.
+- At 1536 × 1024, the case fit within its 40 px side gutters, the volume matched the live paper, and the bottom action ended near y = 1009. Document scrollWidth was 1521 px. The wider projection retained a visible fine outer face. No local browser warnings or errors were observed.
+- These are functional and visual viewport checks, not a frame-rate benchmark, a physical-touch test, or a full accessibility audit. Runtime OS reduced-motion testing remains separate; the new decorative transitions respect its media query.
+
+## Rustic bookshelf home
+
+- TypeScript and all 44 tests passed. Five new model/storage regressions cover album creation bounds, participant/reply rules, full custom-album/page/draft roundtrips, legacy snapshots, and rejection of malformed cover metadata.
+- At 1280 × 720, the cabinet displayed the English header and upright spines. Hovering the first book revealed its textured front cover while pushing neighboring spines aside. Its revealed cover ended near x = 583 and the next spine began near x = 594. Document scrollWidth 1265 stayed below innerWidth 1280, and physical-book dragging did not select text.
+- Clicking the revealed cover photo opened the correct album. During the opening, the shared label read Sam & Alex, all four photo corners were present, and the real reader was already ready while the presentation remained visible.
+- With the pointer still over Sam, keyboard navigation focused Maya and produced exactly one active preview. Enter opened Maya's album. The previous reader's soft-page behavior and bottom creation action remained available.
+- A new Little traditions album was created locally with Maya, survived a reload, accepted its first contribution, and reopened after another reload. The contribution retained its text and simulated transport state. Switching to Maya showed only her seeded and added albums; no unrelated books appeared.
+- At 320 × 844, five albums formed three compartments. A focused front cover stayed inside the 285 px cabinet, and document scrollWidth 305 stayed below innerWidth 320. Day and night materials were reviewed. No local browser warnings or errors were observed.
+- Physical touchscreen activation, runtime OS reduced-motion changes, a full accessibility audit, and frame-rate measurement remain untested. The touch preview branch and reduced-motion styles were reviewed in source.
+
+## Replies workspace continuity
+
+- TypeScript checking passed. This presentation change adds no data schema, transport, or notification rules.
+- Before and after navigating from the bookshelf to Replies at 1280 × 720, the sidebar rectangle/background, astronaut name rectangle/font, navigation button positions, and workspace background were identical. The wood frame retained x = 258, y = 34, width = 977 px. Taller reply content flows naturally and can place the footer lower in the document.
+- Read replies remained visible. Opening the response to Our little moon garden selected the correct contribution on spread 3–4 without a shelf-opening overlay, preserving the existing direct-reply behavior. The reader retained its immersive shell.
+- The private check-in retained all three questions and the same paper navigation. Night mode was reviewed with both populated and empty Replies states.
+- At 320 × 844, two reply cards wrapped without horizontal overflow: document scrollWidth was 305 px. Switching profiles through Settings and then navigating to Replies ended at scrollY = 0, frame y = 63.6, with focus on the Replies heading. No browser warnings or errors were observed.
+- These functional viewport checks do not replace physical-device testing or a full accessibility audit. No new unit tests were added for the visual styling.
+
+## New stories, people, and cover photos — 15 November 2026
+
+- All 51 automated tests passed, including custom people, uploaded cover validation, exact-album participant/reply boundaries, legacy snapshot migration, one-time story installation, and collision-safe seed IDs. TypeScript passed.
+- Existing local browser data retained its previous custom album, pages, and draft; Gui (6 pages), Rosa (4), and Theo (4) appeared without resetting storage. Opened Gui's real first spread and exercised the next-page control.
+- Through the UI, created a fictional Milo album with a chosen JPEG cover. The preview appeared, submission added the book, and a reload retained its cover/person/album. Switched to Milo in Settings and published a first page; the reader displayed Milo in its author, accessible region, and sewn pair label.
+- At 320 × 844, the new-person form fit without horizontal overflow (dialog client and scroll widths both 273 px). Reviewed its night palette, labels, photo control, preview, and submit control. Restored the normal viewport and day theme afterward.
+- No warnings or errors were captured from the local tab. Real-device touch, OS reduced-motion, exhaustive image-decoder failures, and a full accessibility audit remain outside this verification.
+
+## Full-width bookshelf distribution — 15 November 2026
+
+- Removed the desktop six-book cap and permanent preview padding. Rows now distribute their books from edge to edge while retaining capacity for one expanded cover.
+- At a 1280px desktop viewport with existing custom books, the first row held eight books; both outer gaps measured 0px across an 895px row. The last book's keyboard preview remained inside the row (cover right 1190px, row right 1194px).
+- At 320 × 844, the two-book arrangement and last-book preview stayed within the cabinet (cover right 266px, row right 271px). Document width was 305px within a 320px viewport. No browser warnings or errors were captured; the temporary viewport was reset.
+- No data model or storage changes. Existing automated model tests were not rerun for this layout-only change. Production build includes TypeScript validation; real-device touch and exhaustive animation timing remain separate checks.
+
+## Closely packed bookshelf spines — 15 November 2026
+
+- Replaced distributed empty gaps with fixed 7px desktop and 5px narrow-screen spacing. Rendered spine widths share the row's available width and narrow for the expanded cover, with a 155px cap and baseline thickness for a single book. Capacity measures an independent probe, so previews do not regroup rows.
+- Local desktop review with eight books in the first row measured seven gaps of 7px and zero unused space at either end. Spines measured 106px closed and 79px during the last book's preview; the cover stayed inside the row with no horizontal overflow or capacity change.
+- At 320 × 844, the last cover in a two-book row remained within its compartment with no document overflow. Spine typography was capped at 23px. Reset the viewport, opened a book through its full cover transition, and confirmed the reader appeared. No browser warnings or errors were captured.
+- TypeScript passed. Model/storage behavior is unchanged; model tests were not rerun for this presentation change. Physical touch, exhaustive motion timing, and older browsers without registered custom-property animation remain outside this verification.

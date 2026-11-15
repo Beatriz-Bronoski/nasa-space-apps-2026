@@ -59,6 +59,9 @@ export type CheckIn = {
 };
 export type AppData = {
   version: 1;
+  customAlbums?: Album[];
+  customPeople?: Person[];
+  demoStoriesVersion?: 1;
   pages: Contribution[];
   drafts: Record<string, Draft>;
   checkIns: CheckIn[];
@@ -106,6 +109,30 @@ export const PEOPLE: Person[] = [
     initials: "JU",
     color: "blue",
   },
+  {
+    id: "gui",
+    name: "Gui",
+    role: "Son · Age 10",
+    location: "Home on Earth",
+    initials: "GU",
+    color: "blue",
+  },
+  {
+    id: "rosa",
+    name: "Rosa",
+    role: "Grandmother",
+    location: "Home on Earth",
+    initials: "RO",
+    color: "terracotta",
+  },
+  {
+    id: "theo",
+    name: "Theo",
+    role: "Friend",
+    location: "Home on Earth",
+    initials: "TH",
+    color: "sage",
+  },
 ];
 
 export const ALBUMS: Album[] = [
@@ -141,7 +168,202 @@ export const ALBUMS: Album[] = [
     cover: "/images/june.jpg",
     accent: "blue",
   },
+  {
+    id: "gui",
+    personId: "gui",
+    title: "Mission: schoolyard stars",
+    subtitle: "With Gui · Son · Age 10",
+    cover: "/images/gui.jpg",
+    accent: "blue",
+  },
+  {
+    id: "rosa",
+    personId: "rosa",
+    title: "A recipe for coming home",
+    subtitle: "With Rosa · Grandmother",
+    cover: "/images/rosa.jpg",
+    accent: "terracotta",
+  },
+  {
+    id: "theo",
+    personId: "theo",
+    title: "The song we never finished",
+    subtitle: "With Theo · Friend",
+    cover: "/images/theo.jpg",
+    accent: "sage",
+  },
 ];
+
+export const MAX_CUSTOM_ALBUMS = 48;
+export const MAX_ALBUM_TITLE_LENGTH = 70;
+export const MAX_CUSTOM_PEOPLE = 48;
+export const MAX_PERSON_NAME_LENGTH = 60;
+export const DEFAULT_ALBUM_COVER = "/images/blank-album.jpg";
+const colors = ["sage", "amber", "terracotta", "blue"];
+
+const customAlbumId = (value: unknown): value is string =>
+  typeof value === "string" &&
+  /^album-[A-Za-z0-9][A-Za-z0-9-]{0,85}$/.test(value);
+const albumTitle = (value: unknown): value is string =>
+  typeof value === "string" &&
+  value === value.trim() &&
+  value.length > 0 &&
+  value.length <= MAX_ALBUM_TITLE_LENGTH &&
+  !/[\u0000-\u001f\u007f]/.test(value);
+
+const personName = (value: unknown): value is string =>
+  typeof value === "string" &&
+  value === value.trim() &&
+  value.length > 0 &&
+  value.length <= MAX_PERSON_NAME_LENGTH &&
+  !/[\u0000-\u001f\u007f]/.test(value);
+const initialsFor = (name: string) =>
+  name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => Array.from(part)[0])
+    .join("")
+    .toLocaleUpperCase();
+
+/** Covers and page photos stay local: allow bundled JPEGs or a bounded re-encoded upload. */
+export function isLocalPhoto(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    value.length < 500000 &&
+    ((/^data:image\/jpeg;base64,(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(
+      value,
+    ) &&
+      value.length > 23) ||
+      /^\/images\/(lily|sam|maya|june|gui|rosa|theo|blank-album)\.jpg$/.test(
+        value,
+      ))
+  );
+}
+
+export function isCustomPerson(value: unknown): value is Person {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const record = value as Record<string, unknown>;
+  return (
+    typeof record.id === "string" &&
+    /^person-[A-Za-z0-9][A-Za-z0-9-]{0,85}$/.test(record.id) &&
+    personName(record.name) &&
+    record.initials === initialsFor(record.name) &&
+    record.role === "Loved one" &&
+    record.location === "Home on Earth" &&
+    colors.includes(record.color as string)
+  );
+}
+
+export function getPeople(data: Pick<AppData, "customPeople">): Person[] {
+  return [...PEOPLE, ...(data.customPeople ?? [])];
+}
+
+/** Validate custom books against their actual participant, including a newly added loved one. */
+export function isCustomAlbum(
+  value: unknown,
+  people: Person[] = PEOPLE,
+): value is Album {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const record = value as Record<string, unknown>;
+  const companion = people.find(
+    (item) => item.id === record.personId && item.id !== "alex",
+  );
+  return (
+    !!companion &&
+    customAlbumId(record.id) &&
+    albumTitle(record.title) &&
+    isLocalPhoto(record.cover) &&
+    record.accent === companion.color &&
+    record.subtitle === `With ${companion.name} · ${companion.role}`
+  );
+}
+
+export function getAlbums(data: Pick<AppData, "customAlbums">): Album[] {
+  return [...ALBUMS, ...(data.customAlbums ?? [])];
+}
+
+/** Add an empty shared album and, optionally, its new local-demo participant atomically. */
+export function createAlbum(
+  data: AppData,
+  input: {
+    title: string;
+    personId?: string;
+    newPersonName?: string;
+    cover?: string;
+  },
+  id = `album-${globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`}`,
+): AppData {
+  const title = typeof input.title === "string" ? input.title.trim() : "";
+  if (!albumTitle(title))
+    throw new Error(
+      `Give this album a name between 1 and ${MAX_ALBUM_TITLE_LENGTH} characters.`,
+    );
+  if (!customAlbumId(id) || getAlbums(data).some((item) => item.id === id))
+    throw new Error("This album could not be added. Please try again.");
+  if ((data.customAlbums?.length ?? 0) >= MAX_CUSTOM_ALBUMS)
+    throw new Error(
+      `Your bookshelf can hold up to ${MAX_CUSTOM_ALBUMS} added albums.`,
+    );
+  const people = getPeople(data);
+  let companion = people.find(
+    (item) => item.id === input.personId && item.id !== "alex",
+  );
+  let customPeople = data.customPeople;
+  if (input.newPersonName !== undefined) {
+    if (input.personId) throw new Error("Choose a person or add someone new.");
+    const name =
+      typeof input.newPersonName === "string" ? input.newPersonName.trim() : "";
+    if (!personName(name))
+      throw new Error(
+        `Enter a name between 1 and ${MAX_PERSON_NAME_LENGTH} characters.`,
+      );
+    if (
+      people.some(
+        (item) => item.name.toLocaleLowerCase() === name.toLocaleLowerCase(),
+      )
+    )
+      throw new Error(
+        "Someone with this name is already in your circle. Choose them from the list.",
+      );
+    if ((customPeople?.length ?? 0) >= MAX_CUSTOM_PEOPLE)
+      throw new Error("Your circle can hold up to 48 added people.");
+    const personId = `person-${id.slice(6)}`;
+    if (people.some((item) => item.id === personId))
+      throw new Error("This person could not be added. Please try again.");
+    companion = {
+      id: personId,
+      name,
+      initials: initialsFor(name),
+      role: "Loved one",
+      location: "Home on Earth",
+      color: colors[(customPeople?.length ?? 0) % colors.length],
+    };
+    customPeople = [...(customPeople ?? []), companion];
+  }
+  if (!companion)
+    throw new Error(
+      "Choose someone from your existing circle or add a new person.",
+    );
+  const template = ALBUMS.find((item) => item.personId === companion!.id);
+  const cover = input.cover ?? template?.cover ?? DEFAULT_ALBUM_COVER;
+  if (!isLocalPhoto(cover))
+    throw new Error(
+      "Choose a JPEG, PNG, or WebP photo using the cover photo button.",
+    );
+  const album: Album = {
+    id,
+    title,
+    personId: companion.id,
+    subtitle: `With ${companion.name} · ${companion.role}`,
+    cover,
+    accent: companion.color,
+  };
+  return {
+    ...data,
+    ...(customPeople ? { customPeople } : {}),
+    customAlbums: [...(data.customAlbums ?? []), album],
+  };
+}
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -252,9 +474,10 @@ export function addContribution(
   input: NewContribution,
   now = new Date(),
 ): AppData {
-  const album = ALBUMS.find((item) => item.id === input.albumId);
+  const album = getAlbums(data).find((item) => item.id === input.albumId);
   if (
     !album ||
+    !getPeople(data).some((person) => person.id === input.authorId) ||
     (input.authorId !== "alex" && input.authorId !== album.personId)
   ) {
     throw new Error("This person is not a participant in this album.");
@@ -340,6 +563,227 @@ export function hasCrisisLanguage(text: string): boolean {
     /\b(me\s+(machucar|ferir)|suicidio|suicida|automutilacao)\b/,
   ];
   return patterns.some((pattern) => pattern.test(normalized));
+}
+
+/** Authored example chapters, not replies fabricated by the delivery simulator. */
+export function createNewStoryPages(now: Date): Contribution[] {
+  const at = (hoursAgo: number) =>
+    new Date(now.getTime() - hoursAgo * 3_600_000).toISOString();
+  const page = (
+    id: string,
+    albumId: string,
+    authorId: string,
+    hoursAgo: number,
+    title: string,
+    text: string,
+    extra: Partial<Contribution> = {},
+  ): Contribution => ({
+    id,
+    albumId,
+    authorId,
+    title,
+    text,
+    createdAt: at(hoursAgo),
+    status: "delivered",
+    sentAt: at(hoursAgo - 0.05),
+    deliveredAt: at(hoursAgo - 0.25),
+    ...extra,
+  });
+  const decoration = (
+    kind: "rocket" | "flower" | "moon",
+    tape: PageDesign["tape"],
+  ): PageDesign => ({
+    layout: "classic",
+    tape,
+    photoTilt: -2,
+    stickers: [
+      { id: `${kind}-keepsake`, kind, x: 85, y: 81, rotation: -9, scale: 0.9 },
+    ],
+  });
+  const pages = [
+    page(
+      "gui-1",
+      "gui",
+      "gui",
+      336,
+      "Dad, will you be my engineer?",
+      "Our school is entering a rocket olympiad! Ms. Morgan says we can start with little paper rockets and straws. I drew mine with three blue fins. You know how real rockets work. Could we make a team, even with you all the way up there?",
+      { photo: "/images/gui.jpg", design: decoration("rocket", "midnight") },
+    ),
+    page(
+      "gui-2",
+      "gui",
+      "alex",
+      312,
+      "Team Gui, reporting for duty",
+      "Absolutely, son. First engineering tip: draw before you build. Make the fins the same size and space them evenly; that helps a rocket fly straight. Have your teacher check the model and use the school's launch area. Send your sketch when you can. I have a page in my notebook just for our team.",
+      { replyTo: "gui-1", design: decoration("rocket", "linen") },
+    ),
+    page(
+      "rosa-1",
+      "rosa",
+      "rosa",
+      300,
+      "The flour fingerprint",
+      "I found your little handprint in my old recipe book. You were supposed to be helping with the bread; mostly you were covering the kitchen in flour. This morning I made that loaf again. The first slice is still the cook's reward. I wish I could tuck one into this album.",
+      { photo: "/images/rosa.jpg", design: decoration("flower", "linen") },
+    ),
+    page(
+      "theo-1",
+      "theo",
+      "theo",
+      288,
+      "Found: one unfinished song",
+      "I opened the guitar case and found our café napkin, with half a song written beside a coffee ring. Remember? We never agreed on the last line. I played the first few chords tonight. The house sounded a little more like our old apartment.",
+      { photo: "/images/theo.jpg", design: decoration("moon", "sage") },
+    ),
+    page(
+      "gui-3",
+      "gui",
+      "gui",
+      264,
+      "It flew sideways. Very confidently.",
+      "We tried it at school today. Mine made a big left turn! I wrote down three tries like you do in your notebook. Ms. Morgan noticed one fin was bent. I wanted to start over, but I thought you might want to see the wonky version too.",
+      { replyTo: "gui-2", design: decoration("rocket", "sage") },
+    ),
+    page(
+      "rosa-2",
+      "rosa",
+      "alex",
+      252,
+      "A kitchen, carried with me",
+      "I remember the warm tea towel over the dough. I copied your recipe into my mission notebook, including the bit that says 'until it feels right.' What does right feel like? Give me the words you would use if I were standing beside you, stealing the first slice.",
+      { replyTo: "rosa-1", design: decoration("flower", "sage") },
+    ),
+    page(
+      "theo-2",
+      "theo",
+      "alex",
+      228,
+      "Keep the coffee ring",
+      "I remember us trying to rhyme 'Saturday' with everything in the room. What if the last line is 'leave a little light for me'? I tapped the old rhythm against my sleeping bag tonight. Send the next verse as words. I can hear your terrible guitar face from here.",
+      { replyTo: "theo-1", design: decoration("moon", "midnight") },
+    ),
+    page(
+      "gui-4",
+      "gui",
+      "alex",
+      216,
+      "The wonky version belongs here",
+      "Keep that page, Gui. Engineers learn from the flights that surprise them. Try one change at a time: straighten that fin, then repeat the same teacher-approved test. Compare your notes. A careful question matters more than the longest flight. I'm proud you showed me the part that didn't work.",
+      { replyTo: "gui-3", design: decoration("rocket", "linen") },
+    ),
+    page(
+      "rosa-3",
+      "rosa",
+      "rosa",
+      180,
+      "Soft as your cheek used to be",
+      "There. That is the answer. Soft, a little springy, never stiff. I told the dough you were asking after it. Your grandfather would have said a good recipe is just a way to get everyone back to the table. I wrote your name beside mine on this one.",
+      { replyTo: "rosa-2", design: decoration("flower", "linen") },
+    ),
+    page(
+      "theo-3",
+      "theo",
+      "theo",
+      156,
+      "A little light for you",
+      "That is the line. I put it after 'the kettle sings, the evening settles.' Played it for Sam on the porch; even the neighbor's dog listened. The guitar face remains excellent, thank you. I left a blank verse with your name above it. Our song can take the long way home.",
+      { replyTo: "theo-2", design: decoration("moon", "linen") },
+    ),
+    page(
+      "gui-5",
+      "gui",
+      "gui",
+      120,
+      "Two names on the team card",
+      "It flew straight! We took our notebook to the school olympiad and explained the bent fin. I put 'Gui + Dad' on our team card. My favorite bit was telling everyone that you helped me from space. I kept the first wonky rocket. It's next to my bed now.",
+      {
+        replyTo: "gui-4",
+        photo: "/images/gui.jpg",
+        design: decoration("rocket", "midnight"),
+      },
+    ),
+    page(
+      "rosa-4",
+      "rosa",
+      "alex",
+      108,
+      "Both our names",
+      "I added the same two names to my copy. Today the cabin smelled like warm bread for one small second, although I think it was only the memory. Keep the flour fingerprint. When I come home, I want to make a new one beside it.",
+      { replyTo: "rosa-3", design: decoration("flower", "sage") },
+    ),
+    page(
+      "theo-4",
+      "theo",
+      "alex",
+      84,
+      "My verse, from the quiet shift",
+      "'Past the window, past the blue / an ordinary night with you.' There is my verse. Slightly unfair that the dog heard our reunion before I did. Keep the porch performance in the album. I like knowing there is still a place for my part, even when it arrives later.",
+      { replyTo: "theo-3", design: decoration("moon", "sage") },
+    ),
+    page(
+      "gui-6",
+      "gui",
+      "alex",
+      60,
+      "My favorite flight was yours",
+      "I read your page twice before my shift. You asked a question, tried something, and learned from it. That's my kind of rocket engineer. I wrote 'Gui + Dad' on our notebook up here too. Tell me where the next drawing takes us. Being on your team is the best part of my day.",
+      { replyTo: "gui-5", design: decoration("rocket", "linen") },
+    ),
+  ];
+  return chronological(advanceDelivery(pages, true, now));
+}
+
+/** Add the new authored albums once, without replacing any existing browser records. */
+export function upgradeDemoStories(data: AppData): AppData {
+  if (data.demoStoriesVersion === 1) return data;
+  const june = data.pages.find(
+    (page) => page.id === "june-1" && page.albumId === "june",
+  );
+  const anchor = june
+    ? new Date(Date.parse(june.createdAt) + 240 * 3_600_000)
+    : new Date(
+        data.pages.length
+          ? data.pages.reduce(
+              (latest, page) => Math.max(latest, Date.parse(page.createdAt)),
+              0,
+            )
+          : "2026-11-15T12:00:00Z",
+      );
+  const existing = new Map(data.pages.map((page) => [page.id, page]));
+  const seeds = createNewStoryPages(anchor);
+  const mappedIds = new Map<string, string>();
+  const reservedIds = new Set(existing.keys());
+  for (const seed of seeds) {
+    const prior = existing.get(seed.id);
+    let id = seed.id;
+    if (
+      prior &&
+      (prior.albumId !== seed.albumId ||
+        prior.authorId !== seed.authorId ||
+        !["delivered", "answered"].includes(prior.status))
+    ) {
+      let suffix = 1;
+      do {
+        id = `demo-${seed.id}-${suffix++}`;
+      } while (reservedIds.has(id));
+    }
+    mappedIds.set(seed.id, id);
+    reservedIds.add(id);
+  }
+  const additions = seeds
+    .filter((seed) => !existing.has(mappedIds.get(seed.id)!))
+    .map((seed) => ({
+      ...seed,
+      id: mappedIds.get(seed.id)!,
+      ...(seed.replyTo ? { replyTo: mappedIds.get(seed.replyTo)! } : {}),
+    }));
+  return {
+    ...data,
+    demoStoriesVersion: 1,
+    pages: chronological([...data.pages, ...additions]),
+  };
 }
 
 export function createInitialData(now = new Date()): AppData {
@@ -458,7 +902,8 @@ export function createInitialData(now = new Date()): AppData {
   ];
   return {
     version: 1,
-    pages: chronological(pages),
+    demoStoriesVersion: 1,
+    pages: chronological([...pages, ...createNewStoryPages(now)]),
     drafts: {},
     checkIns: [],
     readReplyIds: [],

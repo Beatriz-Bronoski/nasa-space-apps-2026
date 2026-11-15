@@ -7,14 +7,20 @@ import {
   useState,
   type CSSProperties,
 } from "react";
-import { Heart } from "lucide-react";
-import type { Album, Contribution } from "@/lib/model";
+import {
+  PEOPLE,
+  type Album,
+  type Contribution,
+  type Person,
+} from "@/lib/model";
 import {
   estimateOpeningTarget,
   type OpeningTarget,
 } from "@/lib/opening-geometry";
 import AlbumLeaf from "./AlbumLeaf";
 import AlbumNameplate from "./AlbumNameplate";
+import BookVolume from "./BookVolume";
+import { ShelfCoverContents } from "./Bookshelf";
 import "./album-opening.css";
 
 export type AlbumOpeningOrigin = {
@@ -31,6 +37,7 @@ type Props = {
   pages: Contribution[];
   totalPages: number;
   profileId: string;
+  people?: Person[];
   target: OpeningTarget | null;
   onPrepare: () => void;
   readerReady: boolean;
@@ -69,6 +76,7 @@ export default function AlbumOpening({
   pages,
   totalPages,
   profileId,
+  people = PEOPLE,
   target,
   onPrepare,
   readerReady,
@@ -172,7 +180,6 @@ export default function AlbumOpening({
     };
   }, [complete, prepare, finishAnimation, skip]);
 
-  const photo = album.cover.replace(/\.svg$/, ".jpg");
   return (
     <div
       className={`album-opening opening-${album.accent}${bypassed ? " opening-bypassed" : ""}${revealing ? " opening-revealing" : ""}`}
@@ -200,7 +207,11 @@ export default function AlbumOpening({
           className={`book-case book-case-${album.accent} opening-reader-case`}
         >
           <div className="book-ground-shadow" />
-          <div className="book-page-edges" />
+          <BookVolume
+            portrait={destination.portrait}
+            firstPage={0}
+            pageCount={totalPages}
+          />
           <div className="opening-spread">
             {rightPage && (
               <div className="album-leaf opf-page--right opening-stationary-leaf">
@@ -208,6 +219,7 @@ export default function AlbumOpening({
                   page={rightPage}
                   pageIndex={rightIndex}
                   profileId={profileId}
+                  people={people}
                   presentation
                   navigation={{ showNext: rightIndex < totalPages - 1 }}
                 />
@@ -217,19 +229,18 @@ export default function AlbumOpening({
           {!destination.portrait && <div className="book-binding" />}
         </div>
         <div className="opening-nameplate-anchor">
-          <AlbumNameplate album={album} presentation />
+          <AlbumNameplate album={album} people={people} presentation />
         </div>
         <div className="opening-hardcover">
-          <div className="opening-cover-face opening-cover-front">
+          <div className="opening-cover-face opening-cover-front shelf-front-cover">
             <span className="opening-cover-spine" />
-            <div className="opening-cover-photo">
-              <img src={photo} alt="" draggable={false} />
-            </div>
-            <div className="opening-cover-name">
-              {personName}
-              <Heart />
-            </div>
-            <span className="opening-cover-dots">· · ·</span>
+            <ShelfCoverContents
+              album={album}
+              companionName={personName}
+              astronautName={
+                people.find((item) => item.role === "Astronaut")?.name ?? "Alex"
+              }
+            />
           </div>
           <div className="opening-cover-face opening-cover-back">
             <div className="album-leaf opf-page--left opening-turning-leaf">
@@ -238,6 +249,7 @@ export default function AlbumOpening({
                   page={pages[0]}
                   pageIndex={0}
                   profileId={profileId}
+                  people={people}
                   presentation
                 />
               )}

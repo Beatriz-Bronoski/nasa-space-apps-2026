@@ -1,0 +1,179 @@
+.book-volume {
+  --volume-paper: var(--paper, #f2e4cf);
+  --volume-light: var(--leaf-edge-light, #f4e7c9);
+  --volume-mid: var(--leaf-edge-mid, #dec99e);
+  --volume-dark: var(--leaf-edge-dark, #aa8c5c);
+  --volume-seam: #674d303b;
+  position: absolute;
+  inset: 16px 18px 30px;
+  z-index: 1;
+  perspective: 1600px;
+  perspective-origin: 50% 100%;
+  transform-style: preserve-3d;
+  pointer-events: none;
+  user-select: none;
+}
+.book-volume-half {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: calc(50% - 2px);
+  transform-style: preserve-3d;
+}
+.book-volume-left {
+  --volume-side: -1;
+  --half-depth: var(--volume-left-depth);
+  --volume-radius: 7px 2px 4px 16px;
+  left: 0;
+}
+.book-volume-right {
+  --volume-side: 1;
+  --half-depth: var(--volume-right-depth);
+  --volume-radius: 2px 14px 17px 4px;
+  right: 0;
+}
+.book-volume-sheet {
+  position: absolute;
+  inset: 0;
+  border: 1px solid
+    color-mix(in srgb, var(--volume-dark) 72%, var(--volume-paper));
+  border-radius: var(--volume-radius);
+  background-color: var(--volume-paper);
+  background-image:
+    linear-gradient(165deg, #fff8, transparent 48%, #8b6e3921),
+    url("/textures/aged-paper.jpg");
+  background-size:
+    auto,
+    640px 640px;
+  box-shadow:
+    0 0.9px 0.6px var(--volume-seam),
+    inset 0 -0.8px 0 var(--volume-light);
+  transform-origin: 50% 100%;
+  transform: translate3d(
+      calc(var(--half-depth) * var(--sheet-step) * 0.65 * var(--volume-side)),
+      calc(var(--half-depth) * var(--sheet-step) * 0.92 + var(--sheet-nudge)),
+      calc(var(--half-depth) * var(--sheet-step) * -1)
+    )
+    rotateZ(calc(var(--sheet-lean) * var(--volume-side)));
+  transition: transform 240ms ease-out;
+}
+.book-volume-sheet::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-bottom: 0.7px solid
+    color-mix(in srgb, var(--volume-light) 70%, transparent);
+  border-radius: inherit;
+}
+/* These faces join the planes along the same diagonal extrusion vector. */
+.book-volume-outer-face,
+.book-volume-bottom-face {
+  position: absolute;
+  border: 1px solid
+    color-mix(in srgb, var(--volume-dark) 72%, var(--volume-paper));
+  background-color: var(--volume-mid);
+  backface-visibility: hidden;
+}
+.book-volume-outer-face {
+  top: 0;
+  height: 100%;
+  width: calc(var(--half-depth) * 1.193);
+  background-image: linear-gradient(
+    90deg,
+    var(--volume-paper),
+    var(--volume-mid) 34%,
+    var(--volume-dark)
+  );
+}
+.book-volume-left .book-volume-outer-face {
+  right: 100%;
+  border-radius: 6px 0 0 10px;
+  transform-origin: right top;
+  transform: rotateY(-57deg) skewY(-37.7deg);
+}
+.book-volume-right .book-volume-outer-face {
+  left: 100%;
+  border-radius: 0 9px 11px 0;
+  transform-origin: left top;
+  transform: rotateY(57deg) skewY(37.7deg);
+}
+.book-volume-bottom-face {
+  top: calc(100% - 1px);
+  left: 0;
+  width: 100%;
+  height: calc(var(--half-depth) * 1.36);
+  border-radius: 0 0 10px 7px;
+  background-image: linear-gradient(
+    var(--volume-light),
+    var(--volume-mid) 42%,
+    var(--volume-dark)
+  );
+  box-shadow: 0 2px 2px var(--volume-seam);
+  transform-origin: center top;
+  transform: rotateX(-47deg) skewX(calc(25.5deg * var(--volume-side)));
+}
+.book-volume-hinge {
+  position: absolute;
+  top: 0;
+  bottom: -12px;
+  left: calc(50% - 4px);
+  width: 8px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #72583770 34%,
+    #493a265e 50%,
+    #ead8ae55 69%,
+    transparent
+  );
+  border-radius: 0 0 50% 50%;
+  transform: translateZ(-10px);
+}
+.book-volume-portrait .book-volume-left,
+.book-volume-portrait .book-volume-hinge {
+  display: none;
+}
+.book-volume-portrait .book-volume-right {
+  left: 0;
+  right: 0;
+  width: 100%;
+  --volume-radius: 5px 14px 17px 5px;
+}
+:root[data-theme="night"] .book-volume {
+  --volume-seam: #0e202e70;
+}
+:root[data-theme="night"] .book-volume-sheet {
+  background-image:
+    linear-gradient(165deg, #e2e8d514, transparent 48%, #071b3038),
+    linear-gradient(var(--paper-wash), var(--paper-wash)),
+    url("/textures/aged-paper.jpg");
+  background-size:
+    auto,
+    auto,
+    640px 640px;
+}
+:root[data-theme="night"] .book-volume-hinge {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #0e202b99 50%,
+    #71817c44 70%,
+    transparent
+  );
+}
+@media (max-width: 520px) {
+  .book-volume {
+    inset: 10px 10px 24px;
+  }
+  .book-volume-left {
+    --half-depth: calc(var(--volume-left-depth) * 0.42);
+  }
+  .book-volume-right {
+    --half-depth: calc(var(--volume-right-depth) * 0.42);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .book-volume-sheet {
+    transition: none;
+  }
+}

@@ -74,13 +74,13 @@ export function getReaderLayout(
   const mobile = width <= 520;
   const horizontalPadding = mobile ? 10 : 18;
   const topPadding = mobile ? 10 : 16;
-  const bottomPadding = mobile ? 34 : 44;
+  const bottomPadding = mobile ? 24 : 30;
   const mainWidth = Math.max(1, width - (mobile ? 40 : 80));
   const coverWidth = horizontalPadding * 2 + 2;
   const portrait = mainWidth - coverWidth < 560;
   const maxPageWidth = Math.min(
     740,
-    Math.max(300, (height - 218) / BOOK_PAGE_RATIO),
+    Math.max(300, (height - 194) / BOOK_PAGE_RATIO),
   );
   const caseWidth = Math.max(
     1,

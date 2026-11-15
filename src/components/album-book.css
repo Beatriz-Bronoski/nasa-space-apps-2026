@@ -8,9 +8,9 @@
   --book-muted: #60614a;
   --book-thread: #d2b98b;
   --book-edge: #a99063;
-  --book-ambient-shadow: #50322252;
-  --book-contact-shadow: #39271c80;
-  --book-cast-shadow: #40291d70;
+  --book-ambient-shadow: #4a31243d;
+  --book-contact-shadow: #35261980;
+  --book-cast-shadow: #3e2b1e70;
   --leaf-edge-light: #f4e7c9;
   --leaf-edge-mid: #dec99e;
   --leaf-edge-dark: #aa8c5c;
@@ -21,8 +21,8 @@
 }
 .book-case {
   position: relative;
-  padding: 16px 18px 44px;
-  border-radius: 25px 32px 29px 23px;
+  padding: 16px 18px 30px;
+  border-radius: 18px 23px 23px 18px;
   background-color: var(--book-cloth);
   background-image:
     radial-gradient(ellipse at 2% 12%, #f5d3a53b, transparent 27%),
@@ -44,21 +44,21 @@
 /* Outside the clipped paper engine: a broad halo, contact edge and cast shadow. */
 .book-ground-shadow {
   position: absolute;
-  inset: 5px 1px -12px;
+  inset: 3px 0 -5px;
   z-index: -1;
   border-radius: inherit;
   pointer-events: none;
   box-shadow:
-    0 0 26px 8px var(--book-ambient-shadow),
-    0 8px 12px 4px var(--book-contact-shadow),
-    12px 30px 32px 4px var(--book-cast-shadow);
+    0 0 23px 5px var(--book-ambient-shadow),
+    0 4px 8px 2px var(--book-contact-shadow),
+    9px 20px 27px 4px var(--book-cast-shadow);
 }
 .book-case::before {
   content: "";
   position: absolute;
-  inset: 8px -3px -14px 3px;
+  inset: 5px -1px -6px 2px;
   z-index: 0;
-  border-radius: 24px 31px 30px 23px;
+  border-radius: inherit;
   background-color: color-mix(in srgb, var(--book-cloth) 83%, #443226);
   background-image:
     linear-gradient(to bottom, transparent 85%, #2d302329 94%, #222b2c66),
@@ -68,10 +68,10 @@
     24px 24px;
   border: 1px solid #3b2b2480;
   box-shadow:
-    inset 0 -4px 2px #34281e99,
+    inset 0 -2px 1px #34281e99,
     inset 0 1px #f5e3be66,
-    0 3px 0 color-mix(in srgb, var(--book-cloth) 66%, #293027),
-    0 5px 2px #372a2166;
+    0 2px 0 color-mix(in srgb, var(--book-cloth) 66%, #293027),
+    0 3px 2px #372a214d;
   pointer-events: none;
 }
 .book-case::after {
@@ -80,7 +80,7 @@
   z-index: 4;
   inset: 6px 6px 7px;
   border: 1px dashed color-mix(in srgb, var(--book-thread) 78%, transparent);
-  border-radius: 20px 27px 24px 18px;
+  border-radius: 14px 19px 19px 14px;
   box-shadow: 0 0 0 1px #342b2426;
   pointer-events: none;
 }
@@ -95,79 +95,6 @@
 .book-case-blue {
   --book-cloth: var(--cover-slate);
   border-color: color-mix(in srgb, var(--book-cloth) 80%, #263544);
-}
-.book-page-edges {
-  position: absolute;
-  inset: 17px 12px 12px 18px;
-  border-radius: 5px 16px 21px 6px;
-  background:
-    linear-gradient(90deg, #95754a33, transparent 32%, #78563040 99%),
-    linear-gradient(
-      90deg,
-      transparent 47%,
-      #6b4d3033 49%,
-      #49372066 50%,
-      #fff5 51%,
-      transparent 53%
-    ),
-    repeating-linear-gradient(
-        90deg,
-        var(--leaf-edge-mid) 0 2px,
-        var(--leaf-edge-light) 2px 3px,
-        var(--leaf-edge-dark) 3px 4px
-      )
-      right top / 14px 100% no-repeat,
-    repeating-linear-gradient(
-      to bottom,
-      var(--leaf-edge-light) 0 2px,
-      var(--leaf-edge-mid) 2px 4px,
-      var(--leaf-edge-dark) 4px 5px
-    );
-  border: 1px solid var(--leaf-edge-dark);
-  box-shadow:
-    0 1px 0 var(--leaf-edge-light),
-    0 3px 0 var(--leaf-edge-dark),
-    1px 4px 0 var(--leaf-edge-light),
-    2px 7px 5px #503a2866,
-    inset -4px 0 6px #8b714d88,
-    inset 0 -3px 4px #8b714d88;
-  transform: translate(6px, 8px);
-  pointer-events: none;
-  z-index: 1;
-}
-.book-page-edges::before,
-.book-page-edges::after {
-  content: "";
-  position: absolute;
-  inset: -2px 3px 7px -2px;
-  border-radius: 4px 15px 19px 5px;
-  border: 1px solid var(--leaf-edge-dark);
-  background:
-    linear-gradient(90deg, #cab48255, transparent 40%, #bda16d44),
-    repeating-linear-gradient(
-      to bottom,
-      var(--leaf-edge-light) 0 2px,
-      var(--leaf-edge-mid) 2px 4px,
-      var(--leaf-edge-dark) 4px 5px
-    );
-  box-shadow:
-    0 1px 0 var(--leaf-edge-light),
-    0 2px 0 var(--leaf-edge-dark),
-    1px 4px 2px #5b452c4d;
-}
-.book-page-edges::after {
-  inset: -4px 6px 14px -4px;
-  background: repeating-linear-gradient(
-    to bottom,
-    var(--leaf-edge-light) 0 2px,
-    var(--leaf-edge-mid) 2px 4px,
-    var(--leaf-edge-dark) 4px 5px
-  );
-  border-color: var(--leaf-edge-mid);
-  box-shadow:
-    0 1px 0 var(--leaf-edge-light),
-    0 3px 0 var(--leaf-edge-dark),
-    1px 5px 1px var(--leaf-edge-mid);
 }
 .album-flipbook {
   z-index: 2;
@@ -202,6 +129,7 @@
   box-sizing: border-box !important;
 }
 .album-leaf.opf-page--left {
+  border-radius: 7px 1px 2px 16px;
   background-image:
     linear-gradient(90deg, transparent 76%, var(--paper-crease)),
     linear-gradient(var(--paper-wash), var(--paper-wash)),
@@ -211,6 +139,7 @@
     inset 0 1px #fff7;
 }
 .album-leaf.opf-page--right {
+  border-radius: 1px 8px 17px 2px;
   background-image:
     linear-gradient(90deg, var(--paper-crease), transparent 24%),
     linear-gradient(var(--paper-wash), var(--paper-wash)),
@@ -379,17 +308,18 @@
 .book-binding {
   position: absolute;
   z-index: 3;
-  left: calc(50% - 17px);
+  left: calc(50% - 21px);
   top: 14px;
-  bottom: 28px;
-  width: 34px;
+  bottom: 22px;
+  width: 42px;
   background: linear-gradient(
     90deg,
     transparent,
-    #65563835 32%,
-    #49372580 48%,
-    #fff6 52%,
-    #65563824 68%,
+    #65563824 24%,
+    #49372566 46%,
+    #e4cfa94d 50%,
+    #fff5 53%,
+    #65563824 76%,
     transparent
   );
   pointer-events: none;
@@ -579,10 +509,6 @@
   --book-cloth: var(--cover-slate);
   border-color: color-mix(in srgb, var(--book-cloth) 80%, #263544);
 }
-:root[data-theme="night"] .book-page-edges::before,
-:root[data-theme="night"] .book-page-edges::after {
-  border-color: var(--leaf-edge-mid);
-}
 :root[data-theme="night"] .book-leaf-inner::before {
   opacity: 0.48;
 }
@@ -611,11 +537,7 @@
     margin-top: 23px;
   }
   .book-case {
-    padding: 16px 18px 44px;
-  }
-  .book-page-edges {
-    inset: 12px 12px 16px;
-    transform: translate(3px, 7px);
+    padding: 16px 18px 30px;
   }
   .book-binding {
     top: 11px;
@@ -639,12 +561,8 @@
     margin-top: 21px;
   }
   .book-case {
-    padding: 10px 10px 34px;
-    border-radius: 16px 22px 22px 16px;
-  }
-  .book-page-edges {
-    inset: 10px 10px 14px;
-    transform: translate(2px, 6px);
+    padding: 10px 10px 24px;
+    border-radius: 14px 19px 19px 14px;
   }
   .book-leaf-inner {
     padding: 23px 24px 33px;
@@ -744,7 +662,7 @@
 }
 .album-reader .book-footer-actions {
   position: relative;
-  margin-top: 42px;
+  margin-top: 32px;
   min-height: 38px;
 }
 .album-reader .book-footer-actions .book-add-page {
@@ -812,11 +730,7 @@
     margin-top: 0;
   }
   .book-case {
-    padding: 16px 18px 44px;
-  }
-  .book-page-edges {
-    inset: 17px 12px 12px 18px;
-    transform: translate(6px, 8px);
+    padding: 16px 18px 30px;
   }
   .book-binding {
     top: 16px;
@@ -828,21 +742,17 @@
     margin-top: 16px;
   }
   .book-case {
-    padding: 10px 10px 34px;
+    padding: 10px 10px 24px;
   }
   .book-case::before {
-    inset: 8px -2px -10px 2px;
+    inset: 5px 0 -5px 1px;
   }
   .book-ground-shadow {
-    inset: 5px 0 -10px;
+    inset: 3px 0 -4px;
     box-shadow:
-      0 0 18px 4px var(--book-ambient-shadow),
-      0 5px 8px 2px var(--book-contact-shadow),
-      8px 20px 22px 2px var(--book-cast-shadow);
-  }
-  .book-page-edges {
-    inset: 11px 8px 9px 10px;
-    transform: translate(4px, 6px);
+      0 0 16px 3px var(--book-ambient-shadow),
+      0 3px 6px 1px var(--book-contact-shadow),
+      6px 13px 20px 2px var(--book-cast-shadow);
   }
   .book-binding {
     top: 10px;
@@ -853,7 +763,7 @@
     font-size: 12px;
   }
   .album-reader .book-footer-actions {
-    margin-top: 32px;
+    margin-top: 28px;
   }
   .album-reader .book-footer-actions .book-journey {
     right: 0;

@@ -1,8 +1,9 @@
-import { PEOPLE, type Album } from "@/lib/model";
+import { PEOPLE, type Album, type Person } from "@/lib/model";
 import "./album-nameplate.css";
 
 type Props = {
   album: Album;
+  people?: Person[];
   presentation?: boolean;
 };
 
@@ -22,9 +23,13 @@ function OliveSprig({ mirrored = false }: { mirrored?: boolean }) {
 }
 
 /** A sewn-in label shared by the open album and its moving cover presentation. */
-export default function AlbumNameplate({ album, presentation = false }: Props) {
-  const companion = PEOPLE.find((person) => person.id === album.personId)?.name;
-  const astronaut = PEOPLE.find((person) => person.role === "Astronaut")?.name;
+export default function AlbumNameplate({
+  album,
+  people = PEOPLE,
+  presentation = false,
+}: Props) {
+  const companion = people.find((person) => person.id === album.personId)?.name;
+  const astronaut = people.find((person) => person.role === "Astronaut")?.name;
   const names = `${companion ?? "Someone close"} & ${astronaut ?? "Alex"}`;
 
   return (
