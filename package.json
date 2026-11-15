@@ -3,28 +3,35 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --hostname 127.0.0.1",
+    "predev": "node scripts/prepare-vision.mjs",
+    "dev": "node server/start.mjs --dev",
+    "prebuild": "node scripts/prepare-vision.mjs",
     "build": "next build",
-    "start": "serve out -l 3000",
+    "start": "node server/start.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/lib/*.test.ts",
-    "preview": "serve out -l 3000"
+    "test": "tsx --test src/lib/*.test.ts server/*.test.mjs",
+    "preview": "node server/start.mjs"
   },
   "dependencies": {
     "@fontsource/dm-sans": "^5.2.0",
     "@fontsource/lora": "^5.2.0",
     "@openpageflip/core": "^0.4.2",
     "@openpageflip/react": "^0.7.0",
+    "@tensorflow-models/coco-ssd": "2.2.3",
+    "@tensorflow/tfjs": "4.22.0",
     "lucide-react": "^0.577.0",
     "next": "16.4.6",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "serve-handler": "6.1.6",
+    "three": "0.183.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.0",
     "@types/node": "^24.0.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "@types/three": "0.183.1",
     "serve": "^14.2.0",
     "tailwindcss": "^4.1.0",
     "tsx": "^4.20.0",

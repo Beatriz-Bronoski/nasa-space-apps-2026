@@ -7,6 +7,7 @@ import "@fontsource/lora/400.css";
 import "@fontsource/lora/500.css";
 import "@fontsource/lora/400-italic.css";
 import "./globals.css";
+import "./objects.css";
 
 export const metadata: Metadata = {
   title: "Still Here — A little closer, from anywhere",

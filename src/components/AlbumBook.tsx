@@ -21,6 +21,7 @@ import {
   type Contribution,
 } from "@/lib/model";
 import "@openpageflip/core/styles.css";
+import type { Keepsake } from "@/lib/keepsake";
 import "./album-book.css";
 import ScrapbookPage from "./ScrapbookPage";
 
@@ -30,6 +31,7 @@ type Props = {
   profileId: string;
   initialPageId?: string;
   onCompose: (replyTo?: string) => void;
+  onObjectChange: (id: string, next?: Keepsake) => void;
 };
 
 const authorName = (id: string) =>
@@ -50,6 +52,7 @@ export default function AlbumBook({
   profileId,
   initialPageId,
   onCompose,
+  onObjectChange,
 }: Props) {
   const book = useRef<Book>(null);
   const lastJump = useRef("");
@@ -207,6 +210,8 @@ export default function AlbumBook({
                       title={page.title}
                       text={page.text}
                       photo={page.photo}
+                      object3d={page.object3d}
+                      onObjectChange={next => onObjectChange(page.id, next)}
                       design={page.design}
                     />
                   </div>

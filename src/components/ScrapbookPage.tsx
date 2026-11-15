@@ -1,5 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import type { PageDesign, PageSticker } from "@/lib/model";
+import type { Keepsake } from "@/lib/keepsake";
+import { PhotoObject } from "./PhotoObject";
 import { StickerArt } from "./StickerArt";
 import "./scrapbook.css";
 
@@ -15,6 +17,8 @@ type Props = {
   title: string;
   text: string;
   photo?: string;
+  object3d?: Keepsake;
+  onObjectChange: (next?: Keepsake) => void;
   design?: PageDesign;
   children?: ReactNode;
 };
@@ -24,6 +28,8 @@ export default function ScrapbookPage({
   title,
   text,
   photo,
+  object3d,
+  onObjectChange,
   design,
   children,
 }: Props) {
@@ -46,11 +52,7 @@ export default function ScrapbookPage({
                 className="scrapbook-tape scrapbook-tape-top"
                 aria-hidden="true"
               />
-              <img
-                src={photo}
-                alt={`Photo accompanying “${title}”`}
-                draggable={false}
-              />
+              <PhotoObject key={photo} photo={photo} alt={`Photo accompanying “${title}”`} model={object3d} onChange={onObjectChange} />
               <span
                 className="scrapbook-tape scrapbook-tape-bottom"
                 aria-hidden="true"

@@ -1,3 +1,4 @@
+import { isKeepsake } from "./keepsake";
 import {
   ALBUMS,
   PEOPLE,
@@ -42,6 +43,7 @@ const validPage = (p: unknown): p is Contribution =>
   text(p.text, 10000) &&
   photo(p.photo) &&
   (p.design === undefined || isPageDesign(p.design)) &&
+  (p.object3d === undefined || (!!p.photo && isKeepsake(p.object3d))) &&
   date(p.createdAt) &&
   ["recorded", "sent", "delivered", "answered"].includes(p.status as string) &&
   [p.sentAt, p.deliveredAt, p.answeredAt].every(
@@ -68,6 +70,7 @@ const validDraft = (d: unknown): d is Draft =>
   text(d.text, 10000) &&
   photo(d.photo) &&
   (d.design === undefined || isPageDesign(d.design)) &&
+  (d.object3d === undefined || (!!d.photo && isKeepsake(d.object3d))) &&
   (d.replyTo === undefined || identifier(d.replyTo));
 
 /**

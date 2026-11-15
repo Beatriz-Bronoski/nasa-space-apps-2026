@@ -51,6 +51,7 @@ import {
 } from "@/lib/model";
 import { STORAGE_KEY, compressPhoto, parseStoredData } from "@/lib/storage";
 import AlbumBook from "@/components/AlbumBook";
+import Link from "next/link";
 import AlbumOpening from "@/components/AlbumOpening";
 import ScrapbookEditor from "@/components/ScrapbookEditor";
 import "./bookshelf.css";
@@ -464,7 +465,7 @@ export default function Home() {
         ...d,
         drafts: {
           ...d.drafts,
-          [key]: { ...(d.drafts[key] ?? emptyDraft), photo },
+          [key]: { ...(d.drafts[key] ?? emptyDraft), photo, object3d: undefined },
         },
       }));
     } catch (e) {
@@ -713,6 +714,9 @@ export default function Home() {
                   })}
                 </div>
               </section>
+              <div className="shared-entry" lang="pt-BR">
+                <Link href="/shared" className="object-link"><BookOpen size={16} /> Álbuns compartilhados</Link>
+              </div>
               <section className="home-bottom">
                 <div className="latest-card">
                   <div className="mini-heading">
@@ -801,6 +805,10 @@ export default function Home() {
                 profileId={profile}
                 initialPageId={highlight || undefined}
                 onCompose={(replyTo) => compose(selected, replyTo)}
+                onObjectChange={(id, object3d) => setData(current => ({
+                  ...current,
+                  pages: current.pages.map(p => p.id === id ? { ...p, object3d } : p),
+                }))}
               />
               {visiblePages.length > 0 && (
                 <div className="page-end-action book-end-action">

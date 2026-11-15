@@ -2,11 +2,20 @@
 
 A quiet place for an astronaut and the people they love to keep sharing ordinary moments when a reply takes time.
 
-Still Here is a **local-first MVP and clearly labeled DEMO**. Its shared albums, people, example memories, connection state, and delivery are a simulation in one browser. It has no authentication, backend, or real sharing between devices. The original repository is [guiabbehusen/nasa-space-apps-2026](https://github.com/guiabbehusen/nasa-space-apps-2026).
+The home screen is a **local-first DEMO**. Its people, example memories, connection state and delivery are simulated in one browser. **Álbuns compartilhados** opens a separate space with real accounts and invitation-only albums backed by the team's server. Publishing there synchronizes the page with other album members. The demo check-ins and drafts stay on the device. The original repository is [guiabbehusen/nasa-space-apps-2026](https://github.com/guiabbehusen/nasa-space-apps-2026).
+
+## Reviewing photo-to-object on Image_to_object_feature
+
+1. In the demo, choose an album and **Add a page**. Attach a JPEG or PNG using the existing photo picker. The usual photo-only publication still works.
+2. Click the photo on the paper and choose **Manter foto** or **Sim, transformar**. COCO-SSD loads about 18 MB of weights from the site; cats and dogs receive an additional local MobileNet check (5.4 MB). Supported subjects are cats, dogs, birds, teddy bears, cars, airplanes, bottles and cups. A centered subject with a clear background works best. The original photo remains available when recognition is inconclusive.
+3. Watch the photo fold into a faceted cartoon miniature on the page. It starts from a raised, top-down angle, over a contact shadow. Drag or use the controls to rotate, zoom or return to **Vista de cima**. Under **Avaliar ou ajustar**, rate it, generate another faceted variant, or restore the original photo. This also works on photos already published in the album. A reduced-motion preference skips the transition.
+4. Open **Álbuns compartilhados** → **Criar uma conta**. Create an album and give the single-use invitation code to a second account. In another browser profile or device, open the same server, create or sign in to that account, and select **Entrar por convite**. Leave the album open. A new page appears automatically, usually within three seconds in a foreground tab. Both members can manipulate the object independently. Only publishing sends the photo and mesh parameters to the album server.
+
+The review specification is in [IMAGE_TO_OBJECT_SPEC.md](docs/IMAGE_TO_OBJECT_SPEC.md). A public photo for trying the local dog detector is available in [PyTorch Hub's example images](https://github.com/pytorch/hub/blob/master/images/dog.jpg).
 
 ## Run locally
 
-The app uses Next.js **16.4.6**, TypeScript, React **19**, and Tailwind CSS **4**. Install Node.js and npm compatible with the pinned dependencies, then run these commands from the repository directory:
+The app uses Next.js **16.4.6**, TypeScript, React **19**, Tailwind CSS **4**, and the built-in Node SQLite module. Use Node.js 22.18 or later (Node 24 recommended) and npm, then run these commands from the repository directory:
 
 ```sh
 npm ci
@@ -22,7 +31,7 @@ npm run build
 npm run preview
 ```
 
-`build` creates the static site in `out/`; `preview` serves that export on port 3000. Stop the development server before previewing on the same port. Use the static preview for a production-build check: this project exports static files and does not use `next start`.
+`build` creates the static frontend in `out/`. Both `dev` and `preview` expose the same-origin account and album API. Stop the development server before previewing on the same port. The server defaults to loopback and stores data in `.data/still-here.sqlite` outside the public directory. Override with `STILL_HERE_DB`, `STILL_HERE_HOST` and `PORT`. For two phones or computers, use a common server address. For example, on a trusted LAN bind `STILL_HERE_HOST=0.0.0.0` and open the server computer’s LAN address on both devices. For remote use, host the Node process behind HTTPS, set `STILL_HERE_HTTPS=1` for secure cookies and use a persistent database volume. A static-only Sites deployment supports the local demo and local 3D, while real accounts require the Node API.
 
 ## Explore the demo
 
